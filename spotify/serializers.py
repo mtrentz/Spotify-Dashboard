@@ -1,0 +1,164 @@
+from rest_framework import serializers
+from .models import *
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+from dotenv import load_dotenv
+
+
+class GenresSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genres
+        fields = "__all__"
+
+
+class ArtistsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Artists
+        fields = "__all__"
+
+
+class AlbumsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Albums
+        fields = "__all__"
+
+
+class TracksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tracks
+        fields = "__all__"
+
+
+class BulkHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BulkHistory
+        fields = "__all__"
+
+
+class UserActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserActivity
+        fields = "__all__"
+
+
+class TrackEntrySerializer(serializers.Serializer):
+    # Info to query Spotify API for complete data
+    album_sp_id = serializers.CharField(max_length=255, required=True)
+    artists_sp_ids = serializers.ListField(
+        child=serializers.CharField(max_length=255), required=True
+    )
+
+    # Complete data required to insert a Track
+    track_sp_id = serializers.CharField(max_length=255, required=True)
+    track_name = serializers.CharField(max_length=255, required=True)
+    track_duration = serializers.IntegerField(required=False)
+    track_popularity = serializers.IntegerField(required=False)
+    track_explicit = serializers.BooleanField(required=False)
+    track_number = serializers.IntegerField(required=False)
+    track_disc_number = serializers.IntegerField(required=False)
+    track_type = serializers.CharField(max_length=50, required=False)
+
+    # Info to insert user activity
+    played_at = serializers.DateTimeField(required=True)
+    ms_played = serializers.IntegerField(required=True)
+    from_import = serializers.BooleanField(required=True)
+
+    load_dotenv()
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth())
+
+    def save(self):
+        validated_data = self.validated_data
+
+        # TODO: Passar isso pra um arquivo separado. Checar por erros
+        # TODO: Checar primeiro se já existe aquele playtime no user activity. Caso sim, nao precisa fazer nada
+
+        ### ARTISTS
+        artists_sp_ids = validated_data["artists_sp_ids"]
+        artists = []
+        for artist_sp_id in artists_sp_ids:
+            artist_response = self.sp.artist(artist_sp_id)
+            artist_name = artist_response.get("name")
+            artist_popularity = artist_response.get("popularity")
+            artist_followers = artist_response.get("followers").get("total")
+
+            artist, _ = Artists.objects.get_or_create(
+                sp_id=artist_sp_id,
+                name=artist_name,
+                popularity=artist_popularity,
+                followers=artist_followers,
+            )
+            artist.save()
+            artists.append(artist)
+
+            genres = artist_response.get("genres")
+            # Add genres to database
+            for genre in genres:
+                genre, _ = Genres.objects.get_or_create(name=genre)
+                artist.genres.add(genre)
+
+        ### ALBUM
+        album_sp_id = validated_data["album_sp_id"]
+        album_response = self.sp.album(album_sp_id)
+        album_name = album_response.get("name")
+        album_popularity = album_response.get("popularity")
+        album_release_date = album_response.get("release_date")
+        album_total_tracks = album_response.get("total_tracks")
+        album_type = album_response.get("album_type")
+
+        album, _ = Albums.objects.get_or_create(
+            sp_id=album_sp_id,
+            name=album_name,
+            popularity=album_popularity,
+            release_date=album_release_date,
+            total_tracks=album_total_tracks,
+            type=album_type,
+        )
+        album.save()
+
+        album.artists.add(*artists)
+
+        ### TRACK
+        track_sp_id = validated_data["track_sp_id"]
+        track_name = validated_data["track_name"]
+        track_duration = validated_data["track_duration"]
+        track_popularity = validated_data["track_popularity"]
+        track_explicit = validated_data["track_explicit"]
+        track_number = validated_data["track_number"]
+        track_disc_number = validated_data["track_disc_number"]
+        track_type = validated_data["track_type"]
+
+        track, _ = Tracks.objects.get_or_create(
+            sp_id=track_sp_id,
+            name=track_name,
+            duration=track_duration,
+            popularity=track_popularity,
+            explicit=track_explicit,
+            track_number=track_number,
+            disc_number=track_disc_number,
+            type=track_type,
+            album=album,
+        )
+        track.save()
+        track.artists.add(*artists)
+
+        ### User Activity
+        played_at = validated_data["played_at"]
+        ms_played = validated_data["ms_played"]
+        from_import = validated_data["from_import"]
+
+        user_activity, _ = UserActivity.objects.get_or_create(
+            track=track,
+            played_at=played_at,
+            ms_played=ms_played,
+            from_import=from_import,
+        )
+        user_activity.save()
+
+
+# python3 manage.py shell
+# from spotify.models import *
+# Albums.objects.all()
+# Genres.objects.all()
+# Artists.objects.all()
+# Tracks.objects.all()
+# UserActivity.objects.all()
