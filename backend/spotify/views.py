@@ -36,7 +36,10 @@ class ImportStreamingHistoryView(APIView):
         serializer = HistoryFileSerializer(data=request.data)
         if serializer.is_valid():
             data = request.data.get("file").read()
+            # TODO: Renomear as keys, conferir se ta ok, se nao tiver retorna erro.
             data = json.loads(data)
+            # TODO: Fazer um bulk insert no StreamingHistory
+            # TODO: Iterar por cada item, fazer request pro spotify e mandar pro TrackEntryData
             print(data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
