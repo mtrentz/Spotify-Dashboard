@@ -4,6 +4,7 @@ from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, CreateAPIView
+import json
 
 
 class TrackEntryView(APIView):
@@ -26,5 +27,16 @@ class TrackEntryView(APIView):
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ImportStreamingHistoryView(ListCreateAPIView):
-    serializer_class = SteamingHistorySerializer
+# class ImportStreamingHistoryView(ListCreateAPIView):
+#     serializer_class = SteamingHistorySerializer
+
+
+class ImportStreamingHistoryView(APIView):
+    def post(self, request):
+        serializer = HistoryFileSerializer(data=request.data)
+        if serializer.is_valid():
+            data = request.data.get("file").read()
+            data = json.loads(data)
+            print(data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -41,6 +41,10 @@ class UserActivitySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class HistoryFileSerializer(serializers.Serializer):
+    file = serializers.FileField(max_length=100, allow_empty_file=False)
+
+
 class TrackEntrySerializer(serializers.Serializer):
     # Info to query Spotify API for complete data
     album_sp_id = serializers.CharField(max_length=255, required=True)
