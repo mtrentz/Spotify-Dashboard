@@ -52,11 +52,11 @@ class Tracks(models.Model):
         return self.name
 
 
-class BulkHistory(models.Model):
-    end_time = models.DateTimeField(null=True)
-    artist_name = models.CharField(max_length=255, null=True)
-    track_name = models.CharField(max_length=255, null=True)
-    ms_played = models.IntegerField(null=True)
+class SteamingHistory(models.Model):
+    end_time = models.DateTimeField(null=False)
+    artist_name = models.CharField(max_length=255, null=False)
+    track_name = models.CharField(max_length=255, null=False)
+    ms_played = models.IntegerField(null=False)
 
     def __str__(self):
         return f"{self.end_time} - {self.artist_name} - {self.track_name}"

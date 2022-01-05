@@ -29,9 +29,9 @@ class TracksSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class BulkHistorySerializer(serializers.ModelSerializer):
+class SteamingHistorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = BulkHistory
+        model = SteamingHistory
         fields = "__all__"
 
 
@@ -74,6 +74,7 @@ class TrackEntrySerializer(serializers.Serializer):
 
         ### ARTISTS
         artists_sp_ids = validated_data["artists_sp_ids"]
+        # TODO: Verificar se o artista ja existe no banco. Caso sim, nao precisa fazer request
         artists = []
         for artist_sp_id in artists_sp_ids:
             artist_response = self.sp.artist(artist_sp_id)
