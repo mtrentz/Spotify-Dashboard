@@ -2,7 +2,9 @@ from rest_framework import serializers
 from .models import *
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from datetime import datetime
 from dotenv import load_dotenv
+import pytz
 
 
 class GenresSerializer(serializers.ModelSerializer):
@@ -29,9 +31,9 @@ class TracksSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class SteamingHistorySerializer(serializers.ModelSerializer):
+class StreamingHistorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = SteamingHistory
+        model = StreamingHistory
         fields = "__all__"
 
 
@@ -41,8 +43,34 @@ class UserActivitySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+# This is to verify that its a valid file
 class HistoryFileSerializer(serializers.Serializer):
     file = serializers.FileField(max_length=100, allow_empty_file=False)
+
+
+class HistoryEntrySerializer(serializers.Serializer):
+    # Names are different here since it's from the history file
+    endTime = serializers.DateTimeField()
+    artistName = serializers.CharField(max_length=255)
+    trackName = serializers.CharField(max_length=255)
+    msPlayed = serializers.IntegerField()
+
+    def save(self):
+        validated_data = self.validated_data
+        end_time = validated_data["endTime"]
+
+        # Sets date to UTC if not already
+        if not end_time.tzinfo:
+            end_time = end_time.replace(tzinfo=pytz.UTC)
+
+        # Add to StreamingHistory
+        streaming_history = StreamingHistory(
+            end_time=end_time,
+            artist_name=validated_data["artistName"],
+            track_name=validated_data["trackName"],
+            ms_played=validated_data["msPlayed"],
+        )
+        streaming_history.save()
 
 
 class TrackEntrySerializer(serializers.Serializer):
@@ -103,12 +131,22 @@ class TrackEntrySerializer(serializers.Serializer):
 
         ### ALBUM
         album_sp_id = validated_data["album_sp_id"]
+        # TODO: Conferir se album já existe no Albums, se sim, só pegar os dados
         album_response = self.sp.album(album_sp_id)
         album_name = album_response.get("name")
         album_popularity = album_response.get("popularity")
-        album_release_date = album_response.get("release_date")
         album_total_tracks = album_response.get("total_tracks")
         album_type = album_response.get("album_type")
+
+        album_release_date = album_response.get("release_date")
+        album_release_date_precision = album_response.get("release_date_precision")
+
+        if album_release_date_precision == "year":
+            album_release_date = datetime.strptime(album_release_date, "%Y")
+        elif album_release_date_precision == "month":
+            album_release_date = datetime.strptime(album_release_date, "%Y-%m")
+        else:
+            album_release_date = datetime.strptime(album_release_date, "%Y-%m-%d")
 
         album, _ = Albums.objects.get_or_create(
             sp_id=album_sp_id,
@@ -122,6 +160,8 @@ class TrackEntrySerializer(serializers.Serializer):
 
         album.artists.add(*artists)
 
+        # TODO: Pra nao confundir, aqui eu já tenho toda info de antemao, nao faço request
+        # Ou seja, nao precisa fazer verificação se a musica ja existe acho, só se ficar mais fácil...
         ### TRACK
         track_sp_id = validated_data["track_sp_id"]
         track_name = validated_data["track_name"]
@@ -146,6 +186,9 @@ class TrackEntrySerializer(serializers.Serializer):
         track.save()
         track.artists.add(*artists)
 
+        # TODO: Aqui uma coisa que falta é ver se o dado que ta vindo é 'from import', se for e o que tem no banco nao for,
+        # substituir o time played.
+        # Pra isso preciso conferir se o played at é PERTO e não se é IGUAL!!!! Pq nunca vai ser igual, visto q sao calculados diferente
         ### User Activity
         played_at = validated_data["played_at"]
         ms_played = validated_data["ms_played"]
@@ -158,12 +201,3 @@ class TrackEntrySerializer(serializers.Serializer):
             from_import=from_import,
         )
         user_activity.save()
-
-
-# python3 manage.py shell
-# from spotify.models import *
-# Albums.objects.all()
-# Genres.objects.all()
-# Artists.objects.all()
-# Tracks.objects.all()
-# UserActivity.objects.all()

@@ -32,7 +32,6 @@ class Albums(models.Model):
     artists = models.ManyToManyField(Artists)
 
     def __str__(self):
-        # TODO: Colocar nome do artista junto ao album
         return self.name
 
 
@@ -52,11 +51,14 @@ class Tracks(models.Model):
         return self.name
 
 
-class SteamingHistory(models.Model):
+class StreamingHistory(models.Model):
     end_time = models.DateTimeField(null=False)
     artist_name = models.CharField(max_length=255, null=False)
     track_name = models.CharField(max_length=255, null=False)
     ms_played = models.IntegerField(null=False)
+
+    class Meta:
+        unique_together = ("end_time", "artist_name", "track_name", "ms_played")
 
     def __str__(self):
         return f"{self.end_time} - {self.artist_name} - {self.track_name}"
