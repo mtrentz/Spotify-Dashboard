@@ -71,5 +71,8 @@ class UserActivity(models.Model):
     from_import = models.BooleanField(null=True)
     track = models.ForeignKey(Tracks, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ("played_at", "ms_played", "from_import", "track")
+
     def __str__(self):
         return f"{self.played_at} - {self.track.name} - {self.ms_played}"
