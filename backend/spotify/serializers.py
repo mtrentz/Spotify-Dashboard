@@ -63,14 +63,24 @@ class HistoryEntrySerializer(serializers.Serializer):
         if not end_time.tzinfo:
             end_time = end_time.replace(tzinfo=pytz.UTC)
 
-        # Add to StreamingHistory
-        streaming_history = StreamingHistory(
+        artist_name = validated_data["artistName"]
+        track_name = validated_data["trackName"]
+        ms_played = validated_data["msPlayed"]
+
+        # Save if not already in StreamingHistory, save it
+        if not StreamingHistory.objects.filter(
+            artist_name=artist_name,
+            track_name=track_name,
+            ms_played=ms_played,
             end_time=end_time,
-            artist_name=validated_data["artistName"],
-            track_name=validated_data["trackName"],
-            ms_played=validated_data["msPlayed"],
-        )
-        streaming_history.save()
+        ).exists():
+            streaming_history = StreamingHistory(
+                artist_name=artist_name,
+                track_name=track_name,
+                ms_played=ms_played,
+                end_time=end_time,
+            )
+            streaming_history.save()
 
 
 class TrackEntrySerializer(serializers.Serializer):
