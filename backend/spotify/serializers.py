@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from .helpers import insert_user_activity
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from datetime import datetime
@@ -204,10 +205,9 @@ class TrackEntrySerializer(serializers.Serializer):
         ms_played = validated_data["ms_played"]
         from_import = validated_data["from_import"]
 
-        user_activity, _ = UserActivity.objects.get_or_create(
+        insert_user_activity(
             track=track,
             played_at=played_at,
             ms_played=ms_played,
             from_import=from_import,
         )
-        user_activity.save()

@@ -9,6 +9,8 @@ import json
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
+import pytz
+from .helpers import search_spotify_song, insert_user_activity
 
 
 class TrackEntryView(APIView):
@@ -22,8 +24,10 @@ class TrackEntryView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# TODO: Testar no futuro se da pra uploadar dois arquivos
 class ImportStreamingHistoryView(APIView):
     def post(self, request):
+        print(request.data)
         serializer = HistoryFileSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -43,10 +47,11 @@ class ImportStreamingHistoryView(APIView):
         for data in data_list:
             history_entry_serializer = HistoryEntrySerializer(data=data)
 
+            # If not valid for some reason, just continue to next iteration
             if not history_entry_serializer.is_valid():
-                raise ValidationError(history_entry_serializer.errors)
+                continue
 
-            # Won't add duplicates into Streaming History
+            # Won't let duplicates be added into Streaming History
             history_entry_serializer.save()
 
             # TODO: Talvez pegar uma estatistica tipo "x tracks adicionadas... x ja existentes, etc..."
@@ -58,37 +63,34 @@ class ImportStreamingHistoryView(APIView):
 
             print(f"{track_name} - {artist_name}")
 
-            # Neeed to calculate 'played_at' if I want to add to UserActivity (By sending to TrackEntryView)
+            # Neeed to calculate 'played_at' if I want to add to UserActivity
             end_time_dt = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
             played_at = end_time_dt - timedelta(milliseconds=ms_played)
-
-            # Removes "Remaster" or "Live" from track name to search it.
-            if "Remaster" in track_name or "Live" in track_name:
-                track_name = track_name.split(" - ")[0]
+            # Pass it to UTC
+            played_at = played_at.replace(tzinfo=pytz.UTC)
 
             tracks = Tracks.objects.filter(name=track_name, artists__name=artist_name)
             # If track was already in the database, just add to UserActivity
             if tracks.exists():
                 track = tracks.first()
-                # TODO: Aqui tenho que pensar como vai funcionar quando ja existir uma track
-                # com um tempo um pouco diferente. Pq há aqla diferença entre historico e recently played
-                user_activity, _ = UserActivity.objects.get_or_create(
+
+                # Will check if not already in UserActivity
+                insert_user_activity(
                     track=track,
                     played_at=played_at,
                     ms_played=ms_played,
                     from_import=True,
                 )
-                user_activity.save()
+
             # If not, search it on Spotify, and get all necessary data to send it to TrackEntrySerializer
             # which will also add it to user activity.
             else:
                 # Searching song name and artist in spotify to get all the info needed.
-                track = sp.search(
-                    q=f"track:{track_name} artist:{artist_name}",
-                    type="track",
-                    limit=1,
-                )
-                track_resp = track["tracks"]["items"][0]
+                track_resp = search_spotify_song(sp, track_name, artist_name, "track")
+
+                # If not found song on spotify, continue to next iteration
+                if not track_resp:
+                    continue
 
                 artists = track_resp.get("artists")
                 artists_sp_ids = [a.get("id") for a in artists]
@@ -110,9 +112,9 @@ class ImportStreamingHistoryView(APIView):
                     "from_import": True,
                 }
 
-                track_entry_serializer = TrackEntrySerializer(data=track_entry_data)
                 # This adds complete info to tracks/albums/etc...
                 # But also saves to UserActivity!
+                track_entry_serializer = TrackEntrySerializer(data=track_entry_data)
                 if track_entry_serializer.is_valid():
                     track_entry_serializer.save()
 

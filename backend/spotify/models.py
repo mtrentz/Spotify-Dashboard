@@ -66,7 +66,7 @@ class StreamingHistory(models.Model):
 
 class UserActivity(models.Model):
     # Não pode ter musica com o mesmo timestamp. Se tiver, é pq é entry repetido
-    played_at = models.DateTimeField(null=True, unique=True)
+    played_at = models.DateTimeField(null=True)
     ms_played = models.IntegerField(null=True)
     from_import = models.BooleanField(null=True)
     track = models.ForeignKey(Tracks, on_delete=models.CASCADE)
