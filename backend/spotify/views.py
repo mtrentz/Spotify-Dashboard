@@ -24,7 +24,6 @@ class TrackEntryView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# TODO: Testar no futuro se da pra uploadar dois arquivos
 class ImportStreamingHistoryView(APIView):
     def post(self, request):
 

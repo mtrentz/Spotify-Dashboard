@@ -91,7 +91,7 @@ class TrackEntrySerializer(serializers.Serializer):
         child=serializers.CharField(max_length=255), required=True
     )
 
-    # Complete data required to insert a Track
+    # Track data
     track_sp_id = serializers.CharField(max_length=255, required=True)
     track_name = serializers.CharField(max_length=255, required=True)
     track_duration = serializers.IntegerField(required=False)
@@ -112,14 +112,18 @@ class TrackEntrySerializer(serializers.Serializer):
     def save(self):
         validated_data = self.validated_data
 
-        # TODO: Passar isso pra um arquivo separado. Checar por erros
-        # TODO: Checar primeiro se já existe aquele playtime no user activity. Caso sim, nao precisa fazer nada
-
         ### ARTISTS
         artists_sp_ids = validated_data["artists_sp_ids"]
-        # TODO: Verificar se o artista ja existe no banco. Caso sim, nao precisa fazer request
         artists = []
         for artist_sp_id in artists_sp_ids:
+            # First check if artist already exists in database
+            artist = Artists.objects.filter(sp_id=artist_sp_id).first()
+            # If exists
+            if artist:
+                # Just append it to list and continue to next iteration
+                artists.append(artist)
+                continue
+
             artist_response = self.sp.artist(artist_sp_id)
             artist_name = artist_response.get("name")
             artist_popularity = artist_response.get("popularity")
@@ -142,38 +146,42 @@ class TrackEntrySerializer(serializers.Serializer):
 
         ### ALBUM
         album_sp_id = validated_data["album_sp_id"]
-        # TODO: Conferir se album já existe no Albums, se sim, só pegar os dados
-        album_response = self.sp.album(album_sp_id)
-        album_name = album_response.get("name")
-        album_popularity = album_response.get("popularity")
-        album_total_tracks = album_response.get("total_tracks")
-        album_type = album_response.get("album_type")
 
-        album_release_date = album_response.get("release_date")
-        album_release_date_precision = album_response.get("release_date_precision")
+        # First check if album already exists in database
+        album = Albums.objects.filter(sp_id=album_sp_id).first()
+        # If not exist, query it from Spotify, and save it
+        if not album:
+            album_response = self.sp.album(album_sp_id)
+            album_name = album_response.get("name")
+            album_popularity = album_response.get("popularity")
+            album_total_tracks = album_response.get("total_tracks")
+            album_type = album_response.get("album_type")
 
-        if album_release_date_precision == "year":
-            album_release_date = datetime.strptime(album_release_date, "%Y")
-        elif album_release_date_precision == "month":
-            album_release_date = datetime.strptime(album_release_date, "%Y-%m")
-        else:
-            album_release_date = datetime.strptime(album_release_date, "%Y-%m-%d")
+            album_release_date = album_response.get("release_date")
+            album_release_date_precision = album_response.get("release_date_precision")
 
-        album, _ = Albums.objects.get_or_create(
-            sp_id=album_sp_id,
-            name=album_name,
-            popularity=album_popularity,
-            release_date=album_release_date,
-            total_tracks=album_total_tracks,
-            type=album_type,
-        )
-        album.save()
+            if album_release_date_precision == "year":
+                album_release_date = datetime.strptime(album_release_date, "%Y")
+            elif album_release_date_precision == "month":
+                album_release_date = datetime.strptime(album_release_date, "%Y-%m")
+            else:
+                album_release_date = datetime.strptime(album_release_date, "%Y-%m-%d")
 
-        album.artists.add(*artists)
+            album, _ = Albums.objects.get_or_create(
+                sp_id=album_sp_id,
+                name=album_name,
+                popularity=album_popularity,
+                release_date=album_release_date,
+                total_tracks=album_total_tracks,
+                type=album_type,
+            )
+            album.save()
 
-        # TODO: Pra nao confundir, aqui eu já tenho toda info de antemao, nao faço request
-        # Ou seja, nao precisa fazer verificação se a musica ja existe acho, só se ficar mais fácil...
+            # Add artists to album (many to many)
+            album.artists.add(*artists)
+
         ### TRACK
+        # Here I don't have to query spotify, since I already have all the info I need
         track_sp_id = validated_data["track_sp_id"]
         track_name = validated_data["track_name"]
         track_duration = validated_data["track_duration"]
@@ -197,14 +205,13 @@ class TrackEntrySerializer(serializers.Serializer):
         track.save()
         track.artists.add(*artists)
 
-        # TODO: Aqui uma coisa que falta é ver se o dado que ta vindo é 'from import', se for e o que tem no banco nao for,
-        # substituir o time played.
-        # Pra isso preciso conferir se o played at é PERTO e não se é IGUAL!!!! Pq nunca vai ser igual, visto q sao calculados diferente
         ### User Activity
         played_at = validated_data["played_at"]
         ms_played = validated_data["ms_played"]
         from_import = validated_data["from_import"]
 
+        # Here I will check if need to add to user activity.
+        # There are some extra considerations to be made, which will be explained in the function
         insert_user_activity(
             track=track,
             played_at=played_at,
