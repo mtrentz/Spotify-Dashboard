@@ -27,7 +27,7 @@ class TrackEntryView(APIView):
 # TODO: Testar no futuro se da pra uploadar dois arquivos
 class ImportStreamingHistoryView(APIView):
     def post(self, request):
-        print(request.data)
+
         serializer = HistoryFileSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -37,10 +37,13 @@ class ImportStreamingHistoryView(APIView):
         load_dotenv()
         sp = spotipy.Spotify(auth_manager=SpotifyOAuth())
 
-        # List of objects containing the play history
-        data_list = request.data.get("file").read()
+        # Accepts multiple streaming history files
+        file_list = request.data.getlist("file")
+        data_list = []
+
         try:
-            data_list = json.loads(data_list)
+            for file in file_list:
+                data_list.extend(json.loads(file.read()).copy())
         except Exception as e:
             raise ValidationError(f"Invalid Streaming History JSON file; {e}")
 
@@ -49,6 +52,7 @@ class ImportStreamingHistoryView(APIView):
 
             # If not valid for some reason, just continue to next iteration
             if not history_entry_serializer.is_valid():
+                print("yo")
                 continue
 
             # Won't let duplicates be added into Streaming History
@@ -60,8 +64,6 @@ class ImportStreamingHistoryView(APIView):
             artist_name = data.get("artistName")
             end_time = data.get("endTime")
             ms_played = data.get("msPlayed")
-
-            print(f"{track_name} - {artist_name}")
 
             # Neeed to calculate 'played_at' if I want to add to UserActivity
             end_time_dt = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
