@@ -10,7 +10,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 import pytz
-from ..helpers import search_spotify_song, insert_user_activity
+from ..helpers.helpers import search_spotify_song, insert_user_activity
 
 
 class TrackEntryView(APIView):

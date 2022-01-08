@@ -1,4 +1,4 @@
-from .models import UserActivity
+from ..models import UserActivity
 
 
 def search_spotify_song(sp, track_name, artist_name, type):

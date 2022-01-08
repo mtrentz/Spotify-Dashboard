@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import *
-from .helpers import insert_user_activity
+from .helpers.helpers import insert_user_activity
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from datetime import datetime
