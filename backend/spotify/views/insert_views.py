@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
-from .models import *
-from .serializers import *
+from ..models import *
+from ..serializers import *
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -10,7 +10,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 import pytz
-from .helpers import search_spotify_song, insert_user_activity
+from ..helpers import search_spotify_song, insert_user_activity
 
 
 class TrackEntryView(APIView):

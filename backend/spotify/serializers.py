@@ -8,36 +8,6 @@ from dotenv import load_dotenv
 import pytz
 
 
-class GenresSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genres
-        fields = "__all__"
-
-
-class ArtistsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Artists
-        fields = "__all__"
-
-
-class AlbumsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Albums
-        fields = "__all__"
-
-
-class TracksSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tracks
-        fields = "__all__"
-
-
-class StreamingHistorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StreamingHistory
-        fields = "__all__"
-
-
 class UserActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = UserActivity
