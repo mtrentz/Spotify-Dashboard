@@ -28,7 +28,6 @@ class Albums(models.Model):
     release_date = models.DateField(null=True)
     total_tracks = models.IntegerField(null=True)
     type = models.CharField(max_length=50, null=True)
-    # TODO: Ver como funciona qnd um album tem varios artistas
     artists = models.ManyToManyField(Artists)
 
     def __str__(self):
@@ -76,3 +75,15 @@ class UserActivity(models.Model):
 
     def __str__(self):
         return f"{self.played_at} - {self.track.name} - {self.ms_played}"
+
+
+class SpotifyAuthorizationTokens(models.Model):
+    access_token = models.CharField(max_length=255, null=False)
+    refresh_token = models.CharField(max_length=255, null=False)
+    expires_in = models.IntegerField(null=False)
+    expires_at = models.IntegerField(null=False)
+    scope = models.CharField(max_length=255, null=False)
+    token_type = models.CharField(max_length=255, null=False)
+
+    def __str__(self):
+        return f"Refresh Token Expiration: {self.expires_at}"

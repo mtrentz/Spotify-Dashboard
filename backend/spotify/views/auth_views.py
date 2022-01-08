@@ -22,8 +22,11 @@ class AuthTokenView(APIView):
     print("Got in Auth token view")
 
     def post(self, request):
-        # print(request.data)
-        code = request.data.get("code")
-        token = self.sp.auth_manager.get_access_token(code)
-        print(token)
-        return Response({"Token": token})
+        try:
+            code = request.data.get("code")
+            # TODO: Store tokens to database
+            token = self.sp.auth_manager.get_access_token(code)
+        except Exception as e:
+            return Response({"Error": e})
+        # Don't return the tokens since the user (browser) shouldnt't have access to it
+        return Response({"Success": "Tokens stored"})
