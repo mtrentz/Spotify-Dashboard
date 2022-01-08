@@ -5,5 +5,6 @@ from .views.auth_views import *
 urlpatterns = [
     path("entry/", TrackEntryView.as_view(), name="entry"),
     path("history/", ImportStreamingHistoryView.as_view(), name="history"),
-    path("auth/", AuthView.as_view(), name="auth"),
+    path("auth/", AuthURLView.as_view(), name="auth_url"),
+    path("token/", AuthTokenView.as_view(), name="auth_token"),
 ]
