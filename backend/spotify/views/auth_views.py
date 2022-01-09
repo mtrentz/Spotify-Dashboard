@@ -4,7 +4,6 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy import CacheFileHandler
 from dotenv import load_dotenv
-from spotify.models import SpotifyAuthorizationTokens
 import os
 from django.conf import settings
 

@@ -51,7 +51,6 @@ class ImportStreamingHistoryView(APIView):
 
             # If not valid for some reason, just continue to next iteration
             if not history_entry_serializer.is_valid():
-                print("yo")
                 continue
 
             # Won't let duplicates be added into Streaming History

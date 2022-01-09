@@ -4,7 +4,6 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy import CacheFileHandler
 from dotenv import load_dotenv
-from spotify.models import SpotifyAuthorizationTokens
 from django.conf import settings
 import os
 
@@ -17,7 +16,6 @@ class RecentlyPlayedView(APIView):
         sp = spotipy.Spotify(
             auth_manager=SpotifyOAuth(cache_handler=CacheFileHandler(self.cache_path)),
         )
-        print(sp.auth_manager.cache_handler.get_cached_token())
 
         tracks = sp.current_user_recently_played(limit=2)
         return Response(tracks)

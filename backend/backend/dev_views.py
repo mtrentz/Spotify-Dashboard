@@ -1,9 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
-# Dev only
 import requests
-
 
 # This is used to simulate a frontend. Where user will be redirected, and then I'll be able to get the auth CODE
 # the auth code then has to be sent to the backend again to get access/refresh tokens

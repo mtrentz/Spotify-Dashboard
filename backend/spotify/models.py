@@ -75,15 +75,3 @@ class UserActivity(models.Model):
 
     def __str__(self):
         return f"{self.played_at} - {self.track.name} - {self.ms_played}"
-
-
-class SpotifyAuthorizationTokens(models.Model):
-    access_token = models.CharField(max_length=255, null=False)
-    refresh_token = models.CharField(max_length=255, null=False)
-    expires_in = models.IntegerField(null=False)
-    expires_at = models.IntegerField(null=False)
-    scope = models.CharField(max_length=255, null=True)
-    token_type = models.CharField(max_length=255, null=False)
-
-    def __str__(self):
-        return f"Refresh Token Expiration: {self.expires_at}"
