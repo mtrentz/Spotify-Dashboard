@@ -20,24 +20,12 @@ class BaseAuthView(APIView):
 
 
 class AuthURLView(BaseAuthView):
-    # load_dotenv()
-    # sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"))
-
     def get(self, request):
         url = self.sp.auth_manager.get_authorize_url()
         return Response({"Please Sign In": url})
 
 
 class AuthTokenView(BaseAuthView):
-    load_dotenv()
-    # cache_path = os.path.join(settings.BASE_DIR, "spotify", ".auth-cache")
-    # sp = spotipy.Spotify(
-    #     auth_manager=SpotifyOAuth(
-    #         cache_handler=CacheFileHandler(cache_path),
-    #         scope="user-read-recently-played",
-    #     ),
-    # )
-
     def post(self, request):
         try:
             # Get code from params
