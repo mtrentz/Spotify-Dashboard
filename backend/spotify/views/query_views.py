@@ -8,7 +8,7 @@ from django.conf import settings
 import os
 from .auth_views import BaseAuthView
 
-
+# TODO: Tirar limite e ver como lidar com o CURSOR depois pra poder fazer a pagination
 class RecentlyPlayedView(BaseAuthView):
     def get(self, request):
         tracks = self.sp.current_user_recently_played(limit=2)
