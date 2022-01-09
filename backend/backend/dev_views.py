@@ -8,5 +8,5 @@ class HomeView(APIView):
     def get(self, request):
         code = request.query_params.get("code")
         # Send code to a backend view
-        r = requests.post("http://localhost:8000/api/spotify/token/", {"code": code})
+        requests.post("http://localhost:8000/api/spotify/token/", {"code": code})
         return Response({"Code": code})
