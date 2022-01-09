@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 from datetime import datetime, timedelta
 import json
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from dotenv import load_dotenv
 import pytz
 from ..helpers.helpers import search_spotify_song, insert_user_activity
@@ -34,7 +34,7 @@ class ImportStreamingHistoryView(APIView):
 
         # Load environment variable
         load_dotenv()
-        sp = spotipy.Spotify(auth_manager=SpotifyOAuth())
+        sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
         # Accepts multiple streaming history files
         file_list = request.data.getlist("file")
@@ -81,7 +81,6 @@ class ImportStreamingHistoryView(APIView):
                     ms_played=ms_played,
                     from_import=True,
                 )
-
             # If not, search it on Spotify, and get all necessary data to send it to TrackEntrySerializer
             # which will also add it to user activity.
             else:

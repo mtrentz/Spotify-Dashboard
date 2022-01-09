@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import *
 from .helpers.helpers import insert_user_activity
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from datetime import datetime
 from dotenv import load_dotenv
 import pytz
@@ -77,7 +77,7 @@ class TrackEntrySerializer(serializers.Serializer):
     from_import = serializers.BooleanField(required=True)
 
     load_dotenv()
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth())
+    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
     def save(self):
         validated_data = self.validated_data
@@ -99,6 +99,7 @@ class TrackEntrySerializer(serializers.Serializer):
             artist_popularity = artist_response.get("popularity")
             artist_followers = artist_response.get("followers").get("total")
 
+            print(artist_name)
             artist, _ = Artists.objects.get_or_create(
                 sp_id=artist_sp_id,
                 name=artist_name,
@@ -161,6 +162,9 @@ class TrackEntrySerializer(serializers.Serializer):
         track_disc_number = validated_data["track_disc_number"]
         track_type = validated_data["track_type"]
 
+        print("\n>>>>>>>>>>>> ", track_name, "\n")
+        print("\n>>>>>>>>>>>> ", track_sp_id, "\n")
+        print(validated_data)
         track, _ = Tracks.objects.get_or_create(
             sp_id=track_sp_id,
             name=track_name,
