@@ -8,17 +8,7 @@ import os
 from django.conf import settings
 
 
-class AuthURLView(APIView):
-    load_dotenv()
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"))
-
-    url = sp.auth_manager.get_authorize_url()
-
-    def get(self, request):
-        return Response({"Please Sign In": self.url})
-
-
-class AuthTokenView(APIView):
+class BaseAuthView(APIView):
     load_dotenv()
     cache_path = os.path.join(settings.BASE_DIR, "spotify", ".auth-cache")
     sp = spotipy.Spotify(
@@ -27,6 +17,26 @@ class AuthTokenView(APIView):
             scope="user-read-recently-played",
         ),
     )
+
+
+class AuthURLView(BaseAuthView):
+    # load_dotenv()
+    # sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"))
+
+    def get(self, request):
+        url = self.sp.auth_manager.get_authorize_url()
+        return Response({"Please Sign In": url})
+
+
+class AuthTokenView(BaseAuthView):
+    load_dotenv()
+    # cache_path = os.path.join(settings.BASE_DIR, "spotify", ".auth-cache")
+    # sp = spotipy.Spotify(
+    #     auth_manager=SpotifyOAuth(
+    #         cache_handler=CacheFileHandler(cache_path),
+    #         scope="user-read-recently-played",
+    #     ),
+    # )
 
     def post(self, request):
         try:
