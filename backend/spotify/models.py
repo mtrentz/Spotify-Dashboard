@@ -74,4 +74,4 @@ class UserActivity(models.Model):
         unique_together = ("played_at", "ms_played", "from_import", "track")
 
     def __str__(self):
-        return f"{self.played_at} - {self.track.name} - {self.ms_played}"
+        return f"{self.played_at.strftime('%Y-%m-%d %H:%M:%S')} - {self.track.name} - {self.ms_played}"
