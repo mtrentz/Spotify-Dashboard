@@ -10,13 +10,12 @@ from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
 from django_apscheduler import util
 
-from ...views.query_views import RecentlyPlayedView
+from ...views.insert_views import RecentlyPlayedView
 
 logger = logging.getLogger(__name__)
 
 
 def recently_played_job():
-    print("yo")
     view = RecentlyPlayedView()
     view.insert_recently_played()
 

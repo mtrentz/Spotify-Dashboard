@@ -1,11 +1,13 @@
+from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy import CacheFileHandler
-from dotenv import load_dotenv
 import os
-from django.conf import settings
+
+# Dev only
+from dotenv import load_dotenv
 
 
 class BaseAuthView(APIView):
