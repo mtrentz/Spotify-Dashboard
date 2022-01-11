@@ -10,12 +10,15 @@ from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
 from django_apscheduler import util
 
+from ...views.query_views import RecentlyPlayedView
+
 logger = logging.getLogger(__name__)
 
 
 def recently_played_job():
-    # Your job processing logic here...
-    pass
+    print("yo")
+    view = RecentlyPlayedView()
+    view.insert_recently_played()
 
 
 # The `close_old_connections` decorator ensures that database connections, that have become
@@ -42,7 +45,9 @@ class Command(BaseCommand):
 
         scheduler.add_job(
             recently_played_job,
-            trigger=CronTrigger(second="*/900"),  # Every 900 seconds = 15 minutes
+            trigger=CronTrigger(
+                minute="*/15"
+            ),  # Every 15th minute (10h15, 10h30, etc...)
             id="recently_played_job",  # The `id` assigned to each job MUST be unique
             max_instances=1,
             replace_existing=True,
