@@ -1,6 +1,6 @@
 import React from "react";
-import SampleGraph from "../components/SampleGraph";
-import TimePlayedChart from "../components/TimePlayedChart";
+import SampleGraph from "../components/Charts/SampleGraph";
+import TimePlayedChart from "../components/Charts/TimePlayedChart";
 
 const Home = () => {
   return (
