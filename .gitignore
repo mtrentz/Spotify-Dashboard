@@ -4,6 +4,7 @@
 
 ### Project Specific ###
 .auth-cache
+node_modules
 
 ### Django ###
 *.log
