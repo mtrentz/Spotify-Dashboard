@@ -123,9 +123,9 @@ const TimePlayedChart = () => {
           </div>
         </div>
         <div className="d-flex align-items-baseline">
-          <div className="h1 mb-0 me-2">$4,300</div>
+          <div className="h1 mb-0 me-2">240</div>
           <div className="me-auto">
-            <TrendingSideways value="8%" />
+            <TrendingUp value="8%" />
           </div>
         </div>
       </div>
