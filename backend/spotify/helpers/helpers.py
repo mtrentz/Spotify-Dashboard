@@ -101,7 +101,7 @@ def insert_user_activity(track, ms_played, played_at, from_import):
 
     # CHECK IF INCOMING IS FROM RECENTLY PLAYED
     if not user_activity.from_import:
-        # IF IT IS NOT, CHECK IF THE EQUIVALENT IS FROM SPOTIFY HISTORY
+        # IF IT IS, CHECK IF THE EQUIVALENT IS FROM SPOTIFY HISTORY
         if equivalent_activity.from_import:
             # IF SO, UPDATE THE EQUIVALENT ONE TO BE EQUAL THE INCOMING.
             # This is becasue the incoming one (from recently played) is more accurate
