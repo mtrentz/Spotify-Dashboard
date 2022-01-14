@@ -10,7 +10,7 @@ const TimePlayedChart = () => {
   const status = {
     series: [
       {
-        name: "Profits",
+        name: "Hours Played",
         data: [
           37, 35, 44, 28, 36, 24, 65, 31, 37, 39, 62, 51, 35, 41, 35, 27, 93,
           53, 61, 27, 54, 43, 19, 46, 39, 62, 51, 35, 41, 67,
@@ -113,7 +113,7 @@ const TimePlayedChart = () => {
     <div className="card mx-10">
       <div className="card-body">
         <div className="d-flex align-items-center">
-          <div className="subheader">Revenue</div>
+          <div className="subheader">Hours Played</div>
           <div className="ms-auto lh-1">
             <PeriodDropdown
               current={period}
