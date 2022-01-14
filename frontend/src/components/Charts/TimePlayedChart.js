@@ -1,8 +1,10 @@
 import React from "react";
+import { useState } from "react";
 import Chart from "react-apexcharts";
 import TrendingUp from "../Utilities/TrendingUp";
 import TrendingDown from "../Utilities/TrendingDown";
 import TrendingSideways from "../Utilities/TrendingSideways";
+import PeriodDropdown from "../Utilities/PeriodDropdown";
 
 const TimePlayedChart = () => {
   const status = {
@@ -98,34 +100,26 @@ const TimePlayedChart = () => {
     },
   };
 
+  const periodOptions = ["Last 7 days", "Last 30 days", "Last 3 months"];
+
+  const [period, setPeriod] = useState(periodOptions[0]);
+
+  const handlePeriodChange = (e) => {
+    setPeriod(e.target.text);
+    // TODO: Função que ajeita os dados
+  };
+
   return (
     <div className="card mx-10">
       <div className="card-body">
         <div className="d-flex align-items-center">
           <div className="subheader">Revenue</div>
           <div className="ms-auto lh-1">
-            <div className="dropdown">
-              <a
-                className="dropdown-toggle text-muted"
-                href="#"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                Last 7 days
-              </a>
-              <div className="dropdown-menu dropdown-menu-end">
-                <a className="dropdown-item active" href="#">
-                  Last 7 days
-                </a>
-                <a className="dropdown-item" href="#">
-                  Last 30 days
-                </a>
-                <a className="dropdown-item" href="#">
-                  Last 3 months
-                </a>
-              </div>
-            </div>
+            <PeriodDropdown
+              current={period}
+              options={periodOptions}
+              handleClick={handlePeriodChange}
+            />
           </div>
         </div>
         <div className="d-flex align-items-baseline">
