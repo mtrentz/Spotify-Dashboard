@@ -16,7 +16,7 @@ const TimePlayedChart = () => {
       chart: {
         type: "area",
         fontFamily: "inherit",
-        height: 40.0,
+        height: 40,
         sparkline: {
           enabled: true,
         },
@@ -28,7 +28,7 @@ const TimePlayedChart = () => {
         enabled: false,
       },
       fill: {
-        opacity: 0.7,
+        opacity: 0.25,
         type: "solid",
       },
       stroke: {
@@ -96,7 +96,7 @@ const TimePlayedChart = () => {
   };
 
   return (
-    <div className="card">
+    <div className="card mx-10">
       <div className="card-body">
         <div className="d-flex align-items-center">
           <div className="subheader">Revenue</div>
@@ -157,6 +157,8 @@ const TimePlayedChart = () => {
         style={{ minHeight: 40 + "px" }}
         series={status.series}
         options={status.options}
+        type="area"
+        height="40"
       />
     </div>
   );
