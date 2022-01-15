@@ -11,14 +11,14 @@ import RecentActivity from "../components/Charts/RecentActivity";
 import TopArtists from "../components/Charts/TopArtists";
 import TopTracks from "../components/Charts/TopTracks";
 
-const instance = axios.create({
+const api = axios.create({
   baseURL: "http://localhost:8000/api/spotify",
   timeout: 1000,
 });
 
 const Home = () => {
   useEffect(() => {
-    instance
+    api
       .get("/recent/")
       .then((res) => {
         console.log(res.data);
