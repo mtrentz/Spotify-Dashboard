@@ -25,7 +25,9 @@ class TopPlayedArtists(ListAPIView):
         items = Artists.objects.annotate(
             time_played_ms=Sum("tracks__useractivity__ms_played")
         ).order_by("-time_played_ms")[:qty]
+
         queryset = []
+
         for item in items:
             queryset.append(
                 {

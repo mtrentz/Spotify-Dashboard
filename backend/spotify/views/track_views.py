@@ -22,7 +22,9 @@ class RecentUserActivityView(ListAPIView):
             raise ParseError("qty must be less than 50")
 
         items = UserActivity.objects.order_by("-played_at")[:qty]
+
         queryset = []
+
         for item in items:
             queryset.append(
                 {
@@ -33,4 +35,5 @@ class RecentUserActivityView(ListAPIView):
                     "ms_played": item.ms_played,
                 }
             )
+
         return queryset
