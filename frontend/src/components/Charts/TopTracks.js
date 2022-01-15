@@ -1,4 +1,5 @@
 import React from "react";
+import PeriodDropdown from "../Utilities/PeriodDropdown";
 
 const TopTracks = () => {
   const data = [
@@ -24,8 +25,13 @@ const TopTracks = () => {
 
   return (
     <div class="card mx-10">
-      <div class="card-header">
+      <div class="card-header flex justify-between">
         <h3 class="card-title">Top Played Tracks</h3>
+        {/* TODO: Adicionar handle click */}
+        <PeriodDropdown
+          current="Last 7 days"
+          options={["Last 7 days", "Last 30 days", "All Time"]}
+        />
       </div>
       <div class="list-group card-list-group">
         {data.map((item, index) => (
@@ -44,6 +50,7 @@ const TopTracks = () => {
               <div class="col">
                 {item.name}
                 <div class="text-muted">
+                  {/* TODO: Preciso separar por virgula */}
                   {item.artists.map((artist) => artist)}
                 </div>
               </div>

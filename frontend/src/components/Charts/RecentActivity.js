@@ -5,6 +5,7 @@ const RecentActivity = () => {
   // <span class="avatar" style="background-image: url(./static/avatars/002m.jpg)"></span>
   const data = [
     {
+      // TODO: Precisa de uma logica pra separar artistas por virgula
       text: (
         <span>
           You've listened to <strong>Beggin'</strong> by{" "}

@@ -1,4 +1,5 @@
 import React from "react";
+import PeriodDropdown from "../Utilities/PeriodDropdown";
 
 const TopArtists = () => {
   // This gonna need some logic to get the progress
@@ -45,8 +46,13 @@ const TopArtists = () => {
   return (
     <div class="card mx-10">
       {/* TODO: Add dropdown */}
-      <div class="card-header">
+      <div class="card-header flex justify-between">
         <h3 class="card-title">Top Played Artists</h3>
+        {/* TODO: Adicionar handle click */}
+        <PeriodDropdown
+          current="Last 7 days"
+          options={["Last 7 days", "Last 30 days", "All Time"]}
+        />
       </div>
       <table class="table card-table table-vcenter">
         <thead>
