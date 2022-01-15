@@ -21,8 +21,6 @@ class TopPlayedArtists(ListAPIView):
             raise ParseError("days must be an integer")
         if days < 0:
             raise ParseError("days must be positive")
-        if days > 365:
-            raise ParseError("days must be less than 365")
 
         # Amount of data to return. Defaults to 10
         try:
@@ -36,6 +34,7 @@ class TopPlayedArtists(ListAPIView):
 
         date_now = datetime.utcnow()
         date_start = date_now - timedelta(days=days)
+        print(date_start)
 
         items = (
             Artists.objects.filter(
