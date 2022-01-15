@@ -1,5 +1,7 @@
 import React from "react";
 import { useEffect } from "react";
+import axios from "axios";
+
 import SampleGraph from "../components/Charts/SampleGraph";
 import TimePlayedChart from "../components/Charts/TimePlayedChart";
 import UniqueAlbums from "../components/Charts/UniqueAlbums";
@@ -9,14 +11,12 @@ import RecentActivity from "../components/Charts/RecentActivity";
 import TopArtists from "../components/Charts/TopArtists";
 import TopTracks from "../components/Charts/TopTracks";
 
+const instance = axios.create({
+  baseURL: "http://localhost:8000/api/spotify",
+  timeout: 1000,
+});
+
 const Home = () => {
-  const axios = require("axios");
-
-  const instance = axios.create({
-    baseURL: "http://localhost:8000/api/spotify",
-    timeout: 1000,
-  });
-
   useEffect(() => {
     instance
       .get("/recent/")
