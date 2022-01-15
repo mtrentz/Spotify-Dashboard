@@ -1,47 +1,46 @@
 import React from "react";
+import { useContext, useEffect, useState } from "react";
+
+import ApiContext from "../Contexts/ApiContext";
+
 import PeriodDropdown from "../Utilities/PeriodDropdown";
 
 const TopArtists = () => {
-  // This gonna need some logic to get the progress
-  //  I have to get the top progress, round by a even number up.
-  //  Then base everything on that
-  const data = [
-    {
-      name: "Måneskin",
-      minutes: 320,
-      progress: "81.0%",
-    },
-    {
-      name: "Led Zeppelin",
-      minutes: 249,
-      progress: "73.0%",
-    },
-    {
-      name: "Pink Floyd",
-      minutes: 150,
-      progress: "51.0%",
-    },
-    {
-      name: "Linkin Park",
-      minutes: 120,
-      progress: "40.0%",
-    },
-    {
-      name: "Sabotage",
-      minutes: 89,
-      progress: "27.5%",
-    },
-    {
-      name: "Eagles",
-      minutes: 43,
-      progress: "11.0%",
-    },
-    {
-      name: "Audioslave",
-      minutes: 21,
-      progress: "5.0%",
-    },
-  ];
+  const { api } = useContext(ApiContext);
+
+  const [topArtistsData, setTopArtistsData] = useState([]);
+
+  const processApiResponse = (res) => {
+    // I'll receive a response containing the artist name and minutes played.
+    // From this I need to calculate the percentage of the progress bar.
+
+    // I'll get the biggest value (first) and round it UP to the nearest 10.
+    // This will be the max value of the progress bar.
+
+    let maxValue = res[0].minutes_played;
+    let rounded = Math.ceil(maxValue / 10) * 10;
+
+    let processedData = res.map((item) => {
+      return {
+        artistName: item.artist,
+        minutesPlayed: item.minutes_played,
+        progress: Math.round((item.minutes_played / rounded) * 100),
+      };
+    });
+    return processedData;
+  };
+
+  useEffect(() => {
+    api
+      .get("/top-played-artists/", { params: { qty: 7, days: 7 } })
+      .then((res) => {
+        setTopArtistsData(processApiResponse(res.data));
+        // console.log(topArtistsData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   return (
     <div className="card mx-10">
@@ -62,15 +61,15 @@ const TopArtists = () => {
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
+          {topArtistsData.map((item, index) => (
             <tr key={index}>
-              <td>{item.name}</td>
-              <td>{item.minutes}</td>
+              <td>{item.artistName}</td>
+              <td>{item.minutesPlayed}</td>
               <td className="w-50">
                 <div className="progress progress-xs">
                   <div
                     className="progress-bar bg-primary"
-                    style={{ width: item.progress }}
+                    style={{ width: `${item.progress}%` }}
                   ></div>
                 </div>
               </td>
