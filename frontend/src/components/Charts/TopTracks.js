@@ -1,60 +1,86 @@
 import React from "react";
+import { useContext, useEffect, useState } from "react";
+
+import ApiContext from "../Contexts/ApiContext";
+
 import PeriodDropdown from "../Utilities/PeriodDropdown";
 
 const TopTracks = () => {
-  const data = [
-    {
-      name: "Good Enough",
-      artists: ["Evanescence"],
-      minutes: 435,
-      art: "https://i.scdn.co/image/ab67616d000048517b8aabae10ab5bbe7c7f11c5",
-    },
-    {
-      name: "Sweet Sacrifice",
-      artists: ["Evanescence"],
-      minutes: 328,
-      art: "https://i.scdn.co/image/ab67616d000048517b8aabae10ab5bbe7c7f11c5",
-    },
-    {
-      name: "I WANNA BE YOUR SLAVE",
-      artists: ["Måneskin"],
-      minutes: 300,
-      art: "https://i.scdn.co/image/ab67616d000048515aa05015cfa7bd2943c29b21",
-    },
-  ];
+  const { api } = useContext(ApiContext);
+
+  const placeholderAlbum =
+    "https://i.scdn.co/image/ab67616d00004851fa0ab3a28b5c52d8a5f97045";
+
+  const [topTracksData, setTopTracksData] = useState([]);
+
+  const [period, setPeriod] = useState("Last 7 days");
+
+  // Map the text option to the value to API Call
+  const periodOptions = {
+    "Last 7 days": 7,
+    "Last 30 days": 30,
+    "Last 90 days": 90,
+    "All Time": 99999,
+  };
+
+  const handlePeriodChange = (e) => {
+    setPeriod(e.target.text);
+  };
+
+  const cleanApiResponse = (res) => {
+    const cleanedData = res.map((item) => {
+      return {
+        trackName: item.track,
+        artistsString: item.artists.join(", "),
+        minutesPlayed: item.minutes_played,
+        albumCover: placeholderAlbum,
+      };
+    });
+    return cleanedData;
+  };
+
+  useEffect(() => {
+    api
+      .get("/top-played-tracks/", {
+        params: { qty: 5, days: periodOptions[period] },
+      })
+      .then((res) => {
+        setTopTracksData(cleanApiResponse(res.data));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [period]);
 
   return (
     <div class="card mx-10">
       <div class="card-header flex justify-between">
         <h3 class="card-title">Top Played Tracks</h3>
-        {/* TODO: Adicionar handle click */}
         <PeriodDropdown
-          current="Last 7 days"
-          options={["Last 7 days", "Last 30 days", "All Time"]}
+          current={period}
+          options={Object.keys(periodOptions)}
+          handleClick={handlePeriodChange}
         />
       </div>
       <div class="list-group card-list-group">
-        {data.map((item, index) => (
+        {topTracksData.map((item, index) => (
           <div class="list-group-item" key={index}>
             <div class="row g-2 align-items-center">
               <div class="col-auto fs-3">{index + 1}</div>
               <div class="col-auto">
                 <img
-                  src={item.art}
+                  src={item.albumCover}
                   class="rounded"
-                  alt={item.name}
+                  alt={item.trackName}
                   width="40"
                   height="40"
                 />
               </div>
               <div class="col">
-                {item.name}
-                <div class="text-muted">
-                  {/* TODO: Preciso separar por virgula */}
-                  {item.artists.map((artist) => artist)}
-                </div>
+                {item.trackName}
+                <div class="text-muted">{item.artistsString}</div>
               </div>
-              <div class="col-auto text-muted">{item.minutes} mins</div>
+              <div class="col-auto text-muted">{item.minutesPlayed} mins</div>
               <div class="col-auto">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
