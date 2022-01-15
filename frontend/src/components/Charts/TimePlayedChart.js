@@ -1,12 +1,16 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import ApiContext from "../Contexts/ApiContext";
+
 import Chart from "react-apexcharts";
 import TrendingUp from "../Utilities/TrendingUp";
 import TrendingDown from "../Utilities/TrendingDown";
 import TrendingSideways from "../Utilities/TrendingSideways";
 import PeriodDropdown from "../Utilities/PeriodDropdown";
 
-const TimePlayedChart = ({ api }) => {
+const TimePlayedChart = () => {
+  const { api } = useContext(ApiContext);
+
   useEffect(() => {
     api
       .get("/recent/")

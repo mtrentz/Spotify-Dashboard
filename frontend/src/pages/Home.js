@@ -1,6 +1,7 @@
 import React from "react";
-import { useEffect } from "react";
-import axios from "axios";
+import { useEffect, useContext } from "react";
+
+import ApiContext from "../components/Contexts/ApiContext";
 
 import SampleGraph from "../components/Charts/SampleGraph";
 import TimePlayedChart from "../components/Charts/TimePlayedChart";
@@ -11,12 +12,9 @@ import RecentActivity from "../components/Charts/RecentActivity";
 import TopArtists from "../components/Charts/TopArtists";
 import TopTracks from "../components/Charts/TopTracks";
 
-const api = axios.create({
-  baseURL: "http://localhost:8000/api/spotify",
-  timeout: 1000,
-});
-
 const Home = () => {
+  const { api } = useContext(ApiContext);
+
   useEffect(() => {
     api
       .get("/recent/")
@@ -33,7 +31,7 @@ const Home = () => {
   return (
     <div>
       <SampleGraph />
-      <TimePlayedChart api={api} />
+      <TimePlayedChart />
       <UniqueArtistsKPI />
       <UniqueTracks />
       <UniqueAlbums />
