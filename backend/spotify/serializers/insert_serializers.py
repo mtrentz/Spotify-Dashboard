@@ -113,6 +113,10 @@ class TrackEntrySerializer(serializers.Serializer):
                 genre, _ = Genres.objects.get_or_create(name=genre)
                 artist.genres.add(genre)
 
+        # This makes artists required
+        if not artists:
+            raise serializers.ValidationError("No artists found")
+
         ### ALBUM
         album_sp_id = validated_data["album_sp_id"]
 
