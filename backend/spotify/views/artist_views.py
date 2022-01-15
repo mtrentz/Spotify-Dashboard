@@ -2,11 +2,11 @@ from rest_framework.generics import ListAPIView
 from ..serializers.artist_serializers import TopArtistsSerializers
 from ..models import Artists
 from django.db.models import Sum
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from ..helpers.helpers import validate_days_query_param, validate_qty_query_params
 
 
-class TopPlayedArtists(ListAPIView):
+class TopPlayedArtistsView(ListAPIView):
     serializer_class = TopArtistsSerializers
 
     def get_queryset(self):
@@ -17,9 +17,8 @@ class TopPlayedArtists(ListAPIView):
         # How many artists to return, defaults to 10, func will raise for errors
         qty = validate_qty_query_params(self.request.query_params.get("qty", 10))
 
-        date_now = datetime.utcnow()
+        date_now = datetime.now(timezone.utc)
         date_start = date_now - timedelta(days=days)
-        print(date_start)
 
         items = (
             Artists.objects.filter(
