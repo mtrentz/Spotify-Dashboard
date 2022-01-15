@@ -23,14 +23,14 @@ class TopPlayedArtists(ListAPIView):
             raise ParseError("qty must be less than 50")
 
         items = Artists.objects.annotate(
-            time_played=Sum("tracks__useractivity__ms_played")
-        ).order_by("-time_played")[:qty]
+            time_played_ms=Sum("tracks__useractivity__ms_played")
+        ).order_by("-time_played_ms")[:qty]
         queryset = []
         for item in items:
             queryset.append(
                 {
                     "artist": item.name,
-                    "minutes_played": item.time_played / 60_000,
+                    "minutes_played": item.time_played_ms / 60_000,
                 }
             )
 
