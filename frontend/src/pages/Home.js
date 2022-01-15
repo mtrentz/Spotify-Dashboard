@@ -21,9 +21,11 @@ const Home = () => {
     api
       .get("/recent/")
       .then((res) => {
+        console.log("Print from Home.js");
         console.log(res.data);
       })
       .catch((err) => {
+        console.log("Print from Home.js");
         console.log(err);
       });
   }, []);
@@ -31,7 +33,7 @@ const Home = () => {
   return (
     <div>
       <SampleGraph />
-      <TimePlayedChart />
+      <TimePlayedChart api={api} />
       <UniqueArtistsKPI />
       <UniqueTracks />
       <UniqueAlbums />
