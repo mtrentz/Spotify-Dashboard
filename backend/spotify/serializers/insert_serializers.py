@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import *
-from .helpers.helpers import insert_user_activity
+from ..models import *
+from ..helpers.helpers import insert_user_activity
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from datetime import datetime
@@ -8,12 +8,6 @@ import pytz
 
 # Dev only
 from dotenv import load_dotenv
-
-
-class UserActivitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserActivity
-        fields = "__all__"
 
 
 # This is to verify that its a valid file

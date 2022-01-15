@@ -9,7 +9,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import pytz
 import json
 from ..models import Tracks, UserActivity
-from ..serializers import (
+from ..serializers.insert_serializers import (
     TrackEntrySerializer,
     HistoryFileSerializer,
     HistoryEntrySerializer,
