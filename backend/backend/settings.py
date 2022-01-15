@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_apscheduler",
     "spotify.apps.SpotifyConfig",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # https://github.com/jcass77/django-apscheduler
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 APSCHEDULER_RUN_NOW_TIMEOUT = 300  # Seconds
+
+
+# CORSHEADERS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]

@@ -13,26 +13,17 @@ const Home = () => {
   const axios = require("axios");
 
   const instance = axios.create({
-    // baseURL: "http://localhost:8000/api/spotify",
-    baseURL: "https://jsonplaceholder.typicode.com/",
+    baseURL: "http://localhost:8000/api/spotify",
     timeout: 1000,
   });
 
-  // // console.log(api.get("/recent"));
-  // api.get("/recent").then((res) => {
-  //   console.log("YOYOYOYO");
-  //   console.log(res.data);
-  // });
-
   useEffect(() => {
     instance
-      .get("/posts/1")
+      .get("/recent/")
       .then((res) => {
-        console.log("YOYOYOYO");
         console.log(res.data);
       })
       .catch((err) => {
-        console.log("sadge");
         console.log(err);
       });
   }, []);
