@@ -1,6 +1,5 @@
 import React from "react";
-import { useState, useEffect, useContext } from "react";
-import ApiContext from "../Contexts/ApiContext";
+import { useState } from "react";
 
 import Chart from "react-apexcharts";
 import TrendingUp from "../Utilities/TrendingUp";
@@ -9,21 +8,6 @@ import TrendingSideways from "../Utilities/TrendingSideways";
 import PeriodDropdown from "../Utilities/PeriodDropdown";
 
 const TimePlayedChart = () => {
-  const { api } = useContext(ApiContext);
-
-  useEffect(() => {
-    api
-      .get("/recent/")
-      .then((res) => {
-        console.log("Print from TimePlayedChart.js");
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.log("Print from TimePlayedChart.js");
-        console.log(err);
-      });
-  }, []);
-
   const status = {
     series: [
       {

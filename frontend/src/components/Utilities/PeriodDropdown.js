@@ -13,13 +13,17 @@ const PeriodDropdown = ({ current, options, handleClick }) => {
         {current}
       </a>
       <div className="dropdown-menu dropdown-menu-end">
-        {options.map((option) =>
+        {options.map((option, index) =>
           option === current ? (
-            <a className="dropdown-item active" onClick={handleClick}>
+            <a
+              className="dropdown-item active"
+              onClick={handleClick}
+              key={index}
+            >
               {option}
             </a>
           ) : (
-            <a className="dropdown-item" onClick={handleClick}>
+            <a className="dropdown-item" onClick={handleClick} key={index}>
               {option}
             </a>
           )

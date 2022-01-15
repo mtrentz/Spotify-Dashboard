@@ -44,17 +44,17 @@ const TopArtists = () => {
   ];
 
   return (
-    <div class="card mx-10">
+    <div className="card mx-10">
       {/* TODO: Add dropdown */}
-      <div class="card-header flex justify-between">
-        <h3 class="card-title">Top Played Artists</h3>
+      <div className="card-header flex justify-between">
+        <h3 className="card-title">Top Played Artists</h3>
         {/* TODO: Adicionar handle click */}
         <PeriodDropdown
           current="Last 7 days"
           options={["Last 7 days", "Last 30 days", "All Time"]}
         />
       </div>
-      <table class="table card-table table-vcenter">
+      <table className="table card-table table-vcenter">
         <thead>
           <tr>
             <th>Artist</th>
@@ -63,13 +63,13 @@ const TopArtists = () => {
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr>
+            <tr key={index}>
               <td>{item.name}</td>
               <td>{item.minutes}</td>
-              <td class="w-50">
-                <div class="progress progress-xs">
+              <td className="w-50">
+                <div className="progress progress-xs">
                   <div
-                    class="progress-bar bg-primary"
+                    className="progress-bar bg-primary"
                     style={{ width: item.progress }}
                   ></div>
                 </div>

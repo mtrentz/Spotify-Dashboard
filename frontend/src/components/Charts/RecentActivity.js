@@ -6,7 +6,6 @@ import en from "javascript-time-ago/locale/en.json";
 import ApiContext from "../Contexts/ApiContext";
 
 const RecentActivity = () => {
-  // (new Date()).getTimezoneOffset()
   const { api } = useContext(ApiContext);
 
   const [recentlyPlayedData, setRecentlyPlayedData] = useState([]);

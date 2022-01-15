@@ -35,7 +35,7 @@ const TopTracks = () => {
       </div>
       <div class="list-group card-list-group">
         {data.map((item, index) => (
-          <div class="list-group-item">
+          <div class="list-group-item" key={index}>
             <div class="row g-2 align-items-center">
               <div class="col-auto fs-3">{index + 1}</div>
               <div class="col-auto">
