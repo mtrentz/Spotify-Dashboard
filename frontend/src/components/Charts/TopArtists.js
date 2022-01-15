@@ -10,6 +10,20 @@ const TopArtists = () => {
 
   const [topArtistsData, setTopArtistsData] = useState([]);
 
+  const [period, setPeriod] = useState("Last 7 days");
+
+  // Map the text option to the value to API Call
+  const periodOptions = {
+    "Last 7 days": 7,
+    "Last 30 days": 30,
+    "Last 90 days": 90,
+    "All Time": 0,
+  };
+
+  const handlePeriodChange = (e) => {
+    setPeriod(e.target.text);
+  };
+
   const processApiResponse = (res) => {
     // I'll receive a response containing the artist name and minutes played.
     // From this I need to calculate the percentage of the progress bar.
@@ -32,15 +46,16 @@ const TopArtists = () => {
 
   useEffect(() => {
     api
-      .get("/top-played-artists/", { params: { qty: 7, days: 7 } })
+      .get("/top-played-artists/", {
+        params: { qty: 7, days: periodOptions[period] },
+      })
       .then((res) => {
         setTopArtistsData(processApiResponse(res.data));
-        // console.log(topArtistsData);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [period]);
 
   return (
     <div className="card mx-10">
@@ -49,8 +64,9 @@ const TopArtists = () => {
         <h3 className="card-title">Top Played Artists</h3>
         {/* TODO: Adicionar handle click */}
         <PeriodDropdown
-          current="Last 7 days"
-          options={["Last 7 days", "Last 30 days", "All Time"]}
+          current={period}
+          options={Object.keys(periodOptions)}
+          handleClick={handlePeriodChange}
         />
       </div>
       <table className="table card-table table-vcenter">
