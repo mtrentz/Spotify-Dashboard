@@ -21,6 +21,7 @@ class RecentUserActivityView(ListAPIView):
         if qty > 50:
             raise ParseError("qty must be less than 50")
 
+        # TODO: Catch error range
         items = UserActivity.objects.order_by("-played_at")[:qty]
         queryset = []
         for item in items:
