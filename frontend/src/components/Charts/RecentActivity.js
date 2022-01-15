@@ -123,6 +123,7 @@ const RecentActivity = () => {
         </span>
       ),
       when: "Today at 10h45.",
+      // TODO: Colocar só o url, nao o html todo
       avatar: (
         <span
           class="avatar"

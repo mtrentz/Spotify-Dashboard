@@ -6,6 +6,7 @@ import UniqueArtistsKPI from "../components/Charts/UniqueArtistsKPI";
 import UniqueTracks from "../components/Charts/UniqueTracks";
 import RecentActivity from "../components/Charts/RecentActivity";
 import TopArtists from "../components/Charts/TopArtists";
+import TopTracks from "../components/Charts/TopTracks";
 
 const Home = () => {
   return (
@@ -16,6 +17,7 @@ const Home = () => {
       <UniqueTracks />
       <UniqueAlbums />
       <TopArtists />
+      <TopTracks />
       <RecentActivity />
     </div>
   );
