@@ -30,7 +30,6 @@ const TopArtists = () => {
 
     // I'll get the biggest value (first) and round it UP to the nearest 10.
     // This will be the max value of the progress bar.
-
     let maxValue = res[0].minutes_played;
     let rounded = Math.ceil(maxValue / 10) * 10;
 
@@ -59,10 +58,8 @@ const TopArtists = () => {
 
   return (
     <div className="card mx-10">
-      {/* TODO: Add dropdown */}
       <div className="card-header flex justify-between">
         <h3 className="card-title">Top Played Artists</h3>
-        {/* TODO: Adicionar handle click */}
         <PeriodDropdown
           current={period}
           options={Object.keys(periodOptions)}
