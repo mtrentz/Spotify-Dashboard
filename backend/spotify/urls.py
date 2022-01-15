@@ -14,5 +14,5 @@ urlpatterns = [
     path("auth/", AuthURLView.as_view(), name="auth_url"),
     path("token/", AuthTokenView.as_view(), name="auth_token"),
     # Query Tracks
-    path("recent/", RecentUserActivityView.as_view(), name="recent"),
+    path("recently-played/", RecentUserActivityView.as_view(), name="recently_played"),
 ]

@@ -48,7 +48,7 @@ const RecentActivity = () => {
 
   useEffect(() => {
     api
-      .get("/recent/", { params: { qty: 25 } })
+      .get("/recently-played/", { params: { qty: 25 } })
       .then((res) => {
         setRecentlyPlayedData(cleanApiResponse(res.data));
       })
