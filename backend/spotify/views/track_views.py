@@ -10,8 +10,7 @@ class RecentUserActivityView(ListAPIView):
     serializer_class = SimpleUserActivitySerializer
 
     def get_queryset(self):
-
-        # Defaults to 10
+        # Amount of data to return. Defaults to 10
         try:
             qty = int(self.request.query_params.get("qty", 10))
         except ValueError:

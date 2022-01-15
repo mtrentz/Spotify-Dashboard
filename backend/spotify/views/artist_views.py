@@ -5,6 +5,8 @@ from ..serializers.artist_serializers import (
 )
 from ..models import Artists
 from django.db.models import Sum
+from datetime import datetime, timedelta, tzinfo
+import pytz
 
 
 class TopPlayedArtists(ListAPIView):
@@ -12,7 +14,17 @@ class TopPlayedArtists(ListAPIView):
 
     def get_queryset(self):
 
-        # Defaults to 10
+        # How many days in the past to include, defaults to 7
+        try:
+            days = int(self.request.query_params.get("days", 7))
+        except ValueError:
+            raise ParseError("days must be an integer")
+        if days < 0:
+            raise ParseError("days must be positive")
+        if days > 365:
+            raise ParseError("days must be less than 365")
+
+        # Amount of data to return. Defaults to 10
         try:
             qty = int(self.request.query_params.get("qty", 10))
         except ValueError:
@@ -22,9 +34,16 @@ class TopPlayedArtists(ListAPIView):
         if qty > 50:
             raise ParseError("qty must be less than 50")
 
-        items = Artists.objects.annotate(
-            time_played_ms=Sum("tracks__useractivity__ms_played")
-        ).order_by("-time_played_ms")[:qty]
+        date_now = datetime.utcnow()
+        date_start = date_now - timedelta(days=days)
+
+        items = (
+            Artists.objects.filter(
+                tracks__useractivity__played_at__range=[date_start, date_now]
+            )
+            .annotate(time_played_ms=Sum("tracks__useractivity__ms_played"))
+            .order_by("-time_played_ms")[:qty]
+        )
 
         queryset = []
 
