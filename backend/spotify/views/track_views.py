@@ -4,21 +4,15 @@ from ..serializers.track_serializers import (
     SimpleUserActivitySerializer,
 )
 from ..models import UserActivity
+from ..helpers.helpers import validate_qty_query_params
 
 
 class RecentUserActivityView(ListAPIView):
     serializer_class = SimpleUserActivitySerializer
 
     def get_queryset(self):
-        # Amount of data to return. Defaults to 10
-        try:
-            qty = int(self.request.query_params.get("qty", 10))
-        except ValueError:
-            raise ParseError("qty must be an integer")
-        if qty < 0:
-            raise ParseError("qty must be positive")
-        if qty > 50:
-            raise ParseError("qty must be less than 50")
+        # How many tracks to return, defaults to 10, func will raise for errors
+        qty = validate_qty_query_params(self.request.query_params.get("qty", 10))
 
         items = UserActivity.objects.order_by("-played_at")[:qty]
 

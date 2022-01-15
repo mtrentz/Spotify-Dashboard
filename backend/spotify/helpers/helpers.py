@@ -1,5 +1,6 @@
 from ..models import UserActivity
 from datetime import timedelta
+from rest_framework.exceptions import ParseError
 
 
 def search_spotify_song(sp, track_name, artist_name, type):
@@ -134,3 +135,23 @@ def insert_user_activity(track, ms_played, played_at, from_import):
         #      This seems very unlikely.
         # So, assuming its a rounding error, I do nothing
         return
+
+
+def validate_days_query_param(days):
+    try:
+        days = int(days)
+    except ValueError:
+        raise ParseError("days must be an integer")
+    if days < 0:
+        raise ParseError("days must be positive")
+    return days
+
+
+def validate_qty_query_params(qty):
+    try:
+        qty = int(qty)
+    except ValueError:
+        raise ParseError("qty must be an integer")
+    if qty < 0:
+        raise ParseError("qty must be positive")
+    return qty
