@@ -1,4 +1,5 @@
 from rest_framework.generics import ListAPIView
+from rest_framework.exceptions import ParseError
 from ..serializers.track_serializers import (
     SimpleUserActivitySerializer,
 )
@@ -9,7 +10,18 @@ class RecentUserActivityView(ListAPIView):
     serializer_class = SimpleUserActivitySerializer
 
     def get_queryset(self):
-        items = UserActivity.objects.order_by("-played_at")[:10]
+
+        # Defaults to 10
+        try:
+            qty = int(self.request.query_params.get("qty", 10))
+        except ValueError:
+            raise ParseError("qty must be an integer")
+        if qty < 0:
+            raise ParseError("qty must be positive")
+        if qty > 50:
+            raise ParseError("qty must be less than 50")
+
+        items = UserActivity.objects.order_by("-played_at")[:qty]
         queryset = []
         for item in items:
             queryset.append(
