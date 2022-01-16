@@ -28,16 +28,14 @@ const TopArtists = () => {
     // I'll receive a response containing the artist name and minutes played.
     // From this I need to calculate the percentage of the progress bar.
 
-    // I'll get the biggest value (first) and round it UP to the nearest 10.
-    // This will be the max value of the progress bar.
+    // I'll get the biggest value (first) and calculate progress based on it.
     let maxValue = res[0].minutes_played;
-    let rounded = Math.ceil(maxValue / 10) * 10;
 
     let processedData = res.map((item) => {
       return {
         artistName: item.artist,
         minutesPlayed: item.minutes_played,
-        progress: Math.round((item.minutes_played / rounded) * 100),
+        progress: Math.round((item.minutes_played / maxValue) * 100),
       };
     });
     return processedData;
