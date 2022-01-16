@@ -40,7 +40,7 @@ const RecentActivity = () => {
       return {
         text: createTableText(item.track, item.artists),
         timeAgo: createTimeAgoText(item.played_at),
-        albumCover: placeholderAlbum,
+        albumCover: item.album_cover,
       };
     });
     return cleanedData;
@@ -56,10 +56,6 @@ const RecentActivity = () => {
         console.log(err);
       });
   }, []);
-
-  // TODO: Quando tiver arte do album de vdd, trocar aqui
-  const placeholderAlbum =
-    "https://i.scdn.co/image/ab67616d00004851fa0ab3a28b5c52d8a5f97045";
 
   return (
     <div className="card mx-10" style={{ height: "calc(24rem + 10px)" }}>

@@ -8,9 +8,6 @@ import PeriodDropdown from "../Utilities/PeriodDropdown";
 const TopTracks = () => {
   const { api } = useContext(ApiContext);
 
-  const placeholderAlbum =
-    "https://i.scdn.co/image/ab67616d00004851fa0ab3a28b5c52d8a5f97045";
-
   const [topTracksData, setTopTracksData] = useState([]);
 
   const [period, setPeriod] = useState("Last 7 days");
@@ -33,7 +30,7 @@ const TopTracks = () => {
         trackName: item.track,
         artistsString: item.artists.join(", "),
         minutesPlayed: item.minutes_played,
-        albumCover: placeholderAlbum,
+        albumCover: item.album_cover,
       };
     });
     return cleanedData;
