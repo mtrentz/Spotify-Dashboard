@@ -26,6 +26,7 @@ class RecentUserActivityView(ListAPIView):
                 {
                     "track": item.track.name,
                     "album": item.track.album.name,
+                    "album_cover": item.track.album.album_cover_64,
                     "artists": [a.name for a in item.track.artists.all()],
                     "played_at": item.played_at,
                     "ms_played": item.ms_played,
@@ -61,6 +62,8 @@ class TopPlayedTracksView(ListAPIView):
             queryset.append(
                 {
                     "track": item.name,
+                    "album": item.album.name,
+                    "album_cover": item.album.album_cover_64,
                     "artists": [a.name for a in item.artists.all()],
                     "minutes_played": item.time_played_ms / 60_000,
                 }

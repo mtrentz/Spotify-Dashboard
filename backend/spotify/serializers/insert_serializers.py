@@ -133,15 +133,15 @@ class TrackEntrySerializer(serializers.Serializer):
             # Album images
             album_images = album_response.get("images")
             # Start them at None
-            album_art_640, album_art_300, album_art_64 = None, None, None
+            album_cover_640, album_cover_300, album_cover_64 = None, None, None
             # Check if they are the right size before getting it. Else just ignore it and store None
             for img in album_images:
                 if img.get("height") == 640:
-                    album_art_640 = album_response.get("images")[0].get("url")
+                    album_cover_640 = album_response.get("images")[0].get("url")
                 if img.get("height") == 300:
-                    album_art_300 = album_response.get("images")[0].get("url")
+                    album_cover_300 = album_response.get("images")[0].get("url")
                 if img.get("height") == 64:
-                    album_art_64 = album_response.get("images")[0].get("url")
+                    album_cover_64 = album_response.get("images")[0].get("url")
 
             album_release_date = album_response.get("release_date")
             album_release_date_precision = album_response.get("release_date_precision")
@@ -163,9 +163,9 @@ class TrackEntrySerializer(serializers.Serializer):
                 release_date=album_release_date,
                 total_tracks=album_total_tracks,
                 type=album_type,
-                album_art_640=album_art_640,
-                album_art_300=album_art_300,
-                album_art_64=album_art_64,
+                album_cover_640=album_cover_640,
+                album_cover_300=album_cover_300,
+                album_cover_64=album_cover_64,
             )
             album.save()
 

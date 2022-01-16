@@ -29,9 +29,9 @@ class Albums(models.Model):
     total_tracks = models.IntegerField(null=True)
     type = models.CharField(max_length=50, null=True)
     artists = models.ManyToManyField(Artists)
-    album_art_64 = models.URLField(null=True)
-    album_art_300 = models.URLField(null=True)
-    album_art_640 = models.URLField(null=True)
+    album_cover_64 = models.URLField(null=True)
+    album_cover_300 = models.URLField(null=True)
+    album_cover_640 = models.URLField(null=True)
 
     def __str__(self):
         return self.name
