@@ -2,7 +2,7 @@ import TrendingUp from "./Utilities/TrendingUp";
 import TrendingDown from "./Utilities/TrendingDown";
 import TrendingSideways from "./Utilities/TrendingSideways";
 
-export const generateTrendIcon = (growth) => {
+export const generateTrendComponent = (growth) => {
   let percentage = growth * 100;
 
   // How much it has to change to be considered a trend up or down

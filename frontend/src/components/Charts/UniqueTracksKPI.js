@@ -2,7 +2,7 @@ import React from "react";
 import { useContext, useEffect, useState } from "react";
 
 import ApiContext from "../Contexts/ApiContext";
-import { generateTrendIcon } from "../helpers";
+import { generateTrendComponent } from "../helpers";
 
 import CardKPI from "../Utilities/CardKPI";
 
@@ -26,7 +26,7 @@ const UniqueTracksKPI = () => {
     <CardKPI
       value={uniqueTracksData.count}
       text="Unique Tracks (week)"
-      trend={generateTrendIcon(uniqueTracksData.growth)}
+      trend={generateTrendComponent(uniqueTracksData.growth)}
     />
   );
 };

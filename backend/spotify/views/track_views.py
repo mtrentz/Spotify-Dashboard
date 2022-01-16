@@ -182,7 +182,7 @@ class TimePlayedView(RetrieveAPIView):
         ) / previous_total_minutes_played
 
         queryset = {
-            "items": all_items,
+            "items": current_items,
             "total_minutes_played": total_minutes_played,
             "growth": round(growth, 2),
         }

@@ -2,7 +2,7 @@ import React from "react";
 import { useContext, useEffect, useState } from "react";
 
 import ApiContext from "../Contexts/ApiContext";
-import { generateTrendIcon } from "../helpers";
+import { generateTrendComponent } from "../helpers";
 
 import Chart from "react-apexcharts";
 import TrendingUp from "../Utilities/TrendingUp";
@@ -12,11 +12,71 @@ import PeriodDropdown from "../Utilities/PeriodDropdown";
 import LoadingDots from "../Utilities/LoadingDots";
 
 const TimePlayedChart = () => {
+  const startingGraphStatus = {
+    series: [
+      {
+        name: "Hours Played",
+        // Unpack data into array of hours
+        data: [1, 2, 3],
+      },
+    ],
+    options: {
+      chart: {
+        type: "area",
+        fontFamily: "inherit",
+        height: 40,
+        sparkline: {
+          enabled: true,
+        },
+        animations: {
+          enabled: false,
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      fill: {
+        opacity: 0.25,
+        type: "solid",
+      },
+      stroke: {
+        width: 2,
+        lineCap: "round",
+        curve: "smooth",
+      },
+      grid: {
+        strokeDashArray: 4,
+      },
+      xaxis: {
+        labels: {
+          padding: 0,
+        },
+        tooltip: {
+          enabled: false,
+        },
+        axisBorder: {
+          show: false,
+        },
+        type: "datetime",
+      },
+      yaxis: {
+        labels: {
+          padding: 4,
+        },
+      },
+      labels: ["2020-01-01", "2020-01-02", "2020-01-03"],
+      colors: ["#206bc4"],
+      legend: {
+        show: false,
+      },
+    },
+  };
+
   const { api } = useContext(ApiContext);
 
   const [timePlayedData, setTimePlayedData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [graphStatus, setGraphStatus] = useState({});
+  const [graphStatus, setGraphStatus] = useState(startingGraphStatus);
 
   const [period, setPeriod] = useState("Last 7 days");
 
@@ -25,7 +85,7 @@ const TimePlayedChart = () => {
     "Last 7 days": 7,
     "Last 30 days": 30,
     "Last 90 days": 90,
-    "All Time": 99999,
+    "Last 180 days": 180,
   };
 
   const handlePeriodChange = (e) => {
@@ -33,19 +93,11 @@ const TimePlayedChart = () => {
   };
 
   useEffect(() => {
-    // API data here comes likes this:
-    // {
-    // items: [{"date": <date>, "minutes_played": <int>}, ...]
-    // total_minutes_played: int,
-    // growth: float,
-    // }
     api
       .get("/time-played/", { params: { days: periodOptions[period] } })
       .then((res) => {
         setTimePlayedData(res.data);
-      })
-      .then(() => {
-        setGraphStatus(getGraphStatus);
+        updateGraphStatus(res.data);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -53,71 +105,15 @@ const TimePlayedChart = () => {
       });
   }, [period]);
 
-  const getGraphStatus = () => {
-    let status = {
-      series: [
-        {
-          name: "Hours Played",
-          // Unpack data into array of hours
-          data: isLoading
-            ? [1, 2, 3]
-            : timePlayedData.items.map((item) => item.minutes_played / 60),
-        },
-      ],
-      options: {
-        chart: {
-          type: "area",
-          fontFamily: "inherit",
-          height: 40,
-          sparkline: {
-            enabled: true,
-          },
-          animations: {
-            enabled: false,
-          },
-        },
-        dataLabels: {
-          enabled: false,
-        },
-        fill: {
-          opacity: 0.25,
-          type: "solid",
-        },
-        stroke: {
-          width: 2,
-          lineCap: "round",
-          curve: "smooth",
-        },
-        grid: {
-          strokeDashArray: 4,
-        },
-        xaxis: {
-          labels: {
-            padding: 0,
-          },
-          tooltip: {
-            enabled: false,
-          },
-          axisBorder: {
-            show: false,
-          },
-          type: "datetime",
-        },
-        yaxis: {
-          labels: {
-            padding: 4,
-          },
-        },
-        labels: isLoading
-          ? ["2020-01-01", "2020-01-02", "2020-01-03"]
-          : timePlayedData.items.map((item) => item.date),
-        colors: ["#206bc4"],
-        legend: {
-          show: false,
-        },
-      },
-    };
-    return status;
+  const updateGraphStatus = (res) => {
+    // Make a copy of the previous status
+    let newStatus = JSON.parse(JSON.stringify(startingGraphStatus));
+    // Change the data points and labels
+    newStatus.options.labels = res.items.map((item) => item.date);
+    newStatus.series[0].data = res.items.map((item) =>
+      (item.minutes_played / 60).toFixed(1)
+    );
+    setGraphStatus(newStatus);
   };
 
   return (
@@ -134,9 +130,14 @@ const TimePlayedChart = () => {
           </div>
         </div>
         <div className="d-flex align-items-baseline">
-          <div className="h1 mb-0 me-2">240</div>
+          <div className="h1 mb-0 me-2">
+            {isLoading
+              ? 0
+              : (timePlayedData.total_minutes_played / 60).toFixed(0)}
+          </div>
           <div className="me-auto">
-            <TrendingUp value="8%" />
+            {/* Trend component */}
+            {generateTrendComponent(isLoading ? 0 : timePlayedData.growth)}
           </div>
         </div>
       </div>
