@@ -56,63 +56,173 @@ const Layout = ({ children }) => {
                 <li className="nav-item">
                   <a className="nav-link" href="./index.html">
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
-                      {/* <!-- Download SVG icon from http://tabler-icons.io/i/home --> */}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="icon"
+                        class="icon icon-tabler icon-tabler-chart-bar"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
-                        strokeWidth="2"
+                        stroke-width="2"
                         stroke="currentColor"
                         fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
                       >
                         <path
                           stroke="none"
                           d="M0 0h24v24H0z"
                           fill="none"
                         ></path>
-                        <polyline points="5 12 3 12 12 3 21 12 19 12"></polyline>
-                        <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path>
-                        <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path>
+                        <rect x="3" y="12" width="6" height="8" rx="1"></rect>
+                        <rect x="9" y="8" width="6" height="12" rx="1"></rect>
+                        <rect x="15" y="4" width="6" height="16" rx="1"></rect>
+                        <line x1="4" y1="20" x2="18" y2="20"></line>
                       </svg>
                     </span>
-                    <span className="nav-link-title">Home</span>
+                    <span className="nav-link-title">Home Dashboard</span>
                   </a>
                 </li>
 
                 <li className="nav-item">
                   <a className="nav-link" href="./docs/index.html">
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
-                      {/* <!-- Download SVG icon from http://tabler-icons.io/i/file-text --> */}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="icon"
+                        class="icon icon-tabler icon-tabler-music"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
-                        strokeWidth="2"
+                        stroke-width="2"
                         stroke="currentColor"
                         fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
                       >
                         <path
                           stroke="none"
                           d="M0 0h24v24H0z"
                           fill="none"
                         ></path>
-                        <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
-                        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path>
-                        <line x1="9" y1="9" x2="10" y2="9"></line>
-                        <line x1="9" y1="13" x2="15" y2="13"></line>
-                        <line x1="9" y1="17" x2="15" y2="17"></line>
+                        <circle cx="6" cy="17" r="3"></circle>
+                        <circle cx="16" cy="17" r="3"></circle>
+                        <polyline points="9 17 9 4 19 4 19 17"></polyline>
+                        <line x1="9" y1="8" x2="19" y2="8"></line>
                       </svg>
                     </span>
-                    <span className="nav-link-title">Documentation</span>
+                    <span className="nav-link-title">Tracks</span>
                   </a>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link" href="./docs/index.html">
+                    <span className="nav-link-icon d-md-none d-lg-inline-block">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="icon icon-tabler icon-tabler-disc"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path
+                          stroke="none"
+                          d="M0 0h24v24H0z"
+                          fill="none"
+                        ></path>
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <path d="M7 12a5 5 0 0 1 5 -5"></path>
+                        <path d="M12 17a5 5 0 0 0 5 -5"></path>
+                      </svg>
+                    </span>
+                    <span className="nav-link-title">Albums</span>
+                  </a>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link" href="./docs/index.html">
+                    <span className="nav-link-icon d-md-none d-lg-inline-block">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="icon icon-tabler icon-tabler-user"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path
+                          stroke="none"
+                          d="M0 0h24v24H0z"
+                          fill="none"
+                        ></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                        <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+                      </svg>
+                    </span>
+                    <span className="nav-link-title">Artists</span>
+                  </a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#navbar-base"
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    role="button"
+                    aria-expanded="false"
+                  >
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="icon icon-tabler icon-tabler-calendar"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path
+                          stroke="none"
+                          d="M0 0h24v24H0z"
+                          fill="none"
+                        ></path>
+                        <rect x="4" y="5" width="16" height="16" rx="2"></rect>
+                        <line x1="16" y1="3" x2="16" y2="7"></line>
+                        <line x1="8" y1="3" x2="8" y2="7"></line>
+                        <line x1="4" y1="11" x2="20" y2="11"></line>
+                        <line x1="11" y1="15" x2="12" y2="15"></line>
+                        <line x1="12" y1="15" x2="12" y2="18"></line>
+                      </svg>
+                    </span>
+                    <span class="nav-link-title">Year in Review</span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <div class="dropdown-menu-columns">
+                      <div class="dropdown-menu-column">
+                        <a class="dropdown-item" href="./empty.html">
+                          2022
+                        </a>
+                        <a class="dropdown-item" href="./accordion.html">
+                          2021
+                        </a>
+                        <a class="dropdown-item" href="./blank.html">
+                          2020
+                        </a>
+                        <a class="dropdown-item" href="./buttons.html">
+                          2019
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </li>
               </ul>
               <ul className="navbar-nav">
