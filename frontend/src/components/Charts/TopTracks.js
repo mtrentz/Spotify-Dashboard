@@ -39,7 +39,7 @@ const TopTracks = () => {
   useEffect(() => {
     api
       .get("/top-played-tracks/", {
-        params: { qty: 5, days: periodOptions[period] },
+        params: { qty: 7, days: periodOptions[period] },
       })
       .then((res) => {
         setTopTracksData(cleanApiResponse(res.data));
