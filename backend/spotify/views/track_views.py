@@ -124,7 +124,7 @@ class UniqueTracksView(RetrieveAPIView):
         return queryset
 
 
-class TimePlayedView(ListAPIView):
+class TimePlayedView(RetrieveAPIView):
     serializer_class = TimePlayedSerializer
 
     def get_queryset(self):
@@ -138,10 +138,7 @@ class TimePlayedView(ListAPIView):
         # How many data points to include. Defaults to 7, func will raise for errors
         days = validate_days_query_param(self.request.query_params.get("days", 7))
 
-        # date_now = datetime.now(timezone.utc)
-        # date_start = date_now - timedelta(days=days)
-
-        items = (
+        time_played_by_day = (
             UserActivity.objects
             # Truncate by day
             .annotate(day=TruncDay("played_at"))
@@ -151,21 +148,48 @@ class TimePlayedView(ListAPIView):
             .annotate(time_played_ms=Sum("ms_played"))
             # Order so the newest is first
             .order_by("-day")
-            # Limit to the amount of days requested
-            [:days]
+            # Limit to the amount of days requested times two (so I can compare to previous period)
+            [: days * 2]
         )
-
         # Here I will invert the data, so the newest is last (order of graph used in frontend)
-        items = items[::-1]
+        time_played_by_day = time_played_by_day[::-1]
 
-        queryset = []
+        # Items is going to be a list of objects {'date': date, 'minutes_played': int}
+        all_items = []
 
-        for item in items:
-            queryset.append(
+        for obj in time_played_by_day:
+            all_items.append(
                 {
-                    "date": item["day"].strftime("%Y-%m-%d"),
-                    "minutes_played": item["time_played_ms"] / 60_000,
+                    "date": obj["day"].strftime("%Y-%m-%d"),
+                    "minutes_played": obj["time_played_ms"] / 60_000,
                 }
             )
 
+        # Now I want to separate the items in two lists, one for the current period (most recent) and one for the previous one, for comparison.
+        # The most recent data is at the end of the list
+        current_items = all_items[-days:]
+        previous_items = all_items[:-days]
+
+        # Now getting the total minutes played of the current period
+        total_minutes_played = sum([item["minutes_played"] for item in current_items])
+
+        # To calculate the growth, I will sum the minutes played of the previous period
+        previous_total_minutes_played = sum(
+            [item["minutes_played"] for item in previous_items]
+        )
+        growth = (
+            total_minutes_played - previous_total_minutes_played
+        ) / previous_total_minutes_played
+
+        queryset = {
+            "items": all_items,
+            "total_minutes_played": total_minutes_played,
+            "growth": round(growth, 2),
+        }
+
+        return queryset
+
+    def get_object(self):
+        # Overrides the method that requires a pk
+        queryset = self.get_queryset()
         return queryset

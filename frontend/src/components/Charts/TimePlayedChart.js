@@ -9,11 +9,14 @@ import TrendingUp from "../Utilities/TrendingUp";
 import TrendingDown from "../Utilities/TrendingDown";
 import TrendingSideways from "../Utilities/TrendingSideways";
 import PeriodDropdown from "../Utilities/PeriodDropdown";
+import LoadingDots from "../Utilities/LoadingDots";
 
 const TimePlayedChart = () => {
   const { api } = useContext(ApiContext);
 
   const [timePlayedData, setTimePlayedData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [graphStatus, setGraphStatus] = useState({});
 
   const [period, setPeriod] = useState("Last 7 days");
 
@@ -30,76 +33,91 @@ const TimePlayedChart = () => {
   };
 
   useEffect(() => {
+    // API data here comes likes this:
+    // {
+    // items: [{"date": <date>, "minutes_played": <int>}, ...]
+    // total_minutes_played: int,
+    // growth: float,
+    // }
     api
       .get("/time-played/", { params: { days: periodOptions[period] } })
       .then((res) => {
         setTimePlayedData(res.data);
+      })
+      .then(() => {
+        setGraphStatus(getGraphStatus);
+        setIsLoading(false);
       })
       .catch((err) => {
         console.log(err);
       });
   }, [period]);
 
-  const status = {
-    series: [
-      {
-        name: "Hours Played",
-        // Unpack data into array of hours
-        data: timePlayedData.map((item) =>
-          (item.minutes_played / 60).toFixed(2)
-        ),
-      },
-    ],
-    options: {
-      chart: {
-        type: "area",
-        fontFamily: "inherit",
-        height: 40,
-        sparkline: {
-          enabled: true,
+  const getGraphStatus = () => {
+    let status = {
+      series: [
+        {
+          name: "Hours Played",
+          // Unpack data into array of hours
+          data: isLoading
+            ? [1, 2, 3]
+            : timePlayedData.items.map((item) => item.minutes_played / 60),
         },
-        animations: {
+      ],
+      options: {
+        chart: {
+          type: "area",
+          fontFamily: "inherit",
+          height: 40,
+          sparkline: {
+            enabled: true,
+          },
+          animations: {
+            enabled: false,
+          },
+        },
+        dataLabels: {
           enabled: false,
         },
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      fill: {
-        opacity: 0.25,
-        type: "solid",
-      },
-      stroke: {
-        width: 2,
-        lineCap: "round",
-        curve: "smooth",
-      },
-      grid: {
-        strokeDashArray: 4,
-      },
-      xaxis: {
-        labels: {
-          padding: 0,
+        fill: {
+          opacity: 0.25,
+          type: "solid",
         },
-        tooltip: {
-          enabled: false,
+        stroke: {
+          width: 2,
+          lineCap: "round",
+          curve: "smooth",
         },
-        axisBorder: {
+        grid: {
+          strokeDashArray: 4,
+        },
+        xaxis: {
+          labels: {
+            padding: 0,
+          },
+          tooltip: {
+            enabled: false,
+          },
+          axisBorder: {
+            show: false,
+          },
+          type: "datetime",
+        },
+        yaxis: {
+          labels: {
+            padding: 4,
+          },
+        },
+        labels: isLoading
+          ? ["2020-01-01", "2020-01-02", "2020-01-03"]
+          : timePlayedData.items.map((item) => item.date),
+        colors: ["#206bc4"],
+        legend: {
           show: false,
         },
-        type: "datetime",
       },
-      yaxis: {
-        labels: {
-          padding: 4,
-        },
-      },
-      labels: timePlayedData.map((item) => item.date),
-      colors: ["#206bc4"],
-      legend: {
-        show: false,
-      },
-    },
+    };
+    return status;
   };
 
   return (
@@ -122,15 +140,19 @@ const TimePlayedChart = () => {
           </div>
         </div>
       </div>
-      <Chart
-        id="chart-revenue-bg"
-        className="chart-sm"
-        style={{ minHeight: 40 + "px" }}
-        series={status.series}
-        options={status.options}
-        type="area"
-        height="40"
-      />
+      {isLoading ? (
+        <LoadingDots />
+      ) : (
+        <Chart
+          id="chart-revenue-bg"
+          className="chart-sm"
+          style={{ minHeight: 40 + "px" }}
+          series={graphStatus.series}
+          options={graphStatus.options}
+          type="area"
+          height="40"
+        />
+      )}
     </div>
   );
 };
