@@ -21,3 +21,8 @@ class TopTracksSerializer(serializers.Serializer):
 class UniqueTracksSerializer(serializers.Serializer):
     count = serializers.IntegerField()
     growth = serializers.FloatField()
+
+
+class TimePlayedSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    minutes_played = serializers.IntegerField()

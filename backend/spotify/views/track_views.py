@@ -3,8 +3,10 @@ from ..serializers.track_serializers import (
     SimpleUserActivitySerializer,
     TopTracksSerializer,
     UniqueTracksSerializer,
+    TimePlayedSerializer,
 )
 from django.db.models import Sum, Count
+from django.db.models.functions import TruncDay
 from ..models import UserActivity, Tracks
 from datetime import datetime, timedelta, timezone
 from ..helpers.helpers import validate_days_query_param, validate_qty_query_params
@@ -119,4 +121,51 @@ class UniqueTracksView(RetrieveAPIView):
     def get_object(self):
         # Overrides the method that requires a pk
         queryset = self.get_queryset()
+        return queryset
+
+
+class TimePlayedView(ListAPIView):
+    serializer_class = TimePlayedSerializer
+
+    def get_queryset(self):
+        """
+        Here I will always return the days amount of data points.
+        If the query param for days is 10, it will try to return the 10 latests days on the database.
+        In case there isn't enough data, only then will return less than that amount of data points.
+        """
+        # TODO: Talvez tenha que lidar diferente com a timezone aqui
+
+        # How many data points to include. Defaults to 7, func will raise for errors
+        days = validate_days_query_param(self.request.query_params.get("days", 7))
+
+        # date_now = datetime.now(timezone.utc)
+        # date_start = date_now - timedelta(days=days)
+
+        items = (
+            UserActivity.objects
+            # Truncate by day
+            .annotate(day=TruncDay("played_at"))
+            # Get the values for each day
+            .values("day")
+            # Sum the ms_played for each day
+            .annotate(time_played_ms=Sum("ms_played"))
+            # Order so the newest is first
+            .order_by("-day")
+            # Limit to the amount of days requested
+            [:days]
+        )
+
+        # Here I will invert the data, so the newest is last (order of graph used in frontend)
+        items = items[::-1]
+
+        queryset = []
+
+        for item in items:
+            queryset.append(
+                {
+                    "date": item["day"].strftime("%Y-%m-%d"),
+                    "minutes_played": item["time_played_ms"] / 60_000,
+                }
+            )
+
         return queryset

@@ -7,6 +7,7 @@ from .views.track_views import (
     RecentUserActivityView,
     TopPlayedTracksView,
     UniqueTracksView,
+    TimePlayedView,
 )
 from .views.artist_views import TopPlayedArtistsView, UniqueArtistsView
 from .views.album_views import UniqueAlbumsViews
@@ -28,4 +29,5 @@ urlpatterns = [
     path("unique-artists/", UniqueArtistsView.as_view(), name="unique_artists"),
     path("unique-tracks/", UniqueTracksView.as_view(), name="unique_tracks"),
     path("unique-albums/", UniqueAlbumsViews.as_view(), name="unique_albums"),
+    path("time-played/", TimePlayedView.as_view(), name="time_played"),
 ]

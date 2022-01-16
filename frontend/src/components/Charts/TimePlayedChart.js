@@ -1,5 +1,8 @@
 import React from "react";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+
+import ApiContext from "../Contexts/ApiContext";
+import { generateTrendIcon } from "../helpers";
 
 import Chart from "react-apexcharts";
 import TrendingUp from "../Utilities/TrendingUp";
@@ -8,14 +11,43 @@ import TrendingSideways from "../Utilities/TrendingSideways";
 import PeriodDropdown from "../Utilities/PeriodDropdown";
 
 const TimePlayedChart = () => {
+  const { api } = useContext(ApiContext);
+
+  const [timePlayedData, setTimePlayedData] = useState([]);
+
+  const [period, setPeriod] = useState("Last 7 days");
+
+  // Map the text option to the value to API Call
+  const periodOptions = {
+    "Last 7 days": 7,
+    "Last 30 days": 30,
+    "Last 90 days": 90,
+    "All Time": 99999,
+  };
+
+  const handlePeriodChange = (e) => {
+    setPeriod(e.target.text);
+  };
+
+  useEffect(() => {
+    api
+      .get("/time-played/", { params: { days: periodOptions[period] } })
+      .then((res) => {
+        setTimePlayedData(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [period]);
+
   const status = {
     series: [
       {
         name: "Hours Played",
-        data: [
-          37, 35, 44, 28, 36, 24, 65, 31, 37, 39, 62, 51, 35, 41, 35, 27, 93,
-          53, 61, 27, 54, 43, 19, 46, 39, 62, 51, 35, 41, 67,
-        ],
+        // Unpack data into array of hours
+        data: timePlayedData.map((item) =>
+          (item.minutes_played / 60).toFixed(2)
+        ),
       },
     ],
     options: {
@@ -62,52 +94,12 @@ const TimePlayedChart = () => {
           padding: 4,
         },
       },
-      labels: [
-        "2020-06-21",
-        "2020-06-22",
-        "2020-06-23",
-        "2020-06-24",
-        "2020-06-25",
-        "2020-06-26",
-        "2020-06-27",
-        "2020-06-28",
-        "2020-06-29",
-        "2020-06-30",
-        "2020-07-01",
-        "2020-07-02",
-        "2020-07-03",
-        "2020-07-04",
-        "2020-07-05",
-        "2020-07-06",
-        "2020-07-07",
-        "2020-07-08",
-        "2020-07-09",
-        "2020-07-10",
-        "2020-07-11",
-        "2020-07-12",
-        "2020-07-13",
-        "2020-07-14",
-        "2020-07-15",
-        "2020-07-16",
-        "2020-07-17",
-        "2020-07-18",
-        "2020-07-19",
-        "2020-07-20",
-      ],
+      labels: timePlayedData.map((item) => item.date),
       colors: ["#206bc4"],
       legend: {
         show: false,
       },
     },
-  };
-
-  const periodOptions = ["Last 7 days", "Last 30 days", "Last 3 months"];
-
-  const [period, setPeriod] = useState(periodOptions[0]);
-
-  const handlePeriodChange = (e) => {
-    setPeriod(e.target.text);
-    // TODO: Função que ajeita os dados
   };
 
   return (
@@ -118,7 +110,7 @@ const TimePlayedChart = () => {
           <div className="ms-auto lh-1">
             <PeriodDropdown
               current={period}
-              options={periodOptions}
+              options={Object.keys(periodOptions)}
               handleClick={handlePeriodChange}
             />
           </div>
