@@ -45,31 +45,6 @@ const Layout = ({ children }) => {
                 </a>
               </div>
             </div>
-            {/* TODO: Design a "ADD HISTORY" button here */}
-            <a
-              href="https://github.com/sponsors/codecalm"
-              className="btn"
-              target="_blank"
-              rel="noreferrer"
-            >
-              {/* <!-- Download SVG icon from http://tabler-icons.io/i/heart --> */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="icon text-pink"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-                stroke="currentColor"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M19.5 13.572l-7.5 7.428l-7.5 -7.428m0 0a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"></path>
-              </svg>
-              [Change to add history]
-            </a>
           </div>
         </div>
       </header>
@@ -138,6 +113,29 @@ const Layout = ({ children }) => {
                     </span>
                     <span className="nav-link-title">Documentation</span>
                   </a>
+                </li>
+              </ul>
+              <ul className="navbar-nav">
+                <li className="nav-link">
+                  <btn type="button" class="btn btn-outline-primary btn-sm">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="icon icon-tabler icon-tabler-plus"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Upload History
+                  </btn>
                 </li>
               </ul>
             </div>

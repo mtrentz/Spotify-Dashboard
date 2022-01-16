@@ -61,6 +61,25 @@ const RecentActivity = () => {
     <div className="card mx-10" style={{ height: "calc(24rem + 10px)" }}>
       <div class="card-header flex justify-between">
         <h3 class="card-title">Your Recent Activity</h3>
+        {/* TODO: Force activity recheck call */}
+        <button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="icon icon-tabler icon-tabler-refresh text-muted"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+            stroke="currentColor"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
+            <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
+          </svg>
+        </button>
       </div>
       <div className="card-body card-body-scrollable card-body-scrollable-shadow">
         <div className="divide-y">
