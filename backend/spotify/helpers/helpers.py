@@ -47,7 +47,7 @@ def try_searching(sp, query, type):
     return None
 
 
-def get_equivalent_user_activity(track, played_at):
+def get_equivalent_user_activities(track, played_at):
     """
     Will return the UserActivity of any of the same track played 1 minute before or after the given time
     """
@@ -55,10 +55,10 @@ def get_equivalent_user_activity(track, played_at):
     lower_limit = played_at - timedelta(minutes=minute_offset)
     upper_limit = played_at + timedelta(minutes=minute_offset)
 
-    user_activity = UserActivity.objects.filter(
+    user_activities = UserActivity.objects.filter(
         track__sp_id=track.sp_id, played_at__range=[lower_limit, upper_limit]
-    ).first()
-    return user_activity
+    )
+    return user_activities
 
 
 def user_activities_are_equal(ua1, ua2):
@@ -80,61 +80,75 @@ def insert_user_activity(track, ms_played, played_at, from_import):
 
     Besides that, when tracks comes from the import the 'played_at' is calculated from the end time, which is not very precise.
     """
-    user_activity = UserActivity(
+    incoming_activity = UserActivity(
         track=track,
         ms_played=ms_played,
         played_at=played_at,
         from_import=from_import,
     )
 
-    # CHECK IF THERE ARE ANY EQUIVALENT USER ACTIVITIES
-    equivalent_activity = get_equivalent_user_activity(track, played_at)
+    artists = track.artists.all()
+    artists_names = [a.name for a in artists]
+    print(f">>> Trying to insert {track.name} - {artists_names}")
 
-    # IF THERE ISNT ANY, JUST ADD IT AND RETURN
-    if not equivalent_activity:
-        user_activity.save()
+    # Check if there are any equivalent acitivies (more or less the same time played for the same track)
+    equivalent_activities = get_equivalent_user_activities(track, played_at)
+
+    # If there isnt any equivalent activity, insert the new one and exit function
+    if not equivalent_activities:
+        incoming_activity.save()
         return
 
-    # IF THERE IS, CHECK IF ITS EQUAL WITH THE INCOMING ONE
-    # IF IT IS EQUAL, RETURN BECAUSE THERE IS NOTHING ELSE TO DO
-    if user_activities_are_equal(user_activity, equivalent_activity):
-        return
+    # If there is, loop through them and check if there is one thats exactly the same
+    for equivalent_activity in equivalent_activities:
+        if user_activities_are_equal(incoming_activity, equivalent_activity):
+            # If it is, exit function
+            return
 
-    # CHECK IF INCOMING IS FROM RECENTLY PLAYED
-    if not user_activity.from_import:
-        # IF IT IS, CHECK IF THE EQUIVALENT IS FROM SPOTIFY HISTORY
-        if equivalent_activity.from_import:
-            # IF SO, UPDATE THE EQUIVALENT ONE TO BE EQUAL THE INCOMING.
-            # This is becasue the incoming one (from recently played) is more accurate
-            equivalent_activity.track = user_activity.track
-            equivalent_activity.ms_played = user_activity.ms_played
-            equivalent_activity.played_at = user_activity.played_at
-            equivalent_activity.from_import = user_activity.from_import
+    # If none of them were exactly equal, then some assumptions will be needed.
+    # Usually the user activity will either be new or exactly equals as a existing one,
+    #   so it's not often that the code will reach here.
+
+    # Another possible case is that there was a rounding error when one track comes from the history
+    #   and another were is coming through the Recently Played API Endpoint.
+    # I'll loop through them and check for this case
+    for equivalent_activity in equivalent_activities:
+        if equivalent_activity.from_import and not incoming_activity.from_import:
+            # In this case, the incoming one has more accurate data, since it comes from the API,
+            # so I'll update the existing one to match it
+            equivalent_activity.track = incoming_activity.track
+            equivalent_activity.ms_played = incoming_activity.ms_played
+            equivalent_activity.played_at = incoming_activity.played_at
+            equivalent_activity.from_import = incoming_activity.from_import
             equivalent_activity.save()
-            return
-        # IF IS NOT, SHOULD NEVER HAPPEN BUT ADD THE INCOMING TO THE DB.
-        else:
-            # If it gets here means that both are from recently played (very accurate, and only for tracks 100% listened to).
-            # This could only happen if songs are < 1 min of length. If so, just add it to database
-            user_activity.save()
+            # I will exit the function!
+            # There is a chance that the next one (in case there were many equivalent)
+            #   would also match this condition.
+            # But I have no way of telling which one is "more right" to update.
+            # And updating both of them is definitely wrong.
+            # So I will just update this first one and exit this function.
             return
 
-    # IF NOT, THEN INCOMIG IS FROM HISTORY
-    # IF EQUIVALENT IS ALSO FROM HISTORY, THIS SHOULD NOT HAPPEN, BUT ADD TO DB
-    if equivalent_activity.from_import:
-        # It only gets here if both are from history. Which means that they were listened to different time stamps in a span of 1min
-        # And also listened to fully. Add it to database
-        user_activity.save()
-        return
-    else:
-        # Gets here if incoming is from history and equivalent is from recently played.
-        # If so, there are two possibilities:
-        # 1. They are exactly the same entry (same song listened to at the same time), but its a rounding error
-        #       when calculating the played_at for the incoming one (from history);
-        # 2. It is a very short track. But the one existing was listened to fully (it has to) and the incoming one was not.
-        #      This seems very unlikely.
-        # So, assuming its a rounding error, I do nothing
-        return
+        # If it is the other way around, the equivalent one being from the API and the incoming from the import.
+        if not equivalent_activity.from_import and incoming_activity.from_import:
+            # In this case, I want to do nothing. Since I already have the most accurate data.
+
+            # First I'll check if there isn't another equivalent activity
+            if equivalent_activity == equivalent_activities[-1]:
+                # In this case, this is the last one. And I know its a rounding error
+                #  since one is from the history and another isnt.
+                # So I'll just return and don't try anything else
+                return
+            # If there are more equivalent activities to check, I'll just continue
+            continue
+
+    # If it gets here there are two possibilities;
+    #  1. Both of them are from history, but not exactly the same track.
+    #  2. Both are from the API, but not exactly the same track.
+
+    # In this case, I'll just add the incoming one to the database.
+    # This probably happened because the track was very short.
+    incoming_activity.save()
 
 
 def validate_days_query_param(days):
