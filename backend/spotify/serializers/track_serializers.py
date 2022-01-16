@@ -16,3 +16,8 @@ class TopTracksSerializer(serializers.Serializer):
     album_cover = serializers.URLField()
     artists = serializers.ListField(child=serializers.CharField(max_length=255))
     minutes_played = serializers.IntegerField()
+
+
+class UniqueTracksSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    growth = serializers.FloatField()
