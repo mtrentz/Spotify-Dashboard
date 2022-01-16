@@ -1,15 +1,32 @@
 import React from "react";
+import { useContext, useEffect, useState } from "react";
+
+import ApiContext from "../Contexts/ApiContext";
+import { generateTrendIcon } from "../helpers";
+
 import CardKPI from "../Utilities/CardKPI";
-import TrendingUp from "../Utilities/TrendingUp";
-import TrendingDown from "../Utilities/TrendingDown";
-import TrendingSideways from "../Utilities/TrendingSideways";
 
 const UniqueArtistsKPI = () => {
+  const { api } = useContext(ApiContext);
+
+  const [uniqueArtistsData, setUniqueArtistsData] = useState([]);
+
+  useEffect(() => {
+    api
+      .get("/unique-artists/", { params: { days: 7 } })
+      .then((res) => {
+        setUniqueArtistsData(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
   return (
     <CardKPI
-      value="43"
+      value={uniqueArtistsData.count}
       text="Unique Artists (week)"
-      trend={<TrendingUp value="5%" />}
+      trend={generateTrendIcon(uniqueArtistsData.growth)}
     />
   );
 };
