@@ -4,7 +4,7 @@ from .views.insert_views import (
     ImportStreamingHistoryView,
 )
 from .views.track_views import RecentUserActivityView, TopPlayedTracksView
-from .views.artist_views import TopPlayedArtistsView
+from .views.artist_views import TopPlayedArtistsView, UniqueArtistsView
 from .views.auth_views import AuthURLView, AuthTokenView
 
 urlpatterns = [
@@ -20,4 +20,5 @@ urlpatterns = [
         "top-played-artists/", TopPlayedArtistsView.as_view(), name="top_played_artists"
     ),
     path("top-played-tracks/", TopPlayedTracksView.as_view(), name="top_played_tracks"),
+    path("unique-artists/", UniqueArtistsView.as_view(), name="unique_artists"),
 ]
