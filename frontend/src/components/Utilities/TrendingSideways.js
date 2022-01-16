@@ -2,7 +2,12 @@ import React from "react";
 
 const TrendingSideways = ({ value }) => {
   return (
-    <span className="text-orange d-inline-flex align-items-center lh-1">
+    <span
+      className="text-orange d-inline-flex align-items-center lh-1"
+      data-bs-toggle="tooltip"
+      data-bs-placement="bottom"
+      title="Trend calculated comparing with previous period of same length."
+    >
       {value}
       <svg
         xmlns="http://www.w3.org/2000/svg"

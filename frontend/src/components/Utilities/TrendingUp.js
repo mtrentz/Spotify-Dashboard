@@ -2,7 +2,12 @@ import React from "react";
 
 const TrendingUp = ({ value }) => {
   return (
-    <span className="text-green d-inline-flex align-items-center lh-1">
+    <span
+      className="text-green d-inline-flex align-items-center lh-1"
+      data-bs-toggle="tooltip"
+      data-bs-placement="bottom"
+      title="Trend calculated comparing with previous period of same length."
+    >
       {value}
       {/* <!-- Download SVG icon from http://tabler-icons.io/i/trending-up --> */}
       <svg
