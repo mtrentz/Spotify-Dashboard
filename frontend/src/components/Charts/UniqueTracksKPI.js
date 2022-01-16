@@ -10,12 +10,14 @@ const UniqueTracksKPI = () => {
   const { api } = useContext(ApiContext);
 
   const [uniqueTracksData, setUniqueTracksData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     api
       .get("/unique-tracks/", { params: { days: 7 } })
       .then((res) => {
         setUniqueTracksData(res.data);
+        setIsLoading(false);
       })
       .catch((err) => {
         console.log(err);
@@ -24,9 +26,9 @@ const UniqueTracksKPI = () => {
 
   return (
     <CardKPI
-      value={uniqueTracksData.count}
+      value={isLoading ? 0 : uniqueTracksData.count}
       text="Unique Tracks (week)"
-      trend={generateTrendComponent(uniqueTracksData.growth)}
+      trend={generateTrendComponent(isLoading ? 0 : uniqueTracksData.growth)}
     />
   );
 };

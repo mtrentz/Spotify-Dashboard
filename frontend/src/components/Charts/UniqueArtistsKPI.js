@@ -10,12 +10,14 @@ const UniqueArtistsKPI = () => {
   const { api } = useContext(ApiContext);
 
   const [uniqueArtistsData, setUniqueArtistsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     api
       .get("/unique-artists/", { params: { days: 7 } })
       .then((res) => {
         setUniqueArtistsData(res.data);
+        setIsLoading(false);
       })
       .catch((err) => {
         console.log(err);
@@ -24,9 +26,9 @@ const UniqueArtistsKPI = () => {
 
   return (
     <CardKPI
-      value={uniqueArtistsData.count}
+      value={isLoading ? 0 : uniqueArtistsData.count}
       text="Unique Artists (week)"
-      trend={generateTrendComponent(uniqueArtistsData.growth)}
+      trend={generateTrendComponent(isLoading ? 0 : uniqueArtistsData.growth)}
     />
   );
 };

@@ -10,12 +10,14 @@ const UniqueAlbumsKPI = () => {
   const { api } = useContext(ApiContext);
 
   const [uniqueAlbumsData, setUniqueAlbumsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     api
       .get("/unique-albums/", { params: { days: 7 } })
       .then((res) => {
         setUniqueAlbumsData(res.data);
+        setIsLoading(false);
       })
       .catch((err) => {
         console.log(err);
@@ -24,9 +26,9 @@ const UniqueAlbumsKPI = () => {
 
   return (
     <CardKPI
-      value={uniqueAlbumsData.count}
+      value={isLoading ? 0 : uniqueAlbumsData.count}
       text="Unique Albums (week)"
-      trend={generateTrendComponent(uniqueAlbumsData.growth)}
+      trend={generateTrendComponent(isLoading ? 0 : uniqueAlbumsData.growth)}
     />
   );
 };
