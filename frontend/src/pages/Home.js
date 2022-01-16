@@ -2,9 +2,9 @@ import React from "react";
 
 import SampleGraph from "../components/Charts/SampleGraph";
 import TimePlayedChart from "../components/Charts/TimePlayedChart";
-import UniqueAlbums from "../components/Charts/UniqueAlbums";
+import UniqueAlbumsKPI from "../components/Charts/UniqueAlbumsKPI";
 import UniqueArtistsKPI from "../components/Charts/UniqueArtistsKPI";
-import UniqueTracks from "../components/Charts/UniqueTracks";
+import UniqueTracksKPI from "../components/Charts/UniqueTracksKPI";
 import RecentActivity from "../components/Charts/RecentActivity";
 import TopArtists from "../components/Charts/TopArtists";
 import TopTracks from "../components/Charts/TopTracks";
@@ -15,8 +15,8 @@ const Home = () => {
       <SampleGraph />
       <TimePlayedChart />
       <UniqueArtistsKPI />
-      <UniqueTracks />
-      <UniqueAlbums />
+      <UniqueTracksKPI />
+      <UniqueAlbumsKPI />
       <TopArtists />
       <TopTracks />
       <RecentActivity />

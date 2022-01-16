@@ -11,9 +11,9 @@ export const generateTrendIcon = (growth) => {
 
   let percentageString;
 
-  // If the growth is between -1% and 1%, I want it to have 1 decimal place.
+  // If the growth is between -1% and 1% (but not 0.0), I want it to have 1 decimal place.
   // Else it will have none.
-  if (percentage >= -1 && percentage <= 1) {
+  if (percentage >= -1 && percentage <= 1 && percentage !== 0) {
     percentageString = `${percentage.toFixed(1)}%`;
   } else {
     percentageString = `${percentage.toFixed(0)}%`;
@@ -23,7 +23,7 @@ export const generateTrendIcon = (growth) => {
 
   if (percentage > sidewaysThreshold) {
     return <TrendingUp value={percentageString} />;
-  } else if (percentage < sidewaysThreshold) {
+  } else if (percentage < -sidewaysThreshold) {
     return <TrendingDown value={percentageString} />;
   } else {
     return <TrendingSideways value={percentageString} />;
