@@ -11,6 +11,7 @@ from .views.track_views import (
 )
 from .views.artist_views import TopPlayedArtistsView, UniqueArtistsView
 from .views.album_views import UniqueAlbumsViews
+from .views.genres_views import TopPlayedGenresView
 from .views.auth_views import AuthURLView, AuthTokenView
 
 urlpatterns = [
@@ -30,4 +31,5 @@ urlpatterns = [
     path("unique-tracks/", UniqueTracksView.as_view(), name="unique_tracks"),
     path("unique-albums/", UniqueAlbumsViews.as_view(), name="unique_albums"),
     path("time-played/", TimePlayedView.as_view(), name="time_played"),
+    path("top-played-genres/", TopPlayedGenresView.as_view(), name="top_played_genres"),
 ]
