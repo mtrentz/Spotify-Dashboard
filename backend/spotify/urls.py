@@ -9,6 +9,7 @@ from .views.track_views import (
     UniqueTracksView,
 )
 from .views.artist_views import TopPlayedArtistsView, UniqueArtistsView
+from .views.album_views import UniqueAlbumsViews
 from .views.auth_views import AuthURLView, AuthTokenView
 
 urlpatterns = [
@@ -26,4 +27,5 @@ urlpatterns = [
     path("top-played-tracks/", TopPlayedTracksView.as_view(), name="top_played_tracks"),
     path("unique-artists/", UniqueArtistsView.as_view(), name="unique_artists"),
     path("unique-tracks/", UniqueTracksView.as_view(), name="unique_tracks"),
+    path("unique-albums/", UniqueAlbumsViews.as_view(), name="unique_albums"),
 ]
