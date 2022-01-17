@@ -1,28 +1,12 @@
-import React, { useRef } from "react";
+import React from "react";
 
-const UploadHistoryButton = ({ onFileSelect }) => {
-  const filesElement = useRef(null);
-
-  const sendFile = () => {
-    const dataForm = new FormData();
-    for (const file of filesElement.current.files) {
-      dataForm.append("file", file);
-    }
-    console.log(dataForm);
-  };
-
+const UploadHistoryButton = ({ handleClick }) => {
   return (
     <>
-      <input
-        ref={filesElement}
-        type="file"
-        // onChange={handleFileInput}
-        multiple
-      />
       <btn
         type="button"
         className="btn btn-outline-primary btn-sm"
-        onClick={sendFile}
+        onClick={handleClick}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

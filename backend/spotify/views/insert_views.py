@@ -45,7 +45,12 @@ class ImportStreamingHistoryView(APIView):
         sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
         # Accepts multiple streaming history files
+
         file_list = request.data.getlist("file")
+
+        print(file_list)
+        return Response({"Ok": "Test ok"})
+
         data_list = []
 
         try:
