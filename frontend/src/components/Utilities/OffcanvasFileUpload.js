@@ -8,7 +8,13 @@ import UploadHistoryButton from "./UploadHistoryButton";
 const OffcanvasFileUpload = () => {
   const { api } = useContext(ApiContext);
 
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, getValues } = useForm();
+  const [fileCount, setFileCount] = useState(0);
+
+  const handleFileSelect = (e) => {
+    const files = getValues("file");
+    setFileCount(files.length);
+  };
 
   const onSubmit = (values) => {
     // console.log("1>", values);
@@ -48,7 +54,7 @@ const OffcanvasFileUpload = () => {
       </div>
 
       <div className="offcanvas-body flex flex-col justify-start gap-1">
-        <div>
+        <div className="markdown">
           <p>
             To upload your past listening activity from spotify you first need
             to request it through the official spotify website.
@@ -60,23 +66,36 @@ const OffcanvasFileUpload = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <input
-            name="file"
-            type="file"
-            multiple
-            {...register("file", {
-              required: "Required",
-            })}
-          />
-          <input type="submit" />
-        </form>
-
-        <div className="mt-3">
-          <button className="btn" type="button" data-bs-dismiss="offcanvas">
-            Close Menu
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-3 justify-start items-center mt-3"
+        >
+          <div className="flex flex-row align-center">
+            <label
+              htmlFor="file"
+              className="btn w-32 h-8"
+              onChange={handleFileSelect}
+            >
+              Choose Files
+              <input
+                id="file"
+                name="file"
+                type="file"
+                multiple
+                hidden
+                {...register("file", {
+                  required: "Required",
+                })}
+              />
+            </label>
+            {fileCount > 0 ? (
+              <p className="mt-2 ml-2">{fileCount} selected</p>
+            ) : null}
+          </div>
+          <button type="submit" className="btn btn-primary w-32 h-8 font-bold">
+            Submit
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
