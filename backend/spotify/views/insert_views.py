@@ -45,11 +45,7 @@ class ImportStreamingHistoryView(APIView):
         sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
         # Accepts multiple streaming history files
-
         file_list = request.data.getlist("file")
-
-        print(file_list)
-        return Response({"Ok": "Test ok"})
 
         data_list = []
 
@@ -60,6 +56,8 @@ class ImportStreamingHistoryView(APIView):
             raise ValidationError(f"Invalid Streaming History JSON file; {e}")
 
         for data in data_list:
+            print(data)
+            continue
             history_entry_serializer = HistoryEntrySerializer(data=data)
 
             # If not valid for some reason, just continue to next iteration

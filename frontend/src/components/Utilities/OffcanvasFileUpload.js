@@ -1,4 +1,5 @@
-import React, { useRef, useContext } from "react";
+import React, { useRef, useContext, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import ApiContext from "../Contexts/ApiContext";
 
@@ -7,24 +8,22 @@ import UploadHistoryButton from "./UploadHistoryButton";
 const OffcanvasFileUpload = () => {
   const { api } = useContext(ApiContext);
 
-  const filesElement = useRef(null);
+  const { register, handleSubmit } = useForm();
 
-  const sendFile = () => {
-    const formData = new FormData();
-    for (const file of filesElement.current.files) {
+  const onSubmit = (values) => {
+    // console.log("1>", values);
+    let formData = new FormData();
+    for (const file of values.file) {
       formData.append("file", file);
     }
     api
-      .post("/history/", {
-        data: formData,
-      })
+      .post("/history/", formData)
       .then((res) => {
         console.log(res);
       })
       .catch((err) => {
         console.log(err.response);
       });
-    // console.log(dataForm);
   };
 
   return (
@@ -47,8 +46,7 @@ const OffcanvasFileUpload = () => {
           aria-label="Close"
         ></button>
       </div>
-      {/* TODO: Lembrar que recem coloquei isso aq */}
-      {/* <form> */}
+
       <div className="offcanvas-body flex flex-col justify-start gap-1">
         <div>
           <p>
@@ -61,11 +59,18 @@ const OffcanvasFileUpload = () => {
             that going through one single file can take up to several minutes.
           </p>
         </div>
-        <span>1. Select your files</span>
-        <input ref={filesElement} type="file" multiple className="ml-3" />
-        <UploadHistoryButton handleClick={sendFile} />
-        <span>2. Confirm upload</span>
-        <div className="ml-3"></div>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <input
+            name="file"
+            type="file"
+            multiple
+            {...register("file", {
+              required: "Required",
+            })}
+          />
+          <input type="submit" />
+        </form>
 
         <div className="mt-3">
           <button className="btn" type="button" data-bs-dismiss="offcanvas">
@@ -73,7 +78,6 @@ const OffcanvasFileUpload = () => {
           </button>
         </div>
       </div>
-      {/* </form> */}
     </div>
   );
 };
