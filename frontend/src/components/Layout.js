@@ -227,7 +227,13 @@ const Layout = ({ children }) => {
               </ul>
               <ul className="navbar-nav">
                 <li className="nav-link">
-                  <btn type="button" class="btn btn-outline-primary btn-sm">
+                  <btn
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    data-bs-toggle="offcanvas"
+                    href="#offcanvasEnd"
+                    ariaControls="offcanvasEnd"
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="icon icon-tabler icon-tabler-plus"
@@ -252,7 +258,40 @@ const Layout = ({ children }) => {
           </div>
         </div>
       </div>
-      ;<div className="page-wrapper"> {children} </div>
+      <div className="page-wrapper"> {children} </div>
+      <div
+        className="offcanvas offcanvas-end"
+        tabindex="-1"
+        id="offcanvasEnd"
+        ariaLabelledby="offcanvasEndLabel"
+        style={{ visibility: "hidden" }}
+        ariaHidden="true"
+      >
+        <div className="offcanvas-header">
+          <h2 className="offcanvas-title" id="offcanvasEndLabel">
+            End offcanvas
+          </h2>
+          <button
+            type="button"
+            className="btn-close text-reset"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="offcanvas-body">
+          <div>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab
+            assumenda ea est, eum exercitationem fugiat illum itaque laboriosam
+            magni necessitatibus, nemo nisi numquam quae reiciendis repellat sit
+            soluta unde. Aut!
+          </div>
+          <div className="mt-3">
+            <button className="btn" type="button" data-bs-dismiss="offcanvas">
+              Close offcanvas
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
