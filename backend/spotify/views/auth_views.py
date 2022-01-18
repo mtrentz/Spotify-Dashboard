@@ -17,6 +17,7 @@ class BaseAuthView(APIView):
         auth_manager=SpotifyOAuth(
             cache_handler=CacheFileHandler(cache_path),
             scope="user-read-recently-played",
+            show_dialog=True,
         ),
     )
 
@@ -24,7 +25,7 @@ class BaseAuthView(APIView):
 class AuthURLView(BaseAuthView):
     def get(self, request):
         url = self.sp.auth_manager.get_authorize_url()
-        return Response({"Please Sign In": url})
+        return Response({"url": url})
 
 
 class AuthTokenView(BaseAuthView):

@@ -1,6 +1,8 @@
 import React from "react";
 
 import OffcanvasFileUpload from "./Utilities/OffcanvasFileUpload";
+import UploadHistoryButton from "./Utilities/UploadHistoryButton";
+import AuthorizeButton from "./Utilities/AuthorizeButton";
 
 const Layout = ({ children }) => {
   return (
@@ -56,7 +58,7 @@ const Layout = ({ children }) => {
             <div className="container-xl">
               <ul className="navbar-nav">
                 <li className="nav-item">
-                  <a className="nav-link" href="./index.html">
+                  <a className="nav-link" href="/">
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -229,31 +231,10 @@ const Layout = ({ children }) => {
               </ul>
               <ul className="navbar-nav">
                 <li className="nav-link">
-                  <btn
-                    type="button"
-                    class="btn btn-outline-primary btn-sm"
-                    data-bs-toggle="offcanvas"
-                    href="#offcanvasEnd"
-                    ariaControls="offcanvasEnd"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="icon icon-tabler icon-tabler-plus"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                      stroke="currentColor"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                      <line x1="12" y1="5" x2="12" y2="19"></line>
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Upload History
-                  </btn>
+                  <AuthorizeButton />
+                </li>
+                <li className="nav-link">
+                  <UploadHistoryButton />
                 </li>
               </ul>
             </div>

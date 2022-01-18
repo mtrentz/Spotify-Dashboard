@@ -1,23 +1,20 @@
-import React, { useRef, useContext, useEffect, useState } from "react";
+import React, { useRef, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import ApiContext from "../Contexts/ApiContext";
-
-import UploadHistoryButton from "./UploadHistoryButton";
 
 const OffcanvasFileUpload = () => {
   const { api } = useContext(ApiContext);
 
   const { register, handleSubmit, getValues } = useForm();
-  const [fileCount, setFileCount] = useState(0);
+  const [files, setFiles] = useState(0);
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = () => {
     const files = getValues("file");
-    setFileCount(files.length);
+    setFiles(Object.values(files));
   };
 
   const onSubmit = (values) => {
-    // console.log("1>", values);
     let formData = new FormData();
     for (const file of values.file) {
       formData.append("file", file);
@@ -88,14 +85,21 @@ const OffcanvasFileUpload = () => {
                 })}
               />
             </label>
-            {fileCount > 0 ? (
-              <p className="mt-2 ml-2">{fileCount} selected</p>
-            ) : null}
           </div>
           <button type="submit" className="btn btn-primary w-32 h-8 font-bold">
             Submit
           </button>
         </form>
+        <div className="mt-2">
+          {files.length > 0 ? <h4>Selected Files</h4> : null}
+          {files.length > 0
+            ? files.map((f, index) => (
+                <div className="my-1" key={index}>
+                  {f.name}
+                </div>
+              ))
+            : null}
+        </div>
       </div>
     </div>
   );

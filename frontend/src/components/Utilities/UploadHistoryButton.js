@@ -1,12 +1,14 @@
 import React from "react";
 
-const UploadHistoryButton = ({ handleClick }) => {
+const UploadHistoryButton = () => {
   return (
     <>
       <btn
         type="button"
-        className="btn btn-outline-primary btn-sm"
-        onClick={handleClick}
+        class="btn btn-outline-primary btn-sm h-7"
+        data-bs-toggle="offcanvas"
+        href="#offcanvasEnd"
+        ariaControls="offcanvasEnd"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
