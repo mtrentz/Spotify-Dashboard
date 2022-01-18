@@ -22,7 +22,7 @@ const AuthorizeButton = () => {
     <a
       href={authUrl}
       target="_blank"
-      class="btn btn-outline-teal w-100 h-7 btn-sm"
+      class="btn btn-outline-teal w-32 h-7 btn-sm"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

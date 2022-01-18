@@ -62,6 +62,7 @@ class ImportStreamingHistoryView(APIView):
 
             # If not valid for some reason, just continue to next iteration
             if not history_entry_serializer.is_valid():
+                # TODO: Maybe should just throw error here
                 continue
 
             # Won't let duplicates be added into Streaming History
@@ -90,6 +91,9 @@ class ImportStreamingHistoryView(APIView):
                     ms_played=ms_played,
                     from_import=True,
                 )
+                # TODO: Add continue here so I don't have to indent next part
+
+            # TODO: Here is where I will send to celery, since this part depends on the Spotify API and takes a while.
             # If not, search it on Spotify, and get all necessary data to send it to TrackEntrySerializer
             # which will also add it to user activity.
             else:
@@ -124,6 +128,7 @@ class ImportStreamingHistoryView(APIView):
                 # But also saves to UserActivity!
                 track_entry_serializer = TrackEntrySerializer(data=track_entry_data)
                 if track_entry_serializer.is_valid():
+                    # TODO: Here is where the heavy api-calling is
                     track_entry_serializer.save()
 
         return Response(
@@ -189,6 +194,7 @@ class RecentlyPlayedView(BaseAuthView):
                 }
 
                 serializer = TrackEntrySerializer(data=track_entry_data)
+                # TODO: Heavy API call here. Send it to celery?
                 if serializer.is_valid():
                     serializer.save()
 

@@ -16,7 +16,7 @@ const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    let code = searchParams.get("code");
+    const code = searchParams.get("code");
     if (code) {
       api
         .post("/token/", { code: code })
