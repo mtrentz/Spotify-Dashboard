@@ -9,6 +9,7 @@ const RecentActivity = () => {
   const { api } = useContext(ApiContext);
 
   const [recentlyPlayedData, setRecentlyPlayedData] = useState([]);
+  const [refreshed, setRefreshed] = useState(false);
 
   const createTableText = (trackName, artistList) => {
     // Join artists by comma
@@ -46,6 +47,19 @@ const RecentActivity = () => {
     return cleanedData;
   };
 
+  const refreshRecentActivity = () => {
+    api
+      .post("/refresh-recently-played/")
+      .then((res) => {
+        // Change state so the other useEffect runs
+        // wait 2 seconds so API has time to update
+        setInterval(() => setRefreshed(!refreshed), 2000);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   useEffect(() => {
     api
       .get("/recently-played/", { params: { qty: 25 } })
@@ -55,14 +69,14 @@ const RecentActivity = () => {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [refreshed]);
 
   return (
     <div className="card mx-10" style={{ height: "calc(24rem + 10px)" }}>
       <div class="card-header flex justify-between">
         <h3 class="card-title">Your Recent Activity</h3>
-        {/* TODO: Force activity recheck call */}
-        <button>
+        {/* Force activity recheck button */}
+        <button onClick={refreshRecentActivity}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="icon icon-tabler icon-tabler-refresh text-muted"

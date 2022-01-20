@@ -1,12 +1,29 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
+
+import ApiContext from "./Contexts/ApiContext";
 
 import OffcanvasFileUpload from "./Utilities/OffcanvasFileUpload";
 import UploadHistoryButton from "./Utilities/UploadHistoryButton";
 import AuthorizeButton from "./Utilities/AuthorizeButton";
 
 const Layout = ({ children }) => {
+  const { api } = useContext(ApiContext);
+
+  const [isAuthorized, setIsAuthorized] = useState(true);
+
+  useEffect(() => {
+    api
+      .get("/is-authorized/")
+      .then((res) => {
+        setIsAuthorized(res.data.is_authorized);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
   return (
-    <div className="page">
+    <div className="page relative">
       <header className="navbar navbar-expand-md navbar-light d-print-none">
         <div className="container-xl">
           <button
@@ -230,9 +247,11 @@ const Layout = ({ children }) => {
                 </li>
               </ul>
               <ul className="navbar-nav">
-                <li className="nav-link">
-                  <AuthorizeButton />
-                </li>
+                {isAuthorized ? null : (
+                  <li className="nav-link">
+                    <AuthorizeButton />
+                  </li>
+                )}
                 <li className="nav-link">
                   <UploadHistoryButton />
                 </li>

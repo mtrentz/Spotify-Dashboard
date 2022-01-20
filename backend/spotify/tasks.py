@@ -53,7 +53,9 @@ def insert_track_entry(track_entry_data):
 
     # In case it wasn't in the database, then I'll have to do a bunch of queries to get all the data
     load_dotenv()
-    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+    sp = spotipy.Spotify(
+        client_credentials_manager=SpotifyClientCredentials(cache_handler=None)
+    )
 
     ### ARTISTS
     artists_sp_ids = track_entry_data["artists_sp_ids"]

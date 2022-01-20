@@ -5,9 +5,6 @@ import ApiContext from "../Contexts/ApiContext";
 import { generateTrendComponent } from "../helpers";
 
 import Chart from "react-apexcharts";
-import TrendingUp from "../Utilities/TrendingUp";
-import TrendingDown from "../Utilities/TrendingDown";
-import TrendingSideways from "../Utilities/TrendingSideways";
 import PeriodDropdown from "../Utilities/PeriodDropdown";
 import LoadingDots from "../Utilities/LoadingDots";
 

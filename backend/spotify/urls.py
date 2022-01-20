@@ -5,7 +5,7 @@ from .views.user_activity_views import RecentUserActivityView, TimePlayedView
 from .views.artist_views import TopPlayedArtistsView, UniqueArtistsView
 from .views.album_views import UniqueAlbumsViews
 from .views.genres_views import TopPlayedGenresView
-from .views.auth_views import AuthURLView, AuthTokenView
+from .views.auth_views import AuthURLView, AuthTokenView, IsAuthorizedView
 
 urlpatterns = [
     # INSERT DATA
@@ -18,6 +18,7 @@ urlpatterns = [
     # AUTHORIZATION
     path("auth/", AuthURLView.as_view(), name="auth_url"),
     path("token/", AuthTokenView.as_view(), name="auth_token"),
+    path("is-authorized/", IsAuthorizedView.as_view(), name="is_authorized"),
     # USER ACTIVITY
     path("recently-played/", RecentUserActivityView.as_view(), name="recently_played"),
     path("time-played/", TimePlayedView.as_view(), name="time_played"),

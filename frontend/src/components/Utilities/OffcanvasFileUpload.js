@@ -86,7 +86,12 @@ const OffcanvasFileUpload = () => {
               />
             </label>
           </div>
-          <button type="submit" className="btn btn-primary w-32 h-8 font-bold">
+          <button
+            type="submit"
+            className="btn btn-primary w-32 h-8 font-bold"
+            // If there was files, once the button is clicked the offcanvas will close
+            data-bs-dismiss={files ? "offcanvas" : ""}
+          >
             Submit
           </button>
         </form>

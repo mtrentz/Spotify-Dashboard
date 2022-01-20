@@ -5,6 +5,9 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy import CacheFileHandler
 import os
+import logging
+
+logger = logging.getLogger("django")
 
 # Dev only
 from dotenv import load_dotenv
@@ -41,3 +44,15 @@ class AuthTokenView(BaseAuthView):
             return Response({"Error": {f"Error storing tokens {e}"}})
         # Don't return the tokens since the user (browser) shouldnt't have access to it
         return Response({"Success": "Tokens stored"})
+
+
+class IsAuthorizedView(BaseAuthView):
+    def get(self, request):
+        try:
+            tokens = self.sp.auth_manager.cache_handler.get_cached_token()
+            refresh = tokens.get("refresh_token")
+            # Check if refresh exists, if so, say its authorized
+            return Response({"is_authorized": bool(refresh)})
+        except Exception as e:
+            logger.error(f"Error checking if authorized: {e}")
+            return Response({"is_authorized": False})

@@ -4,7 +4,6 @@ from ..serializers.track_serializers import (
     UniqueTracksSerializer,
 )
 from django.db.models import Sum, Count
-from django.db.models.functions import TruncDay
 from ..models import Tracks
 from datetime import datetime, timedelta, timezone
 from ..helpers import validate_days_query_param, validate_qty_query_params

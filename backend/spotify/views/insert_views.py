@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from datetime import datetime, timedelta
 import pytz
 import json
@@ -115,7 +115,16 @@ class RecentlyPlayedView(BaseAuthView):
         For new songs, send it to TrackEntrySerializer, where all data needed will be requested and then stored to UserActivity
         """
 
-        recently_played = self.sp.current_user_recently_played(limit=50)
+        # TODO: Check for error here
+        try:
+            recently_played = self.sp.current_user_recently_played(limit=50)
+        except Exception as e:
+            # Error here means it's not authorized, so I'll just reset token info
+            self.sp.auth_manager.cache_handler.save_token_to_cache({})
+            logger.error(f"Error getting recently played: {e}")
+            raise PermissionDenied(
+                f"Error trying to get recently played; Most likely not authorized."
+            )
         querying_new_songs = True
 
         while querying_new_songs:
