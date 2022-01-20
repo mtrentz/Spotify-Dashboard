@@ -82,7 +82,7 @@ def insert_track_entry(track_entry_data):
         # Here since we only add if the artist with same sp_id doesn't exist,
         # what happens is that the popularity and follower numbers will never be updated.
         # But I don't think that is a problem.
-        artist, created = Artists.objects.get_or_create(
+        artist, _ = Artists.objects.get_or_create(
             sp_id=artist_sp_id,
             name=artist_name,
             popularity=artist_popularity,
@@ -135,7 +135,7 @@ def insert_track_entry(track_entry_data):
         # Here since we only add if an album with same sp_id doesn't exist,
         # what happens is that the popularity of the album will never be updated.
         # But I don't think that is a problem.
-        album, created = Albums.objects.get_or_create(
+        album, _ = Albums.objects.get_or_create(
             sp_id=album_sp_id,
             name=album_name,
             popularity=album_popularity,
@@ -162,7 +162,7 @@ def insert_track_entry(track_entry_data):
 
     # There is a small problem here that the popularity will never be updated
     # but I don't think it matters.
-    track, created = Tracks.objects.get_or_create(
+    track, _ = Tracks.objects.get_or_create(
         sp_id=track_sp_id,
         name=track_name,
         duration=track_duration,
