@@ -20,3 +20,23 @@ docker run -d \
     -e PGDATA=/var/lib/postgresql/data/pgdata \
     -v `pwd`/data/db:/var/lib/postgresql/data \
     postgres:14.1
+
+
+
+
+# Reseting database
+sudo rm -rf data
+docker rm -f postgres
+docker run -d \
+    --name postgres \
+    -p 5432:5432 \
+    -e POSTGRES_NAME=postgres \
+    -e POSTGRES_USER=postgres \
+    -e POSTGRES_PASSWORD=postgres \
+    -e PGDATA=/var/lib/postgresql/data/pgdata \
+    -v `pwd`/data/db:/var/lib/postgresql/data \
+    postgres:14.1
+
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py runserver
