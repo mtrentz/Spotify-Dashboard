@@ -1,4 +1,4 @@
-from celery import shared_task
+from celery import shared_task, Task
 from django.forms import ValidationError
 from .serializers.insert_serializers import TrackEntrySerializer
 from .models import Artists, Genres, Albums, Tracks
@@ -15,7 +15,13 @@ logger = logging.getLogger("django")
 from dotenv import load_dotenv
 
 
-@shared_task
+class LogErrorsTask(Task):
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        logger.exception("Celery task failure; ", exc_info=exc)
+        super(LogErrorsTask, self).on_failure(exc, task_id, args, kwargs, einfo)
+
+
+@shared_task(base=LogErrorsTask)
 def insert_track_entry(track_entry_data):
     """
     Gets proper track entry data dictionary and insert it into the database.
@@ -181,7 +187,7 @@ def insert_track_entry(track_entry_data):
     )
 
 
-@shared_task
+@shared_task(base=LogErrorsTask)
 def search_track_insert_entry(
     track_name, artist_name, played_at, ms_played, from_import
 ):

@@ -1,0 +1,22 @@
+# Running server in background and starting scheduler
+python3 manage.py runserver & python3 manage.py runapscheduler
+
+# Killing server background
+pkill -f runserver
+
+# Run celery
+celery -A backend worker -l info
+
+# Docker Redis
+docker run -d -p 6379:6379 redis
+
+# Docker Postgres
+docker run -d \
+    --name postgres \
+    -p 5432:5432 \
+    -e POSTGRES_NAME=postgres \
+    -e POSTGRES_USER=postgres \
+    -e POSTGRES_PASSWORD=postgres \
+    -e PGDATA=/var/lib/postgresql/data/pgdata \
+    -v `pwd`/data/db:/var/lib/postgresql/data \
+    postgres:14.1
