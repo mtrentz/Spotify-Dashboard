@@ -1,35 +1,35 @@
 from django.urls import path
-from .views.insert_views import (
-    TrackEntryView,
-    ImportStreamingHistoryView,
-)
-from .views.track_views import (
-    RecentUserActivityView,
-    TopPlayedTracksView,
-    UniqueTracksView,
-    TimePlayedView,
-)
+from .views.insert_views import ImportStreamingHistoryView, RecentlyPlayedView
+from .views.track_views import TopPlayedTracksView, UniqueTracksView
+from .views.user_activity_views import RecentUserActivityView, TimePlayedView
 from .views.artist_views import TopPlayedArtistsView, UniqueArtistsView
 from .views.album_views import UniqueAlbumsViews
 from .views.genres_views import TopPlayedGenresView
 from .views.auth_views import AuthURLView, AuthTokenView
 
 urlpatterns = [
-    # Inserting Data
-    path("entry/", TrackEntryView.as_view(), name="entry"),
+    # INSERT DATA
     path("history/", ImportStreamingHistoryView.as_view(), name="history"),
-    # Auth
+    path(
+        "refresh-recently-played/",
+        RecentlyPlayedView.as_view(),
+        name="refresh-recently-played",
+    ),
+    # AUTHORIZATION
     path("auth/", AuthURLView.as_view(), name="auth_url"),
     path("token/", AuthTokenView.as_view(), name="auth_token"),
-    # Query
+    # USER ACTIVITY
     path("recently-played/", RecentUserActivityView.as_view(), name="recently_played"),
+    path("time-played/", TimePlayedView.as_view(), name="time_played"),
+    # ARTISTS
+    path("unique-artists/", UniqueArtistsView.as_view(), name="unique_artists"),
     path(
         "top-played-artists/", TopPlayedArtistsView.as_view(), name="top_played_artists"
     ),
-    path("top-played-tracks/", TopPlayedTracksView.as_view(), name="top_played_tracks"),
-    path("unique-artists/", UniqueArtistsView.as_view(), name="unique_artists"),
+    # TRACKS
     path("unique-tracks/", UniqueTracksView.as_view(), name="unique_tracks"),
+    path("top-played-tracks/", TopPlayedTracksView.as_view(), name="top_played_tracks"),
+    # ALBUMS
     path("unique-albums/", UniqueAlbumsViews.as_view(), name="unique_albums"),
-    path("time-played/", TimePlayedView.as_view(), name="time_played"),
     path("top-played-genres/", TopPlayedGenresView.as_view(), name="top_played_genres"),
 ]

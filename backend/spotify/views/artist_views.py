@@ -6,7 +6,7 @@ from ..serializers.artist_serializers import (
 from ..models import Artists
 from django.db.models import Sum, Count
 from datetime import datetime, timedelta, timezone
-from ..helpers.helpers import validate_days_query_param, validate_qty_query_params
+from ..helpers import validate_days_query_param, validate_qty_query_params
 
 
 class TopPlayedArtistsView(ListAPIView):
@@ -85,9 +85,13 @@ class UniqueArtistsView(RetrieveAPIView):
         )
 
         # Calculate the growth
-        growth = (
-            count["sp_id__count"] - previous_count["sp_id__count"]
-        ) / previous_count["sp_id__count"]
+        # Check if there is something to compare, to avoid division by 0
+        if previous_count["sp_id__count"]:
+            growth = (
+                count["sp_id__count"] - previous_count["sp_id__count"]
+            ) / previous_count["sp_id__count"]
+        else:
+            growth = 0
 
         return {"count": count["sp_id__count"], "growth": growth}
 

@@ -3,7 +3,7 @@ from ..models import Albums
 from ..serializers.album_serializers import UniqueAlbumsSerializer
 from django.db.models import Sum, Count
 from datetime import datetime, timedelta, timezone
-from ..helpers.helpers import validate_days_query_param
+from ..helpers import validate_days_query_param
 
 
 class UniqueAlbumsViews(RetrieveAPIView):
@@ -47,9 +47,13 @@ class UniqueAlbumsViews(RetrieveAPIView):
         )
 
         # Calculate the growth
-        growth = (
-            count["sp_id__count"] - previous_count["sp_id__count"]
-        ) / previous_count["sp_id__count"]
+        # Check if there is something to compare to, to avoid division by 0
+        if previous_count["sp_id__count"]:
+            growth = (
+                count["sp_id__count"] - previous_count["sp_id__count"]
+            ) / previous_count["sp_id__count"]
+        else:
+            growth = 0
 
         return {"count": count["sp_id__count"], "growth": growth}
 

@@ -45,7 +45,7 @@ class Command(BaseCommand):
         scheduler.add_job(
             recently_played_job,
             trigger=CronTrigger(
-                minute="*/15"
+                minute="*/27"
             ),  # Every 15th minute (10h15, 10h30, etc...)
             id="recently_played_job",  # The `id` assigned to each job MUST be unique
             max_instances=1,

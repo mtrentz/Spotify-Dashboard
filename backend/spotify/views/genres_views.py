@@ -3,7 +3,7 @@ from django.db.models import Sum
 from ..serializers.genres_serializer import TopPlayedGenreSerializer
 from ..models import Genres
 from datetime import datetime, timedelta, timezone
-from ..helpers.helpers import validate_days_query_param, validate_qty_query_params
+from ..helpers import validate_days_query_param, validate_qty_query_params
 
 
 class TopPlayedGenresView(ListAPIView):

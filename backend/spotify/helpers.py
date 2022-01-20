@@ -1,9 +1,50 @@
-from ..models import UserActivity
-from datetime import timedelta
+from .models import UserActivity
+from datetime import timedelta, datetime
 from rest_framework.exceptions import ParseError
+from .models import Tracks, SearchHistory
+import logging
+
+logger = logging.getLogger("django")
 
 
-def search_spotify_song(sp, track_name, artist_name, type):
+def find_track_in_database(track_name, artist_name):
+    """
+    Just like when searching for songs on Spotify API I will try to remove the " - Remaster", " - Live", etc...
+    Here I will do the same when searching for tracks in the database.
+
+    This is used only for inserting HISTORY, since then I only have the track and artists name,
+    and have no ID.
+    """
+    # First I try searching for the exact name in the database
+    tracks = Tracks.objects.filter(name=track_name, artists__name=artist_name)
+
+    # If found, just return it
+    if tracks:
+        return tracks
+
+    # If nothing was found, maybe this exact track_name and artist_name were searched before
+    # on Spotify's search API. So I will just check for this in my search history.
+    searched = SearchHistory.objects.filter(
+        track_name=track_name, artist_name=artist_name
+    )
+
+    # If wasnt searched before
+    if not searched:
+        # Tracks is an empty queryset.
+        return tracks
+
+    # Since on the SearchHistory I store only the track sp_id (because tracks are searched before being added into the database)
+    # now I still have to use the sp_id to retrieve the Track object
+    tracks = Tracks.objects.filter(sp_id=searched[0].track_sp_id)
+
+    # Return the tracks.
+    # There is a small chance that for some reason the track_name was added to SearchHistory and not added to the database.
+    # In this case I will have gotten an empty queryset when retrieving with its sp_id.
+    # It makes complete sense to just return an empty queryset here if nothing was found.
+    return tracks
+
+
+def search_spotify_track(sp, track_name, artist_name, type):
     # This usually removes the "... - Remaster" or "...  - Live"
     non_remaster_track = track_name.split(" - ")[0]
 
@@ -11,10 +52,10 @@ def search_spotify_song(sp, track_name, artist_name, type):
     queries = [
         # Try normally forcing track name and artist name
         f"track:{track_name} artist:{artist_name}",
-        # Try without remaster
-        f"track:{non_remaster_track} artist:{artist_name}",
         # Try not forcing track/artist
         f"{track_name} {artist_name}",
+        # Try without remaster
+        f"track:{non_remaster_track} artist:{artist_name}",
         # Try with track name only
         f"track:{track_name}",
     ]
@@ -22,8 +63,15 @@ def search_spotify_song(sp, track_name, artist_name, type):
     for q in queries:
         # Try searching for the query
         track = try_searching(sp, q, type)
-        # If found, return it
         if track:
+            # If I ever find a track after searching for it,
+            # I will keep the record on my SearchHistory, so I will never
+            # have to make the same search again.
+            SearchHistory.objects.create(
+                track_name=track_name,
+                artist_name=artist_name,
+                track_sp_id=track["id"],
+            )
             return track
 
     # If not found, return None
@@ -80,6 +128,20 @@ def insert_user_activity(track, ms_played, played_at, from_import):
 
     Besides that, when tracks comes from the import the 'played_at' is calculated from the end time, which is not very precise.
     """
+
+    # I use this function both for Celery and running normally.
+    # Aparently when it comes from Celery the "played_at" is formated as string.
+    # So I will check and convert it to datetime if needed.
+    if isinstance(played_at, str):
+        try:
+            played_at = datetime.strptime(played_at, "%Y-%m-%dT%H:%M:%S.%f%z")
+        except ValueError:
+            # Some history data seems to be formated differently
+            played_at = datetime.strptime(played_at, "%Y-%m-%dT%H:%M:%S%z")
+        except Exception as e:
+            logger.error(f"Error converting played_at to datetime: {e}")
+            return
+
     incoming_activity = UserActivity(
         track=track,
         ms_played=ms_played,
@@ -89,7 +151,7 @@ def insert_user_activity(track, ms_played, played_at, from_import):
 
     artists = track.artists.all()
     artists_names = [a.name for a in artists]
-    print(f">>> Trying to insert {track.name} - {artists_names}")
+    logger.info(f"Trying to insert user activity for {track.name} - {artists_names}")
 
     # Check if there are any equivalent acitivies (more or less the same time played for the same track)
     equivalent_activities = get_equivalent_user_activities(track, played_at)
@@ -148,6 +210,9 @@ def insert_user_activity(track, ms_played, played_at, from_import):
 
     # In this case, I'll just add the incoming one to the database.
     # This probably happened because the track was very short.
+    logger.info(
+        f"Track {track.name} sp_id {track.sp_id} played for {ms_played} at {played_at} got to the last point when inserting User Activity."
+    )
     incoming_activity.save()
 
 
@@ -169,3 +234,38 @@ def validate_qty_query_params(qty):
     if qty < 0:
         raise ParseError("qty must be positive")
     return qty
+
+
+def unpack_response_images(imgs_resp):
+    """
+    This is going to unpack all the images URL from the spotify response
+    and order it into image_sm, image_md, image_lg.
+
+    It's going to be used for both artists and album.
+    """
+    # Start all values at none
+    image_sm, image_md, image_lg = None, None, None
+
+    data = []
+
+    for img_data in imgs_resp:
+        # As far as I know, all images are square on spotify. So I'll just store one dimension.
+        height = img_data.get("height")
+        url = img_data.get("url")
+        data.append((height, url))
+
+    # Sort the data by height, from lower to higher
+    data.sort(key=lambda x: x[0])
+
+    # Remove any tuple in Data if one of the values (height or url) is None
+    data = [x for x in data if x[0] and x[1]]
+
+    # Assign the images to the variables
+    if data:
+        image_sm = data[0][1]
+        if len(data) > 1:
+            image_md = data[1][1]
+            if len(data) > 2:
+                image_lg = data[2][1]
+
+    return image_sm, image_md, image_lg

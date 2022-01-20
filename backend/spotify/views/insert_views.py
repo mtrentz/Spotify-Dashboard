@@ -4,32 +4,20 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from datetime import datetime, timedelta
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
 import pytz
 import json
-from ..models import Tracks, UserActivity
+from ..models import UserActivity
 from ..serializers.insert_serializers import (
     TrackEntrySerializer,
     HistoryFileSerializer,
     HistoryEntrySerializer,
 )
-from ..helpers.helpers import search_spotify_song, insert_user_activity
+from ..helpers import insert_user_activity, find_track_in_database
 from .auth_views import BaseAuthView
+from ..tasks import search_track_insert_entry, insert_track_entry
+import logging
 
-# Dev only
-from dotenv import load_dotenv
-
-
-class TrackEntryView(APIView):
-    def post(self, request):
-        serializer = TrackEntrySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {"Success": "Track added to database"}, status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+logger = logging.getLogger("django")
 
 
 class ImportStreamingHistoryView(APIView):
@@ -38,11 +26,8 @@ class ImportStreamingHistoryView(APIView):
         serializer = HistoryFileSerializer(data=request.data)
 
         if not serializer.is_valid():
+            logger.error(serializer.errors)
             raise ValidationError(serializer.errors)
-
-        # Load environment variable
-        load_dotenv()
-        sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
         # Accepts multiple streaming history files
         file_list = request.data.getlist("file")
@@ -56,13 +41,11 @@ class ImportStreamingHistoryView(APIView):
             raise ValidationError(f"Invalid Streaming History JSON file; {e}")
 
         for data in data_list:
-            print(data)
-            continue
             history_entry_serializer = HistoryEntrySerializer(data=data)
 
-            # If not valid for some reason, just continue to next iteration
+            # If not valid for some reason, I print error and continue
             if not history_entry_serializer.is_valid():
-                # TODO: Maybe should just throw error here
+                logger.warning(history_entry_serializer.errors)
                 continue
 
             # Won't let duplicates be added into Streaming History
@@ -79,69 +62,52 @@ class ImportStreamingHistoryView(APIView):
             # Pass it to UTC
             played_at = played_at.replace(tzinfo=pytz.UTC)
 
-            tracks = Tracks.objects.filter(name=track_name, artists__name=artist_name)
-            # If track was already in the database, just add to UserActivity
+            # Here I try looking for the track in the database in diferent ways than just name matching.
+            tracks = find_track_in_database(
+                track_name=track_name, artist_name=artist_name
+            )
+            # If track was already in the database, just add to UserActivity and go to next iteration
             if tracks.exists():
                 track = tracks.first()
 
-                # Will check if not already in UserActivity
+                # Will check if not already in UserActivity also
                 insert_user_activity(
                     track=track,
                     played_at=played_at,
                     ms_played=ms_played,
                     from_import=True,
                 )
-                # TODO: Add continue here so I don't have to indent next part
+                continue
 
-            # TODO: Here is where I will send to celery, since this part depends on the Spotify API and takes a while.
-            # If not, search it on Spotify, and get all necessary data to send it to TrackEntrySerializer
-            # which will also add it to user activity.
-            else:
-                # Searching song name and artist in spotify to get all the info needed.
-                track_resp = search_spotify_song(sp, track_name, artist_name, "track")
-
-                # If not found song on spotify, continue to next iteration
-                if not track_resp:
-                    continue
-
-                artists = track_resp.get("artists")
-                artists_sp_ids = [a.get("id") for a in artists]
-
-                track_entry_data = {
-                    "album_sp_id": track_resp.get("album").get("id"),
-                    "artists_sp_ids": artists_sp_ids,
-                    "track_sp_id": track_resp.get("id"),
-                    "track_name": track_resp.get("name"),
-                    "track_duration": track_resp.get("duration_ms"),
-                    "track_popularity": track_resp.get("popularity"),
-                    "track_explicit": track_resp.get("explicit"),
-                    "track_number": track_resp.get("track_number"),
-                    "track_disc_number": track_resp.get("disc_number"),
-                    "track_type": track_resp.get("type"),
-                    # Pass the data from history
-                    "played_at": played_at,
-                    "ms_played": ms_played,
-                    "from_import": True,
-                }
-
-                # This adds complete info to tracks/albums/etc...
-                # But also saves to UserActivity!
-                track_entry_serializer = TrackEntrySerializer(data=track_entry_data)
-                if track_entry_serializer.is_valid():
-                    # TODO: Here is where the heavy api-calling is
-                    track_entry_serializer.save()
+            # Here I have to search the spotify API for the tracks song,
+            # to find a proper match. After its found, I still have to query it
+            # again for Album + Artist data. Which means that it takes a lot of time.
+            # For this reason, here I will be sending this to Celery, to run it in the background.
+            search_track_insert_entry.delay(
+                track_name, artist_name, played_at, ms_played, from_import=True
+            )
 
         return Response(
-            {"Success": "History added to database"}, status=status.HTTP_201_CREATED
+            {"Success": "History is being added into the database."},
+            status=status.HTTP_201_CREATED,
         )
 
 
 class RecentlyPlayedView(BaseAuthView):
     """
-    This view servers just a way of calling the get_recently_played method.
+    The main purpose of this View is having a method that I can call on my scheduler.
 
     Done this way to properly inherit from BaseAuthView.
+
+    Also has a post method that can be called from frontend to force a refresh of the recently played tracks.
     """
+
+    def post(self, request):
+        self.insert_recently_played()
+        return Response(
+            {"Success": "Your recently played tracks are being added to the database."},
+            status=status.HTTP_201_CREATED,
+        )
 
     def insert_recently_played(self):
         """
@@ -163,12 +129,6 @@ class RecentlyPlayedView(BaseAuthView):
                 if UserActivity.objects.filter(
                     track__sp_id=track_sp_id, played_at=played_at
                 ).exists():
-                    # # If there is, just BREAK THE LOOP.
-                    # # Because if this entry was already added, all the following (older) will be already added in the db.
-                    # # Also sets querying_new_songs to False, so the while loop will stop.
-                    # querying_new_songs = False
-                    # break
-                    # TODO: See how i'm gonna use this in the future. If i'll break to not query older songs, or I will just continue
                     continue
 
                 # Get the list of artists
@@ -194,14 +154,16 @@ class RecentlyPlayedView(BaseAuthView):
                 }
 
                 serializer = TrackEntrySerializer(data=track_entry_data)
-                # TODO: Heavy API call here. Send it to celery?
+
                 if serializer.is_valid():
-                    serializer.save()
+                    # If the serializer is valid, I'll send the track entry data
+                    # to a celery task, which will run everything in the
+                    # background.
+                    insert_track_entry.delay(track_entry_data)
 
             # If it got here without "query_new_songs" being set to False, it means that there are more songs to be queried
             if recently_played["next"]:
-                # PS: This seems to not work. Spotify seems to always return an empty list
-                # So queries next page of songs, and start looping again
+                # PS: This seems to not work. Spotify seems to always return an empty list.
                 recently_played = self.sp.next(recently_played)
             else:
                 # If there were no "next" in response, then just stop the while loop
