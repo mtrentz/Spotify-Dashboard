@@ -94,9 +94,13 @@ const TimePlayedChart = () => {
     setPeriod(e.target.text);
   };
 
+  const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   useEffect(() => {
     api
-      .get("/time-played/", { params: { days: periodOptions[period] } })
+      .get("/time-played/", {
+        params: { days: periodOptions[period], timezone: browserTimezone },
+      })
       .then((res) => {
         setTimePlayedData(res.data);
         updateGraphStatus(res.data);
