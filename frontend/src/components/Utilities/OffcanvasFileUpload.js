@@ -21,8 +21,13 @@ const OffcanvasFileUpload = () => {
     for (const file of values.file) {
       formData.append("file", file);
     }
+
+    // It takes a while to process the files.
+    // For this reason I'm setting a timeout of 10s per file
+    const timeOut = files.length * 10000;
+
     api
-      .post("/history/", formData)
+      .post("/history/", formData, { timeout: timeOut })
       .then((res) => {
         console.log(res);
         addNotification({
@@ -66,7 +71,7 @@ const OffcanvasFileUpload = () => {
         <div className="markdown">
           <p>
             To upload your past listening activity from spotify you first need
-            to request it through the official spotify website.
+            to request it through the official Spotify website.
           </p>
           <p>
             You can then upload all <strong>streaming_history.json</strong>{" "}

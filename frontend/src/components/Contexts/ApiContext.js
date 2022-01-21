@@ -8,7 +8,7 @@ export default ApiContext;
 export const ApiProvider = ({ children }) => {
   const api = axios.create({
     baseURL: "http://localhost:8000/api/spotify",
-    timeout: 1000,
+    timeout: 10000,
   });
 
   const contextData = {

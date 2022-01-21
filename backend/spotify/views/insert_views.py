@@ -1,10 +1,7 @@
 from rest_framework.views import APIView
-
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError, PermissionDenied
-from datetime import datetime, timedelta
-import pytz
 import json
 from ..models import UserActivity
 from ..serializers.insert_serializers import (
@@ -12,12 +9,10 @@ from ..serializers.insert_serializers import (
     HistoryFileSerializer,
     HistoryEntrySerializer,
 )
-from ..helpers import insert_user_activity, find_track_in_database
 from .auth_views import BaseAuthView
 from ..tasks import (
-    search_track_insert_entry,
     insert_track_entry,
-    insert_track_from_history,
+    insert_track_batch_from_history,
 )
 import logging
 
@@ -44,6 +39,11 @@ class ImportStreamingHistoryView(APIView):
         except Exception as e:
             raise ValidationError(f"Invalid Streaming History JSON file; {e}")
 
+        # I'll send the data to Celery, to run in the background,
+        # in batches. This is because it takes too long to create
+        # one Task per entry.
+        batch = []
+
         for data in data_list:
             history_entry_serializer = HistoryEntrySerializer(data=data)
 
@@ -55,18 +55,23 @@ class ImportStreamingHistoryView(APIView):
             # Won't let duplicates be added into Streaming History
             history_entry_serializer.save()
 
-            # TODO: Pq ainda demora? O celery demora pra receber as tasks
-            # Ver se tem como juntar em uns bundles e mandar só de vez em qnd
-
-            insert_track_from_history.apply_async(
-                kwargs={
+            batch.append(
+                {
                     "track_name": data.get("trackName"),
                     "artist_name": data.get("artistName"),
                     "end_time": data.get("endTime"),
                     "ms_played": data.get("msPlayed"),
-                },
-                countdown=10,
+                }
             )
+
+            # Send to celery every 200
+            if len(batch) >= 200:
+                insert_track_batch_from_history.apply_async(args=[batch], countdown=5)
+                batch = []
+
+        # Send the remaining tracks
+        if batch:
+            insert_track_batch_from_history.apply_async(args=[batch], countdown=5)
 
         return Response(
             {"Success": "History is being added into the database."},
@@ -113,6 +118,8 @@ class RecentlyPlayedView(BaseAuthView):
                 track = item.get("track")
                 played_at = item.get("played_at")
                 track_sp_id = track.get("id")
+
+                # TODO: Offload these to the background?
 
                 # Check if there is already an exact entry for this song on the database
                 if UserActivity.objects.filter(

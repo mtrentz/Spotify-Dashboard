@@ -195,12 +195,39 @@ def insert_track_entry(track_entry_data):
 
 
 @shared_task(base=LogErrorsTask)
+def insert_track_batch_from_history(batch):
+    """
+    This serves just as a wrapper for the insert_track_from_history function.
+
+    Since executing one Task is too intensive for celery/redis,
+    doing this is batches proved to be way faster.
+    """
+    for data in batch:
+        insert_track_from_history(
+            track_name=data["track_name"],
+            artist_name=data["artist_name"],
+            end_time=data["end_time"],
+            ms_played=data["ms_played"],
+        )
+
+
+@shared_task(base=LogErrorsTask)
 def insert_track_from_history(
     track_name,
     artist_name,
     end_time,
     ms_played,
 ):
+    """
+    This function will get everything needed to insert a track into the database
+    from the track name, history name, end time and miliseconds played
+    which are the info that the spotify history provides.
+
+    It will first check for an existing track in the database,
+    if there aren't any, it will query the spotify API for all the
+    info needed.
+    """
+
     # Neeed to calculate 'played_at' if I want to add to UserActivity
     end_time_dt = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
     played_at = end_time_dt - timedelta(milliseconds=ms_played)
@@ -260,59 +287,6 @@ def insert_track_from_history(
         "played_at": played_at,
         "ms_played": ms_played,
         "from_import": True,
-    }
-
-    # Check if track_entry_data is valid before sending to the add task
-    serializer = TrackEntrySerializer(data=track_entry_data)
-    if not serializer.is_valid():
-        raise ValidationError(serializer.errors)
-
-    # Now that I have the full track entry data, send it to the insert_track_entry task.
-    # Won't call .delay in this task because I want to run it sequentially.
-    insert_track_entry(track_entry_data)
-
-
-@shared_task(base=LogErrorsTask)
-def search_track_insert_entry(
-    track_name, artist_name, played_at, ms_played, from_import
-):
-    """
-    This function will make a request to Spotify's API.
-
-    Because of this, it will run in the background. It will then search for the track on Spotify,
-    and after it's found, it will run the insert_track_entry task (but sequentially, just after this one)
-    to request the artists + album and insert everything into the database.
-    """
-
-    load_dotenv()
-    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-
-    # Search song on Spotify
-    track_resp = search_spotify_track(sp, track_name, artist_name, "track")
-
-    # If not found song on spotify, exits
-    if not track_resp:
-        logger.debug(f"No track found when searching for {track_name} by {artist_name}")
-        return
-
-    artists = track_resp.get("artists")
-    artists_sp_ids = [a.get("id") for a in artists]
-
-    track_entry_data = {
-        "album_sp_id": track_resp.get("album").get("id"),
-        "artists_sp_ids": artists_sp_ids,
-        "track_sp_id": track_resp.get("id"),
-        "track_name": track_resp.get("name"),
-        "track_duration": track_resp.get("duration_ms"),
-        "track_popularity": track_resp.get("popularity"),
-        "track_explicit": track_resp.get("explicit"),
-        "track_number": track_resp.get("track_number"),
-        "track_disc_number": track_resp.get("disc_number"),
-        "track_type": track_resp.get("type"),
-        # Pass the data from history
-        "played_at": played_at,
-        "ms_played": ms_played,
-        "from_import": from_import,
     }
 
     # Check if track_entry_data is valid before sending to the add task
