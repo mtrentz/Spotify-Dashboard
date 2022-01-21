@@ -55,6 +55,9 @@ class TimePlayedView(RetrieveAPIView):
         In case there isn't enough data, only then will return less than that amount of data points.
         """
         # TODO: Não tenho 100% de ctz que ta lidando certo com timezone pro date range
+        # TODO: Utilizar Trunc() só, e deixar escolher day/week/month pra truncar.
+        # Ou fazer automatico pelo numero de dias. If days > x, trunc week etc...
+        # Tem que ver como o grafico do frontend lida com isso
 
         # How many data points to include. Defaults to 7, func will raise for errors
         days = validate_days_query_param(self.request.query_params.get("days", 7))

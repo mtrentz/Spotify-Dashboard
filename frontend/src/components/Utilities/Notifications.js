@@ -1,8 +1,17 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import NotificationContext from "../Contexts/NotificationContext";
 
 const Notifications = () => {
   const { notifications, removeNotification } = useContext(NotificationContext);
+
+  // Remove notifications after a certain amount of time
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      removeNotification(notifications[0]);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [notifications, removeNotification]);
 
   //   Logic here is to show only the first notification on the list
   return (
