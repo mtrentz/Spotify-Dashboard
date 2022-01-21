@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 from rest_framework.exceptions import ParseError
 from .models import Tracks, SearchHistory
 import logging
+import pytz
 
 logger = logging.getLogger("django")
 
@@ -234,6 +235,13 @@ def validate_qty_query_params(qty):
     if qty < 0:
         raise ParseError("qty must be positive")
     return qty
+
+
+def validate_timezone_query_params(tz_name):
+    if tz_name not in pytz.all_timezones:
+        logger.warning(f"Invalid timezone: {tz_name}")
+        return "UTC"
+    return tz_name
 
 
 def unpack_response_images(imgs_resp):

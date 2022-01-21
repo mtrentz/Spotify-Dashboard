@@ -69,7 +69,7 @@ class UniqueTracksView(RetrieveAPIView):
         )
 
         # To return the growth, calculate the unique count from the same number of days in the period just before.
-        # The start of this one is at the end of the past one
+        # The start of the current one is at the end of the past one
         previous_date_end = date_start
         previous_date_start = previous_date_end - timedelta(days=days)
 

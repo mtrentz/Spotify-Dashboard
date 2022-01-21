@@ -4,9 +4,19 @@ from ..serializers.user_activity_serializers import (
     TimePlayedSerializer,
 )
 from ..models import UserActivity
-from ..helpers import validate_qty_query_params, validate_days_query_param
+from ..helpers import (
+    validate_qty_query_params,
+    validate_days_query_param,
+    validate_timezone_query_params,
+)
 from django.db.models import Sum
 from django.db.models.functions import TruncDay
+from django.utils import timezone
+from datetime import datetime, timedelta
+import pytz
+import logging
+
+logger = logging.getLogger("django")
 
 
 class RecentUserActivityView(ListAPIView):
@@ -44,63 +54,77 @@ class TimePlayedView(RetrieveAPIView):
         If the query param for days is 10, it will try to return the 10 latests days on the database.
         In case there isn't enough data, only then will return less than that amount of data points.
         """
-        # TODO: Talvez tenha que lidar diferente com a timezone aqui
+        # TODO: Não tenho 100% de ctz que ta lidando certo com timezone pro date range
 
         # How many data points to include. Defaults to 7, func will raise for errors
         days = validate_days_query_param(self.request.query_params.get("days", 7))
+        # Timezone from the client request, defaults to UTC. If name invalid, also defaults to UTC
+        tz_name = validate_timezone_query_params(
+            self.request.query_params.get("timezone", "UTC")
+        )
 
+        tzinfo = pytz.timezone(tz_name)
+
+        date_now = datetime.now(tzinfo)
+        date_start = date_now - timedelta(days=days)
+
+        # Here I have the amount played day by day in the current period.
         time_played_by_day = (
             UserActivity.objects
+            # Filter by range
+            .filter(played_at__range=[date_start, date_now])
             # Truncate by day
-            .annotate(day=TruncDay("played_at"))
+            .annotate(day=TruncDay("played_at", tzinfo=tzinfo))
             # Get the values for each day
             .values("day")
             # Sum the ms_played for each day
             .annotate(time_played_ms=Sum("ms_played"))
-            # Order so the newest is first
-            .order_by("-day")
-            # Limit to the amount of days requested times two (so I can compare to previous period)
-            [: days * 2]
+            # Order so the oldest is first
+            .order_by("day")
         )
-        # Here I will invert the data, so the newest is last (order of graph used in frontend)
-        time_played_by_day = time_played_by_day[::-1]
+
+        # Sum the ms_played for the current period
+        ms_played_current = time_played_by_day.aggregate(Sum("time_played_ms"))[
+            "time_played_ms__sum"
+        ]
+
+        if not ms_played_current:
+            ms_played_current = 0
+
+        # To return the growth, i'll ned to do this ms_played sum in the past period
+        previous_date_end = date_start
+        previous_date_start = previous_date_end - timedelta(days=days)
+
+        ms_played_previous = (
+            UserActivity.objects
+            # Filter by range
+            .filter(played_at__range=[previous_date_start, previous_date_end])
+            # Aggregate the sum
+            .aggregate(Sum("ms_played"))
+        )["ms_played__sum"]
 
         # Items is going to be a list of objects {'date': date, 'minutes_played': int}
-        all_items = []
+        items = []
 
         for obj in time_played_by_day:
-            all_items.append(
+            items.append(
                 {
                     "date": obj["day"].strftime("%Y-%m-%d"),
                     "minutes_played": obj["time_played_ms"] / 60_000,
                 }
             )
 
-        # Now I want to separate the items in two lists, one for the current period (most recent) and one for the previous one, for comparison.
-        # The most recent data is at the end of the list
-        current_items = all_items[-days:]
-        previous_items = all_items[:-days]
-
-        # Now getting the total minutes played of the current period
-        total_minutes_played = sum([item["minutes_played"] for item in current_items])
-
-        # To calculate the growth, I will sum the minutes played of the previous period
-        previous_total_minutes_played = sum(
-            [item["minutes_played"] for item in previous_items]
-        )
-
         # In case there was no data for previous period, I will set growth to 0
-        if previous_total_minutes_played:
-            growth = (
-                total_minutes_played - previous_total_minutes_played
-            ) / previous_total_minutes_played
+        if ms_played_previous:
+            growth = (ms_played_current - ms_played_previous) / ms_played_previous
         else:
             growth = 0
 
         queryset = {
-            "items": current_items,
-            "total_minutes_played": total_minutes_played,
+            "items": items,
+            "total_minutes_played": ms_played_current / 60_000,
             "growth": round(growth, 2),
+            "tz_name": tz_name,
         }
 
         return queryset
