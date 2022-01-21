@@ -19,8 +19,6 @@ export const generateTrendComponent = (growth) => {
     percentageString = `${percentage.toFixed(0)}%`;
   }
 
-  // TODO: Consider if negative percentages should have a minus sign.
-
   if (percentage > sidewaysThreshold) {
     return <TrendingUp value={percentageString} />;
   } else if (percentage < -sidewaysThreshold) {

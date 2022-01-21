@@ -14,7 +14,11 @@ from ..serializers.insert_serializers import (
 )
 from ..helpers import insert_user_activity, find_track_in_database
 from .auth_views import BaseAuthView
-from ..tasks import search_track_insert_entry, insert_track_entry
+from ..tasks import (
+    search_track_insert_entry,
+    insert_track_entry,
+    insert_track_from_history,
+)
 import logging
 
 logger = logging.getLogger("django")
@@ -51,40 +55,17 @@ class ImportStreamingHistoryView(APIView):
             # Won't let duplicates be added into Streaming History
             history_entry_serializer.save()
 
-            track_name = data.get("trackName")
-            artist_name = data.get("artistName")
-            end_time = data.get("endTime")
-            ms_played = data.get("msPlayed")
+            # TODO: Pq ainda demora? O celery demora pra receber as tasks
+            # Ver se tem como juntar em uns bundles e mandar só de vez em qnd
 
-            # Neeed to calculate 'played_at' if I want to add to UserActivity
-            end_time_dt = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
-            played_at = end_time_dt - timedelta(milliseconds=ms_played)
-            # Pass it to UTC
-            played_at = played_at.replace(tzinfo=pytz.UTC)
-
-            # Here I try looking for the track in the database in diferent ways than just name matching.
-            tracks = find_track_in_database(
-                track_name=track_name, artist_name=artist_name
-            )
-            # If track was already in the database, just add to UserActivity and go to next iteration
-            if tracks.exists():
-                track = tracks.first()
-
-                # Will check if not already in UserActivity also
-                insert_user_activity(
-                    track=track,
-                    played_at=played_at,
-                    ms_played=ms_played,
-                    from_import=True,
-                )
-                continue
-
-            # Here I have to search the spotify API for the tracks song,
-            # to find a proper match. After its found, I still have to query it
-            # again for Album + Artist data. Which means that it takes a lot of time.
-            # For this reason, here I will be sending this to Celery, to run it in the background.
-            search_track_insert_entry.delay(
-                track_name, artist_name, played_at, ms_played, from_import=True
+            insert_track_from_history.apply_async(
+                kwargs={
+                    "track_name": data.get("trackName"),
+                    "artist_name": data.get("artistName"),
+                    "end_time": data.get("endTime"),
+                    "ms_played": data.get("msPlayed"),
+                },
+                countdown=10,
             )
 
         return Response(
@@ -115,7 +96,6 @@ class RecentlyPlayedView(BaseAuthView):
         For new songs, send it to TrackEntrySerializer, where all data needed will be requested and then stored to UserActivity
         """
 
-        # TODO: Check for error here
         try:
             recently_played = self.sp.current_user_recently_played(limit=50)
         except Exception as e:

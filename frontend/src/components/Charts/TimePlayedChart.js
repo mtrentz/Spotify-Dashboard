@@ -44,11 +44,11 @@ const TimePlayedChart = () => {
       grid: {
         strokeDashArray: 4,
       },
-      // Check if its gonna look ugly when I have a lot of data
-      markers: {
-        size: 2,
-        strokeWidth: 1,
-      },
+      // // Check if its gonna look ugly when I have a lot of data
+      // markers: {
+      //   size: 2,
+      //   strokeWidth: 1,
+      // },
       xaxis: {
         labels: {
           padding: 0,

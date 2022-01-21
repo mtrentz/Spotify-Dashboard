@@ -2,11 +2,17 @@ from celery import shared_task, Task
 from django.forms import ValidationError
 from .serializers.insert_serializers import TrackEntrySerializer
 from .models import Artists, Genres, Albums, Tracks
-from .helpers import search_spotify_track, insert_user_activity, unpack_response_images
+from .helpers import (
+    search_spotify_track,
+    insert_user_activity,
+    unpack_response_images,
+    find_track_in_database,
+)
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from rest_framework.exceptions import NotFound, ValidationError
-from datetime import datetime
+from datetime import datetime, timedelta
+import pytz
 import logging
 
 logger = logging.getLogger("django")
@@ -186,6 +192,84 @@ def insert_track_entry(track_entry_data):
         ms_played=ms_played,
         from_import=from_import,
     )
+
+
+@shared_task(base=LogErrorsTask)
+def insert_track_from_history(
+    track_name,
+    artist_name,
+    end_time,
+    ms_played,
+):
+    # Neeed to calculate 'played_at' if I want to add to UserActivity
+    end_time_dt = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
+    played_at = end_time_dt - timedelta(milliseconds=ms_played)
+    # Pass it to UTC
+    played_at = played_at.replace(tzinfo=pytz.UTC)
+
+    # Here I try looking for the track in the database in diferent ways than just name matching.
+    tracks = find_track_in_database(track_name=track_name, artist_name=artist_name)
+
+    # If track was already in the database, just add to UserActivity
+    if tracks.exists():
+        track = tracks.first()
+
+        # Will check if not already in UserActivity also
+        try:
+            insert_user_activity(
+                track=track,
+                played_at=played_at,
+                ms_played=ms_played,
+                from_import=True,
+            )
+        except Exception as e:
+            logger.error(
+                f"Error inserting UserActivity for track {track.sp_id} played at {played_at}: {e}"
+            )
+        return
+
+    # If not, I will try to find it in Spotify
+
+    # TODO: Tirar isso no futuro
+    load_dotenv()
+    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+
+    # Search song on Spotify
+    track_resp = search_spotify_track(sp, track_name, artist_name, "track")
+
+    # If not found song on spotify, exits
+    if not track_resp:
+        logger.debug(f"No track found when searching for {track_name} by {artist_name}")
+        return
+
+    artists = track_resp.get("artists")
+    artists_sp_ids = [a.get("id") for a in artists]
+
+    track_entry_data = {
+        "album_sp_id": track_resp.get("album").get("id"),
+        "artists_sp_ids": artists_sp_ids,
+        "track_sp_id": track_resp.get("id"),
+        "track_name": track_resp.get("name"),
+        "track_duration": track_resp.get("duration_ms"),
+        "track_popularity": track_resp.get("popularity"),
+        "track_explicit": track_resp.get("explicit"),
+        "track_number": track_resp.get("track_number"),
+        "track_disc_number": track_resp.get("disc_number"),
+        "track_type": track_resp.get("type"),
+        # Pass the data from history
+        "played_at": played_at,
+        "ms_played": ms_played,
+        "from_import": True,
+    }
+
+    # Check if track_entry_data is valid before sending to the add task
+    serializer = TrackEntrySerializer(data=track_entry_data)
+    if not serializer.is_valid():
+        raise ValidationError(serializer.errors)
+
+    # Now that I have the full track entry data, send it to the insert_track_entry task.
+    # Won't call .delay in this task because I want to run it sequentially.
+    insert_track_entry(track_entry_data)
 
 
 @shared_task(base=LogErrorsTask)

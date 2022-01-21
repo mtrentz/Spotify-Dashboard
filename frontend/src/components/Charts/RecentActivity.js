@@ -4,9 +4,11 @@ import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 
 import ApiContext from "../Contexts/ApiContext";
+import NotificationContext from "../Contexts/NotificationContext";
 
 const RecentActivity = () => {
   const { api } = useContext(ApiContext);
+  const { addNotification } = useContext(NotificationContext);
 
   const [recentlyPlayedData, setRecentlyPlayedData] = useState([]);
   const [refreshed, setRefreshed] = useState(false);
@@ -51,12 +53,24 @@ const RecentActivity = () => {
     api
       .post("/refresh-recently-played/")
       .then((res) => {
+        // Add a alert that the request its being refreshed
+        addNotification({
+          type: "info",
+          msg: "Updating...",
+          msg_muted: "Try refreshing the page if nothing happens.",
+        });
         // Change state so the other useEffect runs
-        // wait 2 seconds so API has time to update
-        setInterval(() => setRefreshed(!refreshed), 2000);
+        // wait few seconds so API has time to update
+        setInterval(() => setRefreshed(!refreshed), 3000);
       })
       .catch((err) => {
         console.log(err);
+        addNotification({
+          type: "danger",
+          msg: "Something went wrong!",
+          msg_muted:
+            "Check if you authorized the app to access your Spotify data.",
+        });
       });
   };
 

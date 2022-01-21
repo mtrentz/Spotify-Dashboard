@@ -1,10 +1,12 @@
-import React, { useRef, useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import ApiContext from "../Contexts/ApiContext";
+import NotificationContext from "../Contexts/NotificationContext";
 
 const OffcanvasFileUpload = () => {
   const { api } = useContext(ApiContext);
+  const { addNotification } = useContext(NotificationContext);
 
   const { register, handleSubmit, getValues } = useForm();
   const [files, setFiles] = useState(0);
@@ -23,9 +25,19 @@ const OffcanvasFileUpload = () => {
       .post("/history/", formData)
       .then((res) => {
         console.log(res);
+        addNotification({
+          type: "success",
+          msg: "Successfully uploaded files!",
+          msg_muted: "It might take a while for everything to update.",
+        });
       })
       .catch((err) => {
         console.log(err.response);
+        addNotification({
+          type: "danger",
+          msg: "Something went wrong!",
+          msg_muted: "Are you sure you uploaded the correct files?",
+        });
       });
   };
 

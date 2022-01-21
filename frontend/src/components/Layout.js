@@ -5,6 +5,7 @@ import ApiContext from "./Contexts/ApiContext";
 import OffcanvasFileUpload from "./Utilities/OffcanvasFileUpload";
 import UploadHistoryButton from "./Utilities/UploadHistoryButton";
 import AuthorizeButton from "./Utilities/AuthorizeButton";
+import Notifications from "./Utilities/Notifications";
 
 const Layout = ({ children }) => {
   const { api } = useContext(ApiContext);
@@ -262,6 +263,7 @@ const Layout = ({ children }) => {
       </div>
       <div className="page-wrapper"> {children} </div>
       <OffcanvasFileUpload />
+      <Notifications />
     </div>
   );
 };
