@@ -10,6 +10,10 @@ class SimpleUserActivitySerializer(serializers.Serializer):
     ms_played = serializers.IntegerField()
 
 
+class AvailableYearsSerializer(serializers.Serializer):
+    year = serializers.IntegerField()
+
+
 class TimePlayedDateSerializer(serializers.Serializer):
     date = serializers.DateField()
     minutes_played = serializers.IntegerField()

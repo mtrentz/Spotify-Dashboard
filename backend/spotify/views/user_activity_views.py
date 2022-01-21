@@ -1,5 +1,6 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from ..serializers.user_activity_serializers import (
+    AvailableYearsSerializer,
     SimpleUserActivitySerializer,
     TimePlayedSerializer,
 )
@@ -10,7 +11,7 @@ from ..helpers import (
     validate_timezone_query_params,
 )
 from django.db.models import Sum
-from django.db.models.functions import TruncDay
+from django.db.models.functions import TruncDay, TruncYear
 from django.utils import timezone
 from datetime import datetime, timedelta
 import pytz
@@ -135,4 +136,30 @@ class TimePlayedView(RetrieveAPIView):
     def get_object(self):
         # Overrides the method that requires a pk
         queryset = self.get_queryset()
+        return queryset
+
+
+class AvailableYearsView(ListAPIView):
+    "Returns the years available for the user activity"
+    serializer_class = AvailableYearsSerializer
+
+    def get_queryset(self):
+
+        # Defaults to UTC if not any (or invalid) is provided
+        tz_name = validate_timezone_query_params(
+            self.request.query_params.get("timezone", "UTC")
+        )
+        tzinfo = pytz.timezone(tz_name)
+
+        items = (
+            UserActivity.objects.annotate(year=TruncYear("played_at", tzinfo=tzinfo))
+            .values("year")
+            .distinct("year")
+        )
+
+        if items:
+            queryset = [{"year": i["year"].year} for i in items]
+        else:
+            queryset = []
+
         return queryset

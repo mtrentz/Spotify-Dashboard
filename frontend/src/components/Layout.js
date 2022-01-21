@@ -6,17 +6,32 @@ import OffcanvasFileUpload from "./Utilities/OffcanvasFileUpload";
 import UploadHistoryButton from "./Utilities/UploadHistoryButton";
 import AuthorizeButton from "./Utilities/AuthorizeButton";
 import Notifications from "./Utilities/Notifications";
+import Footer from "./Footer";
 
 const Layout = ({ children }) => {
   const { api } = useContext(ApiContext);
 
   const [isAuthorized, setIsAuthorized] = useState(true);
+  const [years, setYears] = useState([]);
+
+  const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   useEffect(() => {
+    // Request Authorization Status
     api
       .get("/is-authorized/")
       .then((res) => {
         setIsAuthorized(res.data.is_authorized);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    // Request Available Years
+    api
+      .get("/available-years/", { timezone: browserTimezone })
+      .then((res) => {
+        setYears(res.data.map((year) => year.year).reverse());
       })
       .catch((err) => {
         console.log(err);
@@ -106,7 +121,7 @@ const Layout = ({ children }) => {
                 </li>
 
                 <li className="nav-item">
-                  <a className="nav-link" href="./docs/index.html">
+                  <a className="nav-link disabled" href="./docs/index.html">
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -135,7 +150,7 @@ const Layout = ({ children }) => {
                   </a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="./docs/index.html">
+                  <a className="nav-link disabled" href="./docs/index.html">
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -164,7 +179,7 @@ const Layout = ({ children }) => {
                   </a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="./docs/index.html">
+                  <a className="nav-link disabled" href="./docs/index.html">
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -230,18 +245,34 @@ const Layout = ({ children }) => {
                   <div class="dropdown-menu">
                     <div class="dropdown-menu-columns">
                       <div class="dropdown-menu-column">
-                        <a class="dropdown-item" href="./empty.html">
+                        {years
+                          ? years.map((year, index) => {
+                              return (
+                                <a
+                                  key={index}
+                                  class="dropdown-item disabled"
+                                  href="./empty.html"
+                                >
+                                  {year}
+                                </a>
+                              );
+                            })
+                          : null}
+                        {/* <a class="dropdown-item disabled" href="./empty.html">
                           2022
                         </a>
-                        <a class="dropdown-item" href="./accordion.html">
+                        <a
+                          class="dropdown-item disabled"
+                          href="./accordion.html"
+                        >
                           2021
                         </a>
-                        <a class="dropdown-item" href="./blank.html">
+                        <a class="dropdown-item disabled" href="./blank.html">
                           2020
                         </a>
-                        <a class="dropdown-item" href="./buttons.html">
+                        <a class="dropdown-item disabled" href="./buttons.html">
                           2019
-                        </a>
+                        </a> */}
                       </div>
                     </div>
                   </div>
@@ -264,6 +295,7 @@ const Layout = ({ children }) => {
       <div className="page-wrapper"> {children} </div>
       <OffcanvasFileUpload />
       <Notifications />
+      <Footer />
     </div>
   );
 };

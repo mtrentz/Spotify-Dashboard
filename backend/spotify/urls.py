@@ -1,7 +1,11 @@
 from django.urls import path
 from .views.insert_views import ImportStreamingHistoryView, RecentlyPlayedView
 from .views.track_views import TopPlayedTracksView, UniqueTracksView
-from .views.user_activity_views import RecentUserActivityView, TimePlayedView
+from .views.user_activity_views import (
+    RecentUserActivityView,
+    TimePlayedView,
+    AvailableYearsView,
+)
 from .views.artist_views import TopPlayedArtistsView, UniqueArtistsView
 from .views.album_views import UniqueAlbumsViews
 from .views.genres_views import TopPlayedGenresView
@@ -22,6 +26,7 @@ urlpatterns = [
     # USER ACTIVITY
     path("recently-played/", RecentUserActivityView.as_view(), name="recently_played"),
     path("time-played/", TimePlayedView.as_view(), name="time_played"),
+    path("available-years/", AvailableYearsView.as_view(), name="available_years"),
     # ARTISTS
     path("unique-artists/", UniqueArtistsView.as_view(), name="unique_artists"),
     path(
