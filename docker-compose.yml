@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  # redis:
+  #   image: redis
+  #   container_name: spotify_redis
+  #   # TODO: Remover isso, nao vai precisar
+  #   ports:
+  #     - 6666:6379
+
+  db:
+    image: postgres:13.5-alpine
+    container_name: spotify_postgres
+    ports:
+      - 5555:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PG_DATA: /tmp
+    volumes:
+      - abab:/var/lib/postgresql/xdxd
+      # - ./backend/data/postgres:/var/lib/postgresql/data/spotify
+
+  # api:
+  #   build:
+  #     context: ./backend
+  #   container_name: spotify_api
+  #   ports:
+  #     - 8888:8000
+  #   # runserver is sent to the background, runapscheduler runs in the foreground
+  #   command: sh -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver & python3 manage.py runapscheduler"
+  # volumes:
+  # - spotify_data:/django/data
+  # - ./backend/data/django:/django
+  # depends_on:
+  #   - db
+
+  # celery:
+  #   build:
+  #     context: ./backend
+  #   container_name: spotify_celery
+  #   command: celery -A backend worker -l info
+
+volumes:
+  abab:

@@ -15,11 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .dev_views import HomeView
 
 urlpatterns = [
     # This is used only in development as the spotify callback
-    path("", HomeView.as_view(), name="home"),
     path("admin/", admin.site.urls),
     path("api/spotify/", include("spotify.urls")),
 ]
