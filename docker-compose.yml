@@ -1,32 +1,26 @@
 version: "3.8"
 
-x-common-variables: &django-variables
+x-common-variables: &common-variables
   REDIS_HOST: spotify_redis # Redis container name, defaults to localhost if not set
-  REDIS_PORT: 6379 # Redis port, defaults to 6379 if not set
-  # Django DB connect info
-  SQL_ENGINE: django.db.backends.postgresql
+  REDIS_PORT: 6379
+  SQL_ENGINE: django.db.backends.postgresql # Django DB connect info
   SQL_DATABASE: postgres
   SQL_USER: postgres
   SQL_PASSWORD: postgres
-  # For entrypoint to wait for postgres
-  DATABASE: postgres
-  # Container DB name
-  SQL_HOST: spotify_postgres
+  DATABASE: postgres # For entrypoint to wait for postgres
+  SQL_HOST: spotify_postgres # Container DB name
   SQL_PORT: 5432
 
 services:
   redis:
     image: redis
     container_name: spotify_redis
-    # TODO: Remover isso, nao vai precisar
-    ports:
-      - 6666:6379
 
   db:
     image: postgres:latest
     container_name: spotify_postgres
     ports:
-      - 5555:5432
+      - 5433:5432
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -38,10 +32,8 @@ services:
     build:
       context: ./backend
     container_name: spotify_api
-    ports:
-      - 8888:8000
     environment:
-      <<: *django-variables
+      <<: *common-variables
       # Frequency which your recently played tracks will be checked in MINUTES (1-59). Defaults to 15
       RECENTLY_PLAYED_JOB_PERIODICITY: 1
       DEBUG: 1
@@ -49,7 +41,7 @@ services:
       # Separate by spaces
       DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1 [::1]
     # Runserver is sent to the background, runapscheduler runs in the foreground
-    command: sh -c "python3 manage.py runserver 0.0.0.0:8000 & python3 manage.py runapscheduler"
+    command: sh -c "gunicorn backend.wsgi --bind 0.0.0.0:8000 & python3 manage.py runapscheduler"
     volumes:
       - ./backend/:/django/
     depends_on:
@@ -60,11 +52,7 @@ services:
       context: ./backend
     container_name: spotify_celery
     environment:
-      <<: *django-variables
-      # # Redis container name, defaults to localhost if not set
-      # REDIS_HOST: spotify_redis
-      # # Redis port, defaults to 6379 if not set
-      # REDIS_PORT: 6379
+      <<: *common-variables
     command: sh -c "celery -A backend worker -l info"
     volumes:
       - ./backend/:/django/
@@ -73,5 +61,24 @@ services:
       - api
       - db
 
+  react:
+    build:
+      context: ./frontend
+    container_name: spotify_react
+    volumes:
+      - spotify_build:/react/build
+
+  nginx:
+    image: nginx:latest
+    container_name: spotify_nginx
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx/nginx-setup.conf:/etc/nginx/conf.d/default.conf:ro
+      - spotify_build:/var/www/react
+    depends_on:
+      - api
+
 volumes:
   spotify_data:
+  spotify_build:

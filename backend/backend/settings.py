@@ -184,9 +184,9 @@ APSCHEDULER_RUN_NOW_TIMEOUT = 300  # Seconds
 
 
 # CORSHEADERS
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    f"http://localhost:8080",
 ]
 
 # CELERY

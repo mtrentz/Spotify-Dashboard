@@ -1,0 +1,11 @@
+FROM node:17-alpine
+WORKDIR /react
+
+# Copy only package json
+COPY package.json .
+
+# Install all dependencies
+RUN npm install
+
+# Copy rest of the project
+COPY . .
