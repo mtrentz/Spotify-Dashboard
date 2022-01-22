@@ -1,7 +1,7 @@
 # runapscheduler.py
 import logging
-
 from django.conf import settings
+import os
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -12,7 +12,7 @@ from django_apscheduler import util
 
 from ...views.insert_views import RecentlyPlayedView
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 def recently_played_job():
@@ -42,11 +42,16 @@ class Command(BaseCommand):
         scheduler = BlockingScheduler(timezone=settings.TIME_ZONE)
         scheduler.add_jobstore(DjangoJobStore(), "default")
 
+        # Periodicity of the job (in minutes), defaults to every 15th minutes
+        periodicity = int(os.environ.get("RECENTLY_PLAYED_JOB_PERIODICITY", "15"))
+        if periodicity < 1 or periodicity > 59:
+            raise ValueError("RECENTLY_PLAYED_JOB_PERIODICITY must be an integer between 1 and 59.")
+
         scheduler.add_job(
             recently_played_job,
             trigger=CronTrigger(
-                minute="*/27"
-            ),  # Every 15th minute (10h15, 10h30, etc...)
+                minute=f"*/{periodicity}"
+            ),  # Defaults to every 15th minute (e.g. 10h15, 10h30)
             id="recently_played_job",  # The `id` assigned to each job MUST be unique
             max_instances=1,
             replace_existing=True,

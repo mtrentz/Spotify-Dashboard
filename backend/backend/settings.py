@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-fe5^+h8d7i3c&&j)cp(rf-lb01j)v&k&u72o#wi4tl7#-62@%y"
+SECRET_KEY = os.environ.get("SECRET_KEY","django-insecure-fe5^+h8d7i3c&&j)cp(rf-lb01j)v&k&u72o#wi4tl7#-62@%y")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(os.environ.get("DEBUG", default=1))
 
-ALLOWED_HOSTS = []
+django_allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
+if django_allowed_hosts:
+    # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
+    os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+else:
+    ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -87,14 +93,12 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        # TODO: Change this to environment variables later
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        # TODO: Change to container name later
-        "HOST": "localhost",
-        "PORT": 5432,
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
 

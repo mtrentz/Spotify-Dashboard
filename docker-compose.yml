@@ -1,15 +1,29 @@
 version: "3.8"
 
+x-common-variables: &django-variables
+  REDIS_HOST: spotify_redis # Redis container name, defaults to localhost if not set
+  REDIS_PORT: 6379 # Redis port, defaults to 6379 if not set
+  # Django DB connect info
+  SQL_ENGINE: django.db.backends.postgresql
+  SQL_DATABASE: postgres
+  SQL_USER: postgres
+  SQL_PASSWORD: postgres
+  # For entrypoint to wait for postgres
+  DATABASE: postgres
+  # Container DB name
+  SQL_HOST: spotify_postgres
+  SQL_PORT: 5432
+
 services:
-  # redis:
-  #   image: redis
-  #   container_name: spotify_redis
-  #   # TODO: Remover isso, nao vai precisar
-  #   ports:
-  #     - 6666:6379
+  redis:
+    image: redis
+    container_name: spotify_redis
+    # TODO: Remover isso, nao vai precisar
+    ports:
+      - 6666:6379
 
   db:
-    image: postgres:13.5-alpine
+    image: postgres:latest
     container_name: spotify_postgres
     ports:
       - 5555:5432
@@ -17,30 +31,47 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      PG_DATA: /tmp
     volumes:
-      - abab:/var/lib/postgresql/xdxd
-      # - ./backend/data/postgres:/var/lib/postgresql/data/spotify
+      - spotify_data:/var/lib/postgresql/data
 
-  # api:
-  #   build:
-  #     context: ./backend
-  #   container_name: spotify_api
-  #   ports:
-  #     - 8888:8000
-  #   # runserver is sent to the background, runapscheduler runs in the foreground
-  #   command: sh -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver & python3 manage.py runapscheduler"
-  # volumes:
-  # - spotify_data:/django/data
-  # - ./backend/data/django:/django
-  # depends_on:
-  #   - db
+  api:
+    build:
+      context: ./backend
+    container_name: spotify_api
+    ports:
+      - 8888:8000
+    environment:
+      <<: *django-variables
+      # Frequency which your recently played tracks will be checked in MINUTES (1-59). Defaults to 15
+      RECENTLY_PLAYED_JOB_PERIODICITY: 1
+      DEBUG: 1
+      SECRET_KEY: 4iv@cQ&L*MSJZc
+      # Separate by spaces
+      DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1 [::1]
+    # Runserver is sent to the background, runapscheduler runs in the foreground
+    command: sh -c "python3 manage.py runserver 0.0.0.0:8000 & python3 manage.py runapscheduler"
+    volumes:
+      - ./backend/:/django/
+    depends_on:
+      - db
 
-  # celery:
-  #   build:
-  #     context: ./backend
-  #   container_name: spotify_celery
-  #   command: celery -A backend worker -l info
+  celery:
+    build:
+      context: ./backend
+    container_name: spotify_celery
+    environment:
+      <<: *django-variables
+      # # Redis container name, defaults to localhost if not set
+      # REDIS_HOST: spotify_redis
+      # # Redis port, defaults to 6379 if not set
+      # REDIS_PORT: 6379
+    command: sh -c "celery -A backend worker -l info"
+    volumes:
+      - ./backend/:/django/
+    depends_on:
+      - redis
+      - api
+      - db
 
 volumes:
-  abab:
+  spotify_data:

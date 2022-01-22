@@ -5,8 +5,11 @@ from celery import Celery
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
+redis_host = os.environ.get("REDIS_HOST", "localhost")
+redis_port = os.environ.get("REDIS_PORT", "6379")
+
 app = Celery(
-    "backend", broker="redis://localhost:6379/0", backend="redis://localhost:6379/0"
+    "backend", broker=f"redis://{redis_host}:{redis_port}/0", backend=f"redis://{redis_host}:{redis_port}/0"
 )
 
 # Using a string here means the worker doesn't have to serialize

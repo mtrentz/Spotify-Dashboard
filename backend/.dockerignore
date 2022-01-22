@@ -1,16 +1,16 @@
-######################################################
-### IM LITERALLY JUST COPYING/PASTING MY GITIGNORE ###
-######################################################
+###############################################################################
+### MOSTLY COPY FROM GITIGNORE, DIFFERENCES ARE .log files and .auth-cache ###
+###############################################################################
 
 # Created by https://www.toptal.com/developers/gitignore/api/django
 # Edit at https://www.toptal.com/developers/gitignore?templates=django
 
 ### Project Specific ###
-.auth-cache
+# .auth-cache
 node_modules
 
 ### Django ###
-*.log
+# *.log
 *.pot
 *.pyc
 __pycache__/
