@@ -12,16 +12,16 @@ docker run -d -p 6379:6379 redis
 
 # Docker Postgres
 docker run -d \
-    --name postgres \
+    --name spotify_postgres \
     -p 5432:5432 \
     -e POSTGRES_NAME=postgres \
     -e POSTGRES_USER=postgres \
     -e POSTGRES_PASSWORD=postgres \
-    -e PGDATA=/var/lib/postgresql/data/pgdata \
-    -v `pwd`/data/db:/var/lib/postgresql/data \
-    postgres:14.1
+    -v spotify_data:/var/lib/postgresql/data \
+    postgres:latest
 
 
+### -e PGDATA=/var/lib/postgresql/data/pgdata \
 
 
 # Reseting database

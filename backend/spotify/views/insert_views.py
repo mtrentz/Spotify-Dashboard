@@ -39,10 +39,26 @@ class ImportStreamingHistoryView(APIView):
         except Exception as e:
             raise ValidationError(f"Invalid Streaming History JSON file; {e}")
 
+        # TODO: When its not that many entries, batch is not needed
+        # since it makes it slower, because all requests will run single threaded
+
         # I'll send the data to Celery, to run in the background,
         # in batches. This is because it takes too long to create
         # one Task per entry.
         batch = []
+
+        # I have to choose a batch size. When it's too small, it will take too long
+        # because then too many TASKS will be created for celery to run.
+        # But when its too few, then all requests will be running
+        # in the same thread, which will be too slow.
+        if len(data_list) < 50:
+            batch_size = 1
+        elif len(data_list) < 500:
+            batch_size = 10
+        elif len(data_list) < 1000:
+            batch_size = 100
+        else:
+            batch_size = 200
 
         for data in data_list:
             history_entry_serializer = HistoryEntrySerializer(data=data)
@@ -64,8 +80,8 @@ class ImportStreamingHistoryView(APIView):
                 }
             )
 
-            # Send to celery every 200
-            if len(batch) >= 200:
+            # Send to celery every few entries
+            if len(batch) >= batch_size:
                 insert_track_batch_from_history.apply_async(args=[batch], countdown=5)
                 batch = []
 
