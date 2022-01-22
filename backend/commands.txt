@@ -1,3 +1,23 @@
+# FOR DEVELOPMENT
+
+# Start docker redis
+docker-compose up -d redis
+
+# Start docker db
+docker-compose up -d db
+
+# Start celery locally
+celery -A backend worker -l info
+
+# Start server and scheduler
+python3 manage.py runserver & python3 manage.py runapscheduler
+
+# To kill server
+pkill -f runserver
+
+
+
+
 # Running server in background and starting scheduler
 python3 manage.py runserver & python3 manage.py runapscheduler
 
