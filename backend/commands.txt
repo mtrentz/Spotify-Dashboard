@@ -1,10 +1,7 @@
 # FOR DEVELOPMENT
 
-# Start docker redis
-docker-compose up -d redis
-
-# Start docker db
-docker-compose up -d db
+# Start docker redis and postgres
+docker-compose up -d redis db
 
 # Start celery locally
 celery -A backend worker -l info
