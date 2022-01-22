@@ -37,7 +37,7 @@ services:
       # Frequency which your recently played tracks will be checked in MINUTES (1-59). Defaults to 15
       RECENTLY_PLAYED_JOB_PERIODICITY: 1
       DEBUG: 1
-      SECRET_KEY: 4iv@cQ&L*MSJZc
+      SECRET_KEY: CF7FgFy8tGPzhUZBzQMvdoNBfEhdWRRLvejbVneyo9S8eFfE45iS5E27mDZEF8eXfVYA
       # Separate by spaces
       DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1 [::1]
     # Runserver is sent to the background, runapscheduler runs in the foreground
