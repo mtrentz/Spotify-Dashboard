@@ -10,11 +10,11 @@ import logging
 logger = logging.getLogger("django")
 
 # Dev only
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 
 class BaseAuthView(APIView):
-    load_dotenv()
+    # load_dotenv()
     cache_path = os.path.join(settings.BASE_DIR, "spotify", ".auth-cache")
     sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(

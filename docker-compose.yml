@@ -10,6 +10,9 @@ x-common-variables: &common-variables
   DATABASE: postgres # For entrypoint to wait for postgres
   SQL_HOST: spotify_postgres # Container DB name
   SQL_PORT: 5432
+  SPOTIPY_CLIENT_ID: f18de31089bf449184c4a4c30639246b
+  SPOTIPY_CLIENT_SECRET: a1e68d84697f47478cc1a4edf5480560
+  SPOTIPY_REDIRECT_URI: http://localhost:8080/
 
 services:
   redis:
@@ -37,7 +40,7 @@ services:
     environment:
       <<: *common-variables
       # Frequency which your recently played tracks will be checked in MINUTES (1-59). Defaults to 15
-      RECENTLY_PLAYED_JOB_PERIODICITY: 1
+      RECENTLY_PLAYED_JOB_PERIODICITY: 5
       DEBUG: 1
       SECRET_KEY: CF7FgFy8tGPzhUZBzQMvdoNBfEhdWRRLvejbVneyo9S8eFfE45iS5E27mDZEF8eXfVYA
       # Separate by spaces
@@ -70,7 +73,7 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
     volumes:
-      - spotify_build:/react/build
+      - spotify_build:/react/build/
 
   nginx:
     image: nginx:latest
@@ -81,9 +84,10 @@ services:
       - 8080:80
     volumes:
       - ./nginx/nginx-setup.conf:/etc/nginx/conf.d/default.conf:ro
-      - spotify_build:/var/www/react
+      - spotify_build:/var/www/react/
     depends_on:
       - api
+      - react
 
 volumes:
   spotify_data:
