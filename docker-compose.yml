@@ -67,12 +67,16 @@ services:
     build:
       context: ./frontend
     container_name: spotify_react
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     volumes:
       - spotify_build:/react/build
 
   nginx:
     image: nginx:latest
     container_name: spotify_nginx
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     ports:
       - 8080:80
     volumes:
