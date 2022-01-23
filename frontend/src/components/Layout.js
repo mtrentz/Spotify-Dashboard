@@ -125,7 +125,7 @@ const Layout = ({ children }) => {
                         <line x1="4" y1="20" x2="18" y2="20"></line>
                       </svg>
                     </span>
-                    <span className="nav-link-title">Home Dashboard</span>
+                    <span className="nav-link-title">Home</span>
                   </Link>
                 </li>
 
