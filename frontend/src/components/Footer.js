@@ -9,7 +9,7 @@ const Footer = () => {
             <ul class="list-inline list-inline-dots mb-0">
               <li class="list-inline-item">
                 <a
-                  href="https://github.com/tabler/tabler"
+                  href="https://github.com/mtrentz/Spotify-Dashboard"
                   target="_blank"
                   class="link-secondary"
                   rel="noopener"
@@ -18,18 +18,18 @@ const Footer = () => {
                 </a>
               </li>
               <li class="list-inline-item">
-                <a href="./docs/index.html" class="link-secondary">
+                <a href="https://mtrentz.com.br/aboutme" class="link-secondary">
                   About Me
                 </a>
               </li>
               <li class="list-inline-item">
-                <a href="./license.html" class="link-secondary">
+                <a href="https://github.com/mtrentz" class="link-secondary">
                   Github
                 </a>
               </li>
               <li class="list-inline-item">
                 <a
-                  href="https://github.com/tabler/tabler"
+                  href="https://www.linkedin.com/in/mtrentz/"
                   target="_blank"
                   class="link-secondary"
                   rel="noopener"

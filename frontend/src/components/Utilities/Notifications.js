@@ -11,7 +11,7 @@ const Notifications = () => {
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [notifications, removeNotification]);
+  }, [notifications]);
 
   //   Logic here is to show only the first notification on the list
   return (
