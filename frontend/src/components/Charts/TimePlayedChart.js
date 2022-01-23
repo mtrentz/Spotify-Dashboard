@@ -123,7 +123,7 @@ const TimePlayedChart = () => {
   };
 
   return (
-    <div className="card mx-10">
+    <div className="card">
       <div className="card-body">
         <div className="d-flex align-items-center">
           <div className="subheader">Hours Played</div>

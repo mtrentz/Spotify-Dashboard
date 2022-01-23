@@ -292,7 +292,11 @@ const Layout = ({ children }) => {
           </div>
         </div>
       </div>
-      <div className="page-wrapper"> {children} </div>
+      <div className="page-wrapper">
+        <div className="page-body">
+          <div className="container-xl">{children}</div>
+        </div>
+      </div>
       <OffcanvasFileUpload />
       <Notifications />
       <Footer />

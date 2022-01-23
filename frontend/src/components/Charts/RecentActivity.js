@@ -86,7 +86,7 @@ const RecentActivity = () => {
   }, [refreshed]);
 
   return (
-    <div className="card mx-10" style={{ height: "calc(24rem + 10px)" }}>
+    <div className="card" style={{ height: "calc(24rem + 10px)" }}>
       <div class="card-header flex justify-between">
         <h3 class="card-title">Your Recent Activity</h3>
         {/* Force activity recheck button */}

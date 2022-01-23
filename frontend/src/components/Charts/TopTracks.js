@@ -50,7 +50,7 @@ const TopTracks = () => {
   }, [period]);
 
   return (
-    <div class="card mx-10">
+    <div class="card">
       <div class="card-header flex justify-between">
         <h3 class="card-title">Top Played Tracks</h3>
         <PeriodDropdown

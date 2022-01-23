@@ -30,14 +30,28 @@ const Home = () => {
   }, []);
 
   return (
-    <div>
-      <TimePlayedChart />
-      <UniqueArtistsKPI />
-      <UniqueTracksKPI />
-      <UniqueAlbumsKPI />
-      <TopArtists />
-      <TopTracks />
-      <RecentActivity />
+    <div className="m-2 flex flex-col gap-2 md:grid md:grid-cols-2 md:grid-flow-row md:auto-rows-min">
+      <div className="order-none md:order-1 md:col-span-2">
+        <TimePlayedChart />
+      </div>
+      <div className="order-none md:order-2">
+        <UniqueTracksKPI />
+      </div>
+      <div className="order-none md:order-3">
+        <UniqueAlbumsKPI />
+      </div>
+      <div className="order-none md:order-4">
+        <UniqueArtistsKPI />
+      </div>
+      <div className="order-none md:order-6">
+        <TopArtists />
+      </div>
+      <div className="order-none md:order-5 row-span-2">
+        <TopTracks />
+      </div>
+      <div className="order-none md:order-7 col-span-2">
+        <RecentActivity />
+      </div>
     </div>
   );
 };

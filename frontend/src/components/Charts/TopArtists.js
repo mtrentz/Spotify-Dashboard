@@ -55,7 +55,7 @@ const TopArtists = () => {
   }, [period]);
 
   return (
-    <div className="card mx-10">
+    <div className="card">
       <div className="card-header flex justify-between">
         <h3 className="card-title">Top Played Artists</h3>
         <PeriodDropdown
@@ -73,7 +73,7 @@ const TopArtists = () => {
         </thead>
         <tbody>
           {topArtistsData.map((item, index) => (
-            <tr key={index}>
+            <tr key={index} className="h-11">
               <td>{item.artistName}</td>
               <td>{item.minutesPlayed}</td>
               <td className="w-50">
