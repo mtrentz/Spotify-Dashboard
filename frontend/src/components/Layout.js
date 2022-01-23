@@ -2,15 +2,18 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import ApiContext from "./Contexts/ApiContext";
+import ThemeContext from "./Contexts/ThemeContext";
 
 import OffcanvasFileUpload from "./Utilities/OffcanvasFileUpload";
 import UploadHistoryButton from "./Utilities/UploadHistoryButton";
 import AuthorizeButton from "./Utilities/AuthorizeButton";
 import Notifications from "./Utilities/Notifications";
+import ThemeSwitch from "./Utilities/ThemeSwitch";
 import Footer from "./Footer";
 
 const Layout = ({ children }) => {
   const { api } = useContext(ApiContext);
+  const { theme } = useContext(ThemeContext);
 
   const [isAuthorized, setIsAuthorized] = useState(true);
   const [years, setYears] = useState([]);
@@ -40,7 +43,7 @@ const Layout = ({ children }) => {
   }, []);
 
   return (
-    <body className="theme-light">
+    <body className={theme === "dark" ? "theme-dark" : "theme-light"}>
       <div className="page relative">
         <header className="navbar navbar-expand-md navbar-light d-print-none">
           <div className="container-xl">
@@ -92,6 +95,7 @@ const Layout = ({ children }) => {
                   </a>
                 </div>
               </div>
+              <ThemeSwitch />
             </div>
           </div>
         </header>
