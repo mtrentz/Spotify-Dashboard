@@ -1,6 +1,6 @@
 import "@tabler/core/dist/css/tabler.min.css";
 import "@tabler/core/dist/js/tabler";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { ApiProvider } from "./components/Contexts/ApiContext";
 import { NotificationProvider } from "./components/Contexts/NotificationContext";

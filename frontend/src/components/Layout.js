@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import ApiContext from "./Contexts/ApiContext";
 
@@ -51,13 +52,21 @@ const Layout = ({ children }) => {
             <span className="navbar-toggler-icon"></span>
           </button>
           <h1 className="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href=".">Spotify Dashboard</a>
+            <Link to="/">
+              <img
+                src="/spotify_dashboard_logo.png"
+                width="110"
+                height="32"
+                alt="Tabler"
+                className="navbar-brand-image scale-90"
+              />
+            </Link>
           </h1>
           <div className="navbar-nav flex-row order-md-last">
             <div className="nav-item d-none d-md-flex me-3">
               <div className="btn-list">
                 <a
-                  href="https://github.com/tabler/tabler"
+                  href="https://github.com/mtrentz/Spotify-Dashboard"
                   className="btn"
                   target="_blank"
                   rel="noreferrer"
@@ -91,7 +100,7 @@ const Layout = ({ children }) => {
             <div className="container-xl">
               <ul className="navbar-nav">
                 <li className="nav-item">
-                  <a className="nav-link" href="/">
+                  <Link to="/" className="nav-link">
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -117,7 +126,7 @@ const Layout = ({ children }) => {
                       </svg>
                     </span>
                     <span className="nav-link-title">Home Dashboard</span>
-                  </a>
+                  </Link>
                 </li>
 
                 <li className="nav-item">
