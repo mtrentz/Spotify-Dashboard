@@ -22,10 +22,16 @@ const OffcanvasFileUpload = () => {
       formData.append("file", file);
     }
 
-    // It takes a while to process the files.
-    // For this reason I'm setting a timeout of 10s per file
-    const timeOut = files.length * 10000;
+    // Notification just to show that a upload is in progress
+    addNotification({
+      type: "info",
+      msg: "On the way!",
+      msg_muted: "Your files are being uploaded...",
+    });
 
+    // It takes a while to process the files.
+    // For this reason I'm setting a timeout of 30s per file
+    const timeOut = files.length * 30000;
     api
       .post("/history/", formData, { timeout: timeOut })
       .then((res) => {
