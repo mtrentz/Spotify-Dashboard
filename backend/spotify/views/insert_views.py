@@ -62,10 +62,9 @@ class ImportStreamingHistoryView(APIView):
         # This is because I have to prepare all tasks and return OK to client
         # before it starts executing. Else it will take too long to give OK.
         # Randomly guessing a good delay. Its going to be 1s per 200 entries
-        delay = int(len(data_list)/200)
+        delay = int(len(data_list) / 200)
         # It will be at least 5 seconds
         delay = max(delay, 5)
-
 
         for data in data_list:
             history_entry_serializer = HistoryEntrySerializer(data=data)
@@ -89,7 +88,9 @@ class ImportStreamingHistoryView(APIView):
 
             # Send to celery every few entries
             if len(batch) >= batch_size:
-                insert_track_batch_from_history.apply_async(args=[batch], countdown=delay)
+                insert_track_batch_from_history.apply_async(
+                    args=[batch], countdown=delay
+                )
                 batch = []
 
         # Send the remaining tracks
@@ -126,6 +127,8 @@ class RecentlyPlayedView(BaseAuthView):
 
         try:
             recently_played = self.sp.current_user_recently_played(limit=50)
+            logger.info(f"[API Call] Query for recenltly played tracks")
+
         except Exception as e:
             # Error here means it's not authorized, so I'll just reset token info
             self.sp.auth_manager.cache_handler.save_token_to_cache({})
@@ -184,6 +187,7 @@ class RecentlyPlayedView(BaseAuthView):
             if recently_played["next"]:
                 # PS: This seems to not work. Spotify seems to always return an empty list.
                 recently_played = self.sp.next(recently_played)
+                logger.info(f"[API Call] Query for NEXT recently played.")
             else:
                 # If there were no "next" in response, then just stop the while loop
                 querying_new_songs = False

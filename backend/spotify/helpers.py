@@ -86,6 +86,7 @@ def try_searching(sp, query, type):
         type=type,
         limit=1,
     )
+    logger.info(f"[API Call] Made SEARCH for: {query}")
 
     # Check if got a response
     items = track["tracks"]["items"]
@@ -131,8 +132,8 @@ def insert_user_activity(track, ms_played, played_at, from_import):
     """
 
     # I use this function both for Celery and running normally.
-    # Aparently when it comes from Celery the "played_at" is formated as string.
-    # So I will check and convert it to datetime if needed.
+    # So I'll just convert the string to date,
+    # since it gets converted to string in celery.
     if isinstance(played_at, str):
         try:
             played_at = datetime.strptime(played_at, "%Y-%m-%dT%H:%M:%S.%f%z")

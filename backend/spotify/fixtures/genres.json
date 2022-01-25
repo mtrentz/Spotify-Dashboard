@@ -1,0 +1,79 @@
+[
+{
+    "model": "spotify.genres",
+    "pk": 1,
+    "fields": {
+        "name": "permanent wave"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 3,
+    "fields": {
+        "name": "rock"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 4,
+    "fields": {
+        "name": "album rock"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 9,
+    "fields": {
+        "name": "classic rock"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 17,
+    "fields": {
+        "name": "mellow gold"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 18,
+    "fields": {
+        "name": "soft rock"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 21,
+    "fields": {
+        "name": "alternative metal"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 22,
+    "fields": {
+        "name": "alternative rock"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 23,
+    "fields": {
+        "name": "nu metal"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 24,
+    "fields": {
+        "name": "post-grunge"
+    }
+},
+{
+    "model": "spotify.genres",
+    "pk": 25,
+    "fields": {
+        "name": "supergroup"
+    }
+}
+]

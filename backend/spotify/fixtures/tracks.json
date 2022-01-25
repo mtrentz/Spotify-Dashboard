@@ -1,0 +1,56 @@
+[
+{
+    "model": "spotify.tracks",
+    "pk": 23,
+    "fields": {
+        "sp_id": "3zwmW1gM4E8FlHXV5nE16u",
+        "name": "Be Yourself",
+        "duration": 278973,
+        "popularity": 72,
+        "explicit": false,
+        "track_number": 3,
+        "disc_number": 1,
+        "type": "track",
+        "album": 22,
+        "artists": [
+            6
+        ]
+    }
+},
+{
+    "model": "spotify.tracks",
+    "pk": 370,
+    "fields": {
+        "sp_id": "3bwAS8cN7Xtzvv5UurJOOX",
+        "name": "I Am the Highway",
+        "duration": 334906,
+        "popularity": 67,
+        "explicit": false,
+        "track_number": 8,
+        "disc_number": 1,
+        "type": "track",
+        "album": 5,
+        "artists": [
+            6
+        ]
+    }
+},
+{
+    "model": "spotify.tracks",
+    "pk": 1035,
+    "fields": {
+        "sp_id": "071BtONQBIq4SkvO0okS4k",
+        "name": "Telegraph Road",
+        "duration": 858533,
+        "popularity": 42,
+        "explicit": false,
+        "track_number": 1,
+        "disc_number": 1,
+        "type": "track",
+        "album": 540,
+        "artists": [
+            151
+        ]
+    }
+}
+]
