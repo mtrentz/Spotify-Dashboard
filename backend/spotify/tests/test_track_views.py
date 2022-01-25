@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase
 from django.urls import reverse
 from spotify.tasks import insert_track_entry
-from spotify.models import Tracks, UserActivity
+from spotify.models import Tracks
 from datetime import datetime, timedelta, timezone
 
 
