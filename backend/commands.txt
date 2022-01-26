@@ -16,6 +16,9 @@ pkill -f runserver
 coverage run --source='.' manage.py test spotify
 coverage html
 
+# Running single test file
+python3 manage.py test spotify.tests.test_track_views.TestTrackViews
+
 
 
 # Running server in background and starting scheduler
