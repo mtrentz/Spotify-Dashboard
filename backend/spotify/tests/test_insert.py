@@ -4,6 +4,10 @@ from django.db.models import Sum
 from spotify.models import Albums, Artists, Tracks, Genres, UserActivity
 from spotify.tasks import insert_track_batch_from_history, insert_track_entry
 from spotify.helpers import insert_user_activity
+from django.test import override_settings
+import json
+from django.urls import reverse
+import io
 
 
 class TestInsert(APITestCase):
@@ -588,5 +592,118 @@ class TestInsert(APITestCase):
         self.assertTrue(
             self.amount_of_entries_that_day(
                 year=2018, month=1, day=1, expected_amount=3
+            )
+        )
+
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    def test_insert_single_file(self):
+        """
+        This is only checking if I can properly test views that
+        call some task with .delay(), and the data goes to the test database.
+        """
+        # This has to be formatted exactly as an original spotify history
+        file_history = [
+            {
+                "endTime": "2020-10-10 08:01",
+                "msPlayed": 12345,
+                "trackName": "Telegraph Road",
+                "artistName": "Dire Straits",
+            },
+            {
+                "endTime": "2020-10-11 08:11",
+                "msPlayed": 54321,
+                "trackName": "Be Yourself",
+                "artistName": "Audioslave",
+            },
+        ]
+
+        data = dict(file=(io.BytesIO(str.encode(json.dumps(file_history)))))
+
+        # Send it to 'history' url
+        response = self.client.post(reverse("history"), data, format="multipart")
+
+        # Check if response ok
+        self.assertEqual(response.status_code, 201)
+
+        # Check if data in database
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2020, month=10, day=10, expected_amount=1
+            )
+        )
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2020, month=10, day=11, expected_amount=1
+            )
+        )
+
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    def test_insert_multiple_file(self):
+        """
+        This check if sending two separe history files to the upload history view is working
+        """
+        history_one = [
+            {
+                "endTime": "2020-10-10 08:01",
+                "msPlayed": 12345,
+                "trackName": "Telegraph Road",
+                "artistName": "Dire Straits",
+            },
+            {
+                "endTime": "2020-10-11 08:11",
+                "msPlayed": 54321,
+                "trackName": "Be Yourself",
+                "artistName": "Audioslave",
+            },
+        ]
+
+        # Same data but 1 year ahead
+        history_two = [
+            {
+                "endTime": "2021-10-10 08:01",
+                "msPlayed": 12345,
+                "trackName": "Telegraph Road",
+                "artistName": "Dire Straits",
+            },
+            {
+                "endTime": "2021-10-11 08:11",
+                "msPlayed": 54321,
+                "trackName": "Be Yourself",
+                "artistName": "Audioslave",
+            },
+        ]
+
+        data = dict(
+            file=(
+                io.BytesIO(str.encode(json.dumps(history_one))),
+                io.BytesIO(str.encode(json.dumps(history_two))),
+            )
+        )
+
+        # Send it to 'history' url
+        response = self.client.post(reverse("history"), data, format="multipart")
+
+        # Check if response ok
+        self.assertEqual(response.status_code, 201)
+
+        # Check if data in database
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2020, month=10, day=10, expected_amount=1
+            )
+        )
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2020, month=10, day=11, expected_amount=1
+            )
+        )
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2021, month=10, day=10, expected_amount=1
+            )
+        )
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2021, month=10, day=11, expected_amount=1
             )
         )

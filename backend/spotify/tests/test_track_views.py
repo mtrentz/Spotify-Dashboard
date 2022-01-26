@@ -233,6 +233,10 @@ class TestTrackViews(APITestCase):
         self.assertEqual(res.json()["count"], 0)
         self.assertEqual(res.json()["growth"], 0)
 
+        # Check if strings raises error
+        res = self.client.get(reverse("unique_tracks"), {"days": "a"})
+        self.assertEqual(res.status_code, 400)
+
     def test_unique_tracks_calc(self):
         """
         Checking if the track count and growth is correct.

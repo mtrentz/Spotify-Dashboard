@@ -85,7 +85,7 @@ class TestTrackViews(APITestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(len(res.json()), 0)
 
-    def test_single_track_long_period(self):
+    def test_top_played_single_track_long_period(self):
         """
         Add single track of a single artist.
         """
@@ -120,7 +120,7 @@ class TestTrackViews(APITestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(len(res.json()), 1)
 
-    def test_track_with_two_artists(self):
+    def test_top_played_track_with_two_artists(self):
         """
         Some tracks have two artists. Unfortunately in the fixture I don't have
         any like this. So I'll just edit the database.
@@ -193,3 +193,226 @@ class TestTrackViews(APITestCase):
         # Check for second
         self.assertEqual(res.json()[1]["artist"], "Dire Straits")
         self.assertEqual(res.json()[1]["minutes_played"], 6)
+
+    def test_top_played_cals(self):
+        """
+        Add some mock entries, check if its properly ordering artists,
+        if its grouping them together and summing everything properly.
+        """
+        track_one = Tracks.objects.get(name="Be Yourself")  # Audioslave
+        track_two = Tracks.objects.get(name="I Am the Highway")  # Audioslave
+        track_three = Tracks.objects.get(name="Telegraph Road")  # Dire Straits
+
+        # Track one will be scattered over the past three days
+        entries_one = [
+            # Yesterday, three times, two minutes each
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=1)
+                ).isoformat(),
+                "ms_played": 120000,
+            },
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=1, hours=10)
+                ).isoformat(),
+                "ms_played": 120000,
+            },
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=1, hours=5)
+                ).isoformat(),
+                "ms_played": 120000,
+            },
+            # Two days ago, 1 entry, 2 minutes
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=2)
+                ).isoformat(),
+                "ms_played": 120000,
+            },
+            # One day ago, 1 entry, 2 minutes
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=1)
+                ).isoformat(),
+                "ms_played": 120000,
+            },
+        ]
+
+        # Tracks two will be only played 5 days ago, 1 entry, 5 min
+        entries_two = [
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=5)
+                ).isoformat(),
+                "ms_played": 300000,
+            }
+        ]
+
+        # Track three will have been played 2 weeks ago, and not show on calcs
+        entries_three = [
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=14)
+                ).isoformat(),
+                "ms_played": 120000,
+            }
+        ]
+
+        # Insert them
+        self.insert_track_entries(track_one, entries_one)
+        self.insert_track_entries(track_two, entries_two)
+        self.insert_track_entries(track_three, entries_three)
+
+        # Checking if the top played artists are correct
+        res = self.client.get(reverse("top_played_artists"), {"days": 7})
+
+        # First, check for response ok
+        self.assertEqual(res.status_code, 200)
+
+        # Check if there is only one artists
+        self.assertEqual(len(res.json()), 1)
+
+        # Check if the artist is Audioslave
+        self.assertEqual(res.json()[0]["artist"], "Audioslave")
+
+        # Request now to include the ones 14 days ago
+        res = self.client.get(reverse("top_played_artists"), {"days": 20})
+
+        # First, check for response ok
+        self.assertEqual(res.status_code, 200)
+
+        # Check if now there are 2 artists
+        self.assertEqual(len(res.json()), 2)
+
+        # Check if the most played is still audioslave
+        self.assertEqual(res.json()[0]["artist"], "Audioslave")
+
+        # Check if the second one is Dire Straits
+        self.assertEqual(res.json()[1]["artist"], "Dire Straits")
+
+    def test_unique_artists_query_params(self):
+        """
+        Check if the query params are working properly
+        """
+        # Check if long days (period) is allowed
+        res = self.client.get(reverse("unique_artists"), {"days": 1200})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["count"], 0)
+        # Growth should be 0 since there are no tracks
+        self.assertEqual(res.json()["growth"], 0)
+
+        # Check if negative days raises error
+        res = self.client.get(reverse("unique_artists"), {"days": -1})
+        self.assertEqual(res.status_code, 400)
+
+        # Check if 0 days returns empty
+        res = self.client.get(reverse("unique_artists"), {"days": 0})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["count"], 0)
+        self.assertEqual(res.json()["growth"], 0)
+
+        # Check if strings raises error
+        res = self.client.get(reverse("unique_artists"), {"days": "a"})
+        self.assertEqual(res.status_code, 400)
+
+    def test_unique_artists_calcs(self):
+        """
+        Checking if the artist count and growth is correct.
+
+        Remembering that to be considered in this view tracks has to be
+        listened to for at least 2 mins
+        """
+        track_one = Tracks.objects.get(name="Be Yourself")
+        track_two = Tracks.objects.get(name="I Am the Highway")
+        track_three = Tracks.objects.get(name="Telegraph Road")
+
+        # Played this week and a bit last week
+        entries_one = [
+            # Played for 10 min yesterday
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=1)
+                ).isoformat(),
+                "ms_played": 600000,
+            },
+            # Played for 5 min last week, 10 days ago
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=10)
+                ).isoformat(),
+                "ms_played": 300000,
+            },
+        ]
+
+        # Played a bit this week and last week
+        entries_two = [
+            # Two days ago, played for 5 min
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=2)
+                ).isoformat(),
+                "ms_played": 300000,
+            },
+            # Played for 5 min last week, 10 days ago
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=10)
+                ).isoformat(),
+                "ms_played": 300000,
+            },
+        ]
+
+        # Track three will be played only last week
+        entries_three = [
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=10)
+                ).isoformat(),
+                "ms_played": 600000,
+            }
+        ]
+
+        # Insert them
+        self.insert_track_entries(track_one, entries_one)
+        self.insert_track_entries(track_two, entries_two)
+        self.insert_track_entries(track_three, entries_three)
+
+        # Now check for the response in the last 7 days
+        res = self.client.get(reverse("unique_artists"), {"days": 7})
+
+        # Response ok
+        self.assertEqual(res.status_code, 200)
+
+        # Count should be one, since its only for the current period
+        self.assertEqual(res.json()["count"], 1)
+
+        # TODO: Change data to make sens for artists
+
+        # # Growth should be -33 % since last week I've listened to three tracks
+        # # and this week i've listened to two
+        # self.assertEqual(res.json()["growth"], -1 / 3)
+
+        # # Now I'll add a track to be played this week, so the growth should be 0
+        # new_entry = [
+        #     {
+        #         "played_at": (
+        #             datetime.now(timezone.utc) - timedelta(days=3)
+        #         ).isoformat(),
+        #         "ms_played": 300000,
+        #     }
+        # ]
+        # self.insert_track_entries(track_three, new_entry)
+
+        # # Check if the growth is 0
+        # res = self.client.get(reverse("unique_artists"), {"days": 7})
+        # self.assertEqual(res.status_code, 200)
+        # self.assertEqual(res.json()["growth"], 0)
+
+        # # Change the days to 14, should be 3 tracks and 0 count
+        # # just because there wasnt a previous period to compare to
+        # res = self.client.get(reverse("unique_artists"), {"days": 14})
+        # self.assertEqual(res.status_code, 200)
+        # self.assertEqual(res.json()["count"], 3)
+        # self.assertEqual(res.json()["growth"], 0)
