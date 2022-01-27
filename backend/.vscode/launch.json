@@ -26,6 +26,10 @@
       "request": "launch",
       "program": "${workspaceFolder}/manage.py",
       "args": ["test"],
+      // "args": [
+      //   "test",
+      //   "spotify.tests.test_insert.TestInsert.test_recently_played_view"
+      // ],
       "django": true
     }
   ]

@@ -17,7 +17,7 @@ urlpatterns = [
     path(
         "refresh-recently-played/",
         RecentlyPlayedView.as_view(),
-        name="refresh-recently-played",
+        name="refresh_recently_played",
     ),
     # AUTHORIZATION
     path("auth/", AuthURLView.as_view(), name="auth_url"),

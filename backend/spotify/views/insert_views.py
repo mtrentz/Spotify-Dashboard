@@ -69,7 +69,7 @@ class ImportStreamingHistoryView(APIView):
         for data in data_list:
             history_entry_serializer = HistoryEntrySerializer(data=data)
 
-            # If not valid for some reason, I print error and continue
+            # If not valid for some reason, I'll log error and continue
             if not history_entry_serializer.is_valid():
                 logger.warning(history_entry_serializer.errors)
                 continue

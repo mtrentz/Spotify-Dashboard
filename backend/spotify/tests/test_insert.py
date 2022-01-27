@@ -1,4 +1,5 @@
 from rest_framework.test import APITestCase
+from django.conf import settings
 from django.test.utils import tag
 from django.db.models import Sum
 from spotify.models import Albums, Artists, Tracks, Genres, UserActivity
@@ -8,6 +9,8 @@ from django.test import override_settings
 import json
 from django.urls import reverse
 import io
+from unittest import mock
+import os
 
 
 class TestInsert(APITestCase):
@@ -707,3 +710,248 @@ class TestInsert(APITestCase):
                 year=2021, month=10, day=11, expected_amount=1
             )
         )
+
+    def test_insert_invalid_history_file(self):
+
+        unvalid_data = "abcd"
+
+        data = dict(file=(io.BytesIO(str.encode(unvalid_data)),))
+
+        # Send it to 'history' url
+        response = self.client.post(reverse("history"), data, format="multipart")
+
+        # Check if error
+        self.assertEqual(response.status_code, 400)
+
+    def test_mock_spotipy_resp(self):
+        """
+        This is basically a test to check if I can mock the calls to spotify api
+        by using patch on spotipy's search methods.
+        """
+
+        BASE_DIR = settings.BASE_DIR
+        fake_resp_dir = os.path.join(BASE_DIR, "spotify", "tests", "fake_resp")
+
+        # Here I'll load a fake spotify API response:
+        # The track I've faked searching is "Sweet Sacrifice" by "Evanescence"
+        with open(os.path.join(fake_resp_dir, "fake_search_resp.json"), "r") as f:
+            fake_search_resp = json.load(f)
+
+        # Track: Sweet Sacrifice
+        with open(os.path.join(fake_resp_dir, "fake_track_resp.json"), "r") as f:
+            fake_track_resp = json.load(f)
+
+        # Album: The Open Door
+        with open(os.path.join(fake_resp_dir, "fake_album_resp.json"), "r") as f:
+            fake_album_resp = json.load(f)
+
+        # Artist: Evanescence
+        with open(os.path.join(fake_resp_dir, "fake_artist_resp.json"), "r") as f:
+            fake_artist_resp = json.load(f)
+
+        # Here I'll put some invalid track_name and artist_name.
+        # If the Evanescence info I'm mocking was properly added to the database
+        # means that the request was successfully mocked and no call was made to the API.
+        history = [
+            {
+                "end_time": "2020-10-10 08:01",
+                "ms_played": 12345,
+                "track_name": "TRACK_THAT_DOES_NOT_EXIST",
+                "artist_name": "ARTIST_THAT_DOES_NOT_EXIST",
+            }
+        ]
+
+        @mock.patch("spotipy.Spotify.search", return_value=fake_search_resp)
+        @mock.patch("spotipy.Spotify.track", return_value=fake_track_resp)
+        @mock.patch("spotipy.Spotify.album", return_value=fake_album_resp)
+        @mock.patch("spotipy.Spotify.artist", return_value=fake_artist_resp)
+        def make_insert(*args, **kwargs):
+            insert_track_batch_from_history(history)
+
+        make_insert()
+
+        # Check if track is in the database
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2020, month=10, day=10, expected_amount=1
+            )
+        )
+
+        # Check if its the track from the fake resp data
+        track = Tracks.objects.get(name="Sweet Sacrifice")
+
+        # Assert all data is correct
+        self.assertEqual(track.name, "Sweet Sacrifice")
+        self.assertEqual(track.artists.first().name, "Evanescence")
+        self.assertEqual(track.album.name, "The Open Door")
+
+    def test_history_view_not_file(self):
+        """
+        Sending something other than a file to insert history view to check for error
+        """
+        resp = self.client.post(reverse("history"), {"key": "val"})
+
+        self.assertEqual(resp.status_code, 400)
+
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    def test_history_varying_batch_sizes(self):
+        """
+        The history can accept very log history file sizes.
+        And for that to work in a timely fashion it will split up the batches into different size
+        and send it to celery.
+
+        Here I'm just checking if that works ok without any error
+        """
+
+        single_entry = {
+            "endTime": "2020-10-11 08:11",
+            "msPlayed": 54321,
+            "trackName": "Be Yourself",
+            "artistName": "Audioslave",
+        }
+
+        # 15 entries -> default to batch size of 1
+        small_batch = [single_entry for i in range(15)]
+
+        # 51 entries -> default to batch size of 10
+        medium_batch = [single_entry for i in range(51)]
+
+        # 501 entries -> default to batch size of 100
+        large_batch = [single_entry for i in range(501)]
+
+        # 1001 entries -> default to batch size of 200
+        largest_batch = [single_entry for i in range(1001)]
+
+        for batch in [small_batch, medium_batch, large_batch, largest_batch]:
+            data = dict(file=(io.BytesIO(str.encode(json.dumps(batch))),))
+
+            # Send it to 'history' url
+            response = self.client.post(reverse("history"), data, format="multipart")
+
+            # Check if response ok
+            self.assertEqual(response.status_code, 201)
+
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    def test_history_with_some_invalid_entries(self):
+        """
+        When iterating over the history entries (track name / artist name)
+        if some of them are invalid for whatever reason, instead of stopping everything
+        the endpoint will continue iterating and try them all.
+
+        So here I'll just put some invalid data in the middle of valid ones and check
+        if the valid ones are still added to the database
+        """
+
+        fake_history = [
+            {
+                "endTime": "2020-10-10 08:01",
+                "msPlayed": 12345,
+                "trackName": "Telegraph Road",
+                "artistName": "Dire Straits",
+            },
+            {
+                "this": "one",
+                "is": "wrong",
+            },
+            {
+                "endTime": "this one",
+                "msPlayed": True,
+                "trackName": "Is also",
+                "artistName": "wrong",
+            },
+            {
+                "endTime": "2020-10-11 08:11",
+                "msPlayed": 54321,
+                "trackName": "Be Yourself",
+                "artistName": "Audioslave",
+            },
+        ]
+        data = dict(file=(io.BytesIO(str.encode(json.dumps(fake_history))),))
+
+        # Send it to 'history' url
+        response = self.client.post(reverse("history"), data, format="multipart")
+
+        # Check if response ok
+        self.assertEqual(response.status_code, 201)
+
+        # Check if the two valid ones were added
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2020, month=10, day=10, expected_amount=1
+            )
+        )
+
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2020, month=10, day=11, expected_amount=1
+            )
+        )
+
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    def test_recently_played_view(self):
+        """
+        This one will call a empty post to "refresh_recently_played", which makes
+        the view call its method to get all recently played tracks.
+
+        Here I'll be mocking the recently played response from the api.
+
+        On my mock response I have three tracks, played at 2018-01-01, 2018-01-02, 2018-01-03,
+        from the three tracks I have in the fixture: Telegraph Road, Be Yourself, I am The Highway, respectively.
+        """
+
+        BASE_DIR = settings.BASE_DIR
+        fake_resp_dir = os.path.join(BASE_DIR, "spotify", "tests", "fake_resp")
+
+        with open(
+            os.path.join(fake_resp_dir, "fake_recently_played_resp.json"), "r"
+        ) as f:
+            fake_recently_played_data = json.load(f)
+
+        @mock.patch(
+            "spotipy.Spotify.current_user_recently_played",
+            return_value=fake_recently_played_data,
+        )
+        def make_request(*args, **kwargs):
+            resp = self.client.post(reverse("refresh_recently_played"), {})
+            return resp
+
+        resp = make_request()
+
+        # Check if response ok
+        self.assertEqual(resp.status_code, 201)
+
+        # Check if data was inserted
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2018, month=1, day=1, expected_amount=1
+            )
+        )
+
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2018, month=1, day=2, expected_amount=1
+            )
+        )
+
+        self.assertTrue(
+            self.amount_of_entries_that_day(
+                year=2018, month=1, day=3, expected_amount=1
+            )
+        )
+
+        # Check if it's the right track
+        track = UserActivity.objects.get(
+            played_at__year=2018, played_at__month=1, played_at__day=1
+        )
+        self.assertEqual(track.track.name, "Telegraph Road")
+
+        track = UserActivity.objects.get(
+            played_at__year=2018, played_at__month=1, played_at__day=2
+        )
+        self.assertEqual(track.track.name, "Be Yourself")
+
+        track = UserActivity.objects.get(
+            played_at__year=2018, played_at__month=1, played_at__day=3
+        )
+
+        self.assertEqual(track.track.name, "I Am the Highway")

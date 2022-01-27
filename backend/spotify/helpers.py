@@ -81,7 +81,7 @@ def search_spotify_track(sp, track_name, artist_name, type):
 
 def try_searching(sp, query, type):
     # If yet not got a response, search only with track name
-    track = sp.search(
+    resp = sp.search(
         q=query,
         type=type,
         limit=1,
@@ -89,7 +89,7 @@ def try_searching(sp, query, type):
     logger.info(f"[API Call] Made SEARCH for: {query}")
 
     # Check if got a response
-    items = track["tracks"]["items"]
+    items = resp["tracks"]["items"]
     if len(items) > 0:
         return items[0]
 
