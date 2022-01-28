@@ -1,0 +1,89 @@
+version: "3.8"
+
+x-common-variables: &common-variables
+  REDIS_HOST: spotify_redis # Redis container name, defaults to localhost if not set
+  REDIS_PORT: 6379
+  SQL_ENGINE: django.db.backends.postgresql # Django DB connect info
+  SQL_DATABASE: postgres
+  SQL_USER: postgres
+  SQL_PASSWORD: postgres
+  DATABASE: postgres # For entrypoint to wait for postgres
+  SQL_HOST: spotify_postgres # Container DB name
+  SQL_PORT: 5432
+  SECRET_KEY: CF7FgFy8tGPzhUZBzQMvdoNBfEhdWRRLvejbVneyo9S8eFfE45iS5E27mDZEF8eXfVYA # DJANGO_SECRET_KEY, change if deploying
+  ### CHANGE BELOW ###
+  SPOTIPY_CLIENT_ID: YOUR_CLIENT_ID
+  SPOTIPY_CLIENT_SECRET: YOUR_CLIENT_SECRET
+  SPOTIPY_REDIRECT_URI: YOUR_REDIRECT_URI
+  LOGIN_USERNAME: admin
+  LOGIN_PASSWORD: admin
+  # Frequency which your recently played tracks will be checked in MINUTES (1-59). Defaults to 15.
+  RECENTLY_PLAYED_JOB_PERIODICITY: 5
+
+services:
+  redis:
+    image: redis
+    container_name: spotify_redis
+    # ports:
+    #   - 6379:6379
+
+  db:
+    image: postgres:latest
+    container_name: spotify_postgres
+    # ports:
+    #   - 5432:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - spotify_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./backend
+    container_name: spotify_api
+    ports:
+      - 8080:8000
+    environment:
+      <<: *common-variables
+      DEBUG: 1
+      # Separate by spaces
+      DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1 [::1]
+    # Runserver is sent to the background, runapscheduler runs in the foreground
+    command: sh -c "gunicorn backend.wsgi --bind 0.0.0.0:8000 & python3 manage.py runapscheduler"
+    volumes:
+      - ./backend/:/django/
+    depends_on:
+      - db
+
+  celery:
+    build:
+      context: ./backend
+    container_name: spotify_celery
+    environment:
+      <<: *common-variables
+    command: sh -c "celery -A backend worker -l info"
+    volumes:
+      - ./backend/:/django/
+    depends_on:
+      - redis
+      - api
+      - db
+
+  react_dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 8081:8080
+    container_name: spotify_react_dev
+    entrypoint: "npm run start"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend/:/react/
+
+volumes:
+  spotify_data:
+  spotify_build:
