@@ -330,47 +330,33 @@ class TestTrackViews(APITestCase):
 
         # Played this week and a bit last week
         entries_one = [
-            # Played for 10 min yesterday
-            {
-                "played_at": (
-                    datetime.now(timezone.utc) - timedelta(days=1)
-                ).isoformat(),
-                "ms_played": 600000,
-            },
-            # Played for 5 min last week, 10 days ago
+            # Played for 10 min 10 days ago
             {
                 "played_at": (
                     datetime.now(timezone.utc) - timedelta(days=10)
                 ).isoformat(),
-                "ms_played": 300000,
+                "ms_played": 600000,
             },
         ]
 
-        # Played a bit this week and last week
+        # Played 5 minutes yesterday
         entries_two = [
             # Two days ago, played for 5 min
             {
                 "played_at": (
-                    datetime.now(timezone.utc) - timedelta(days=2)
-                ).isoformat(),
-                "ms_played": 300000,
-            },
-            # Played for 5 min last week, 10 days ago
-            {
-                "played_at": (
-                    datetime.now(timezone.utc) - timedelta(days=10)
+                    datetime.now(timezone.utc) - timedelta(days=1)
                 ).isoformat(),
                 "ms_played": 300000,
             },
         ]
 
-        # Track three will be played only last week
+        # Played 15 last week
         entries_three = [
             {
                 "played_at": (
                     datetime.now(timezone.utc) - timedelta(days=10)
                 ).isoformat(),
-                "ms_played": 600000,
+                "ms_played": 900000,
             }
         ]
 
@@ -388,31 +374,22 @@ class TestTrackViews(APITestCase):
         # Count should be one, since its only for the current period
         self.assertEqual(res.json()["count"], 1)
 
-        # TODO: Change data to make sens for artists
+        # At the moment, there was 2 artists played last week and one this week
+        # so the growth has to be -50%
+        self.assertEqual(res.json()["growth"], -0.5)
 
-        # # Growth should be -33 % since last week I've listened to three tracks
-        # # and this week i've listened to two
-        # self.assertEqual(res.json()["growth"], -1 / 3)
+        # Now I'll add another artist to be played this week, so the growth is 0
+        new_entry = [
+            {
+                "played_at": (
+                    datetime.now(timezone.utc) - timedelta(days=3)
+                ).isoformat(),
+                "ms_played": 300000,
+            }
+        ]
 
-        # # Now I'll add a track to be played this week, so the growth should be 0
-        # new_entry = [
-        #     {
-        #         "played_at": (
-        #             datetime.now(timezone.utc) - timedelta(days=3)
-        #         ).isoformat(),
-        #         "ms_played": 300000,
-        #     }
-        # ]
-        # self.insert_track_entries(track_three, new_entry)
+        self.insert_track_entries(track_three, new_entry)
 
-        # # Check if the growth is 0
-        # res = self.client.get(reverse("unique_artists"), {"days": 7})
-        # self.assertEqual(res.status_code, 200)
-        # self.assertEqual(res.json()["growth"], 0)
-
-        # # Change the days to 14, should be 3 tracks and 0 count
-        # # just because there wasnt a previous period to compare to
-        # res = self.client.get(reverse("unique_artists"), {"days": 14})
-        # self.assertEqual(res.status_code, 200)
-        # self.assertEqual(res.json()["count"], 3)
-        # self.assertEqual(res.json()["growth"], 0)
+        res = self.client.get(reverse("unique_artists"), {"days": 7})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["growth"], 0)

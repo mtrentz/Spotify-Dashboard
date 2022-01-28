@@ -28,7 +28,7 @@
       "args": ["test"],
       // "args": [
       //   "test",
-      //   "spotify.tests.test_insert.TestInsert.test_recently_played_view"
+      //   "spotify.tests.test_user_activity_views.TestUserActivityViews.test_simple_time_played"
       // ],
       "django": true
     }

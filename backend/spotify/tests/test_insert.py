@@ -811,22 +811,31 @@ class TestInsert(APITestCase):
         }
 
         # 15 entries -> default to batch size of 1
-        small_batch = [single_entry for i in range(15)]
+        small_batch = [single_entry for _ in range(15)]
 
         # 51 entries -> default to batch size of 10
-        medium_batch = [single_entry for i in range(51)]
+        medium_batch = [single_entry for _ in range(51)]
 
         # 501 entries -> default to batch size of 100
-        large_batch = [single_entry for i in range(501)]
+        large_batch = [single_entry for _ in range(501)]
 
         # 1001 entries -> default to batch size of 200
-        largest_batch = [single_entry for i in range(1001)]
+        largest_batch = [single_entry for _ in range(1001)]
 
         for batch in [small_batch, medium_batch, large_batch, largest_batch]:
             data = dict(file=(io.BytesIO(str.encode(json.dumps(batch))),))
 
-            # Send it to 'history' url
-            response = self.client.post(reverse("history"), data, format="multipart")
+            # Patching the function that actually adds the tracks to database
+            # to save time. Since adding 1000+ tracks takes a while.
+            # And the purpose of the test is to see if batch size breaks something
+
+            with mock.patch(
+                "spotify.tasks.insert_track_from_history", return_value=True
+            ):
+                # Send it to 'history' url
+                response = self.client.post(
+                    reverse("history"), data, format="multipart"
+                )
 
             # Check if response ok
             self.assertEqual(response.status_code, 201)
