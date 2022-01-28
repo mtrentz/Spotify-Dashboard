@@ -10,9 +10,15 @@ x-common-variables: &common-variables
   DATABASE: postgres # For entrypoint to wait for postgres
   SQL_HOST: spotify_postgres # Container DB name
   SQL_PORT: 5432
-  SPOTIPY_CLIENT_ID: f18de31089bf449184c4a4c30639246b
-  SPOTIPY_CLIENT_SECRET: a1e68d84697f47478cc1a4edf5480560
-  SPOTIPY_REDIRECT_URI: http://localhost:8080/
+  SECRET_KEY: CF7FgFy8tGPzhUZBzQMvdoNBfEhdWRRLvejbVneyo9S8eFfE45iS5E27mDZEF8eXfVYA # DJANGO_SECRET_KEY, change if deploying
+  ### CHANGE BELOW ###
+  SPOTIPY_CLIENT_ID: YOUR_CLIENT_ID
+  SPOTIPY_CLIENT_SECRET: YOUR_CLIENT_SECRET
+  SPOTIPY_REDIRECT_URI: YOUR_REDIRECT_URI
+  LOGIN_USERNAME: admin
+  LOGIN_PASSWORD: admin
+  # Frequency which your recently played tracks will be checked in MINUTES (1-59). Defaults to 15.
+  RECENTLY_PLAYED_JOB_PERIODICITY: 5
 
 services:
   redis:
@@ -39,10 +45,7 @@ services:
     container_name: spotify_api
     environment:
       <<: *common-variables
-      # Frequency which your recently played tracks will be checked in MINUTES (1-59). Defaults to 15
-      RECENTLY_PLAYED_JOB_PERIODICITY: 5
       DEBUG: 1
-      SECRET_KEY: CF7FgFy8tGPzhUZBzQMvdoNBfEhdWRRLvejbVneyo9S8eFfE45iS5E27mDZEF8eXfVYA
       # Separate by spaces
       DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1 [::1]
     # Runserver is sent to the background, runapscheduler runs in the foreground
