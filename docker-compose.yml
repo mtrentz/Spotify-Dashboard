@@ -45,7 +45,7 @@ services:
     container_name: spotify_api
     environment:
       <<: *common-variables
-      DEBUG: 1
+      DEBUG: 0
       # Separate by spaces
       DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1 [::1]
     # Runserver is sent to the background, runapscheduler runs in the foreground
