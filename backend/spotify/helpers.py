@@ -81,14 +81,15 @@ def search_spotify_track(sp, track_name, artist_name, type):
 
 def try_searching(sp, query, type):
     # If yet not got a response, search only with track name
-    track = sp.search(
+    resp = sp.search(
         q=query,
         type=type,
         limit=1,
     )
+    logger.info(f"[API Call] Made SEARCH for: {query}")
 
     # Check if got a response
-    items = track["tracks"]["items"]
+    items = resp["tracks"]["items"]
     if len(items) > 0:
         return items[0]
 
@@ -128,11 +129,20 @@ def insert_user_activity(track, ms_played, played_at, from_import):
     for recently played tracks in Spotify's API, only tracks that were listened through fully will be returned.
 
     Besides that, when tracks comes from the import the 'played_at' is calculated from the end time, which is not very precise.
+
+    For this reason, I'll apply some logic when a track is being inserted FROM HISTORY and there was another very similar entry FROM RECENTLY PLAYED.
+    The same happens when a track is being inserted FROM RECENTLY PLAYED and there was another very similar entry FROM HISTORY.
+    If all the tracks were coming in from the same source, then there would be no problem.
+
+    So my checks here are first to see if there is a similar track. If there isnt, then it's easy, just add it.
+    If there is, then I can start checking for exact matches. If there is an exact match, then it's also easy, just do nothing!
+    But if there is no exact match and there are similar tracks, then I'll check if they come from different sources. If they do,
+    then some logic and assumptions will be needed. If they come from the same source, i'll just add the incoming one as new.
     """
 
     # I use this function both for Celery and running normally.
-    # Aparently when it comes from Celery the "played_at" is formated as string.
-    # So I will check and convert it to datetime if needed.
+    # So I'll just convert the string to date,
+    # since it gets converted to string in celery.
     if isinstance(played_at, str):
         try:
             played_at = datetime.strptime(played_at, "%Y-%m-%dT%H:%M:%S.%f%z")

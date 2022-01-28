@@ -76,6 +76,10 @@ def insert_track_entry(track_entry_data):
             continue
 
         artist_response = sp.artist(artist_sp_id)
+        logger.info(
+            f"[API Call] Artist: sp_id: {artist_sp_id}, name: {artist_response.get('name')}"
+        )
+
         artist_name = artist_response.get("name")
         artist_popularity = artist_response.get("popularity")
         artist_followers = artist_response.get("followers").get("total")
@@ -120,6 +124,10 @@ def insert_track_entry(track_entry_data):
     # If not exist, query it from Spotify, and save it
     if not album:
         album_response = sp.album(album_sp_id)
+        logger.info(
+            f"[API Call] Album: sp_id: {album_sp_id}, name: {album_response.get('name')}"
+        )
+
         album_name = album_response.get("name")
         album_popularity = album_response.get("popularity")
         album_total_tracks = album_response.get("total_tracks")

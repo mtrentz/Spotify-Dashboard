@@ -12,6 +12,12 @@ python3 manage.py runserver & python3 manage.py runapscheduler
 # To kill server
 pkill -f runserver
 
+# Coverage
+coverage run --source='.' manage.py test spotify
+coverage html
+
+# Running single test file
+python3 manage.py test spotify.tests.test_track_views.TestTrackViews
 
 
 

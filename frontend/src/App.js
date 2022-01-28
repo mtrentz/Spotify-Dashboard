@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { ApiProvider } from "./components/Contexts/ApiContext";
 import { NotificationProvider } from "./components/Contexts/NotificationContext";
+import { ThemeProvider } from "./components/Contexts/ThemeContext";
 
 import Home from "./pages/Home";
 import Layout from "./components/Layout";
@@ -11,17 +12,19 @@ import Layout from "./components/Layout";
 function App() {
   return (
     <div className="App">
-      <ApiProvider>
-        <NotificationProvider>
-          <BrowserRouter>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Home />} />
-              </Routes>
-            </Layout>
-          </BrowserRouter>
-        </NotificationProvider>
-      </ApiProvider>
+      <ThemeProvider>
+        <ApiProvider>
+          <NotificationProvider>
+            <BrowserRouter>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                </Routes>
+              </Layout>
+            </BrowserRouter>
+          </NotificationProvider>
+        </ApiProvider>
+      </ThemeProvider>
     </div>
   );
 }

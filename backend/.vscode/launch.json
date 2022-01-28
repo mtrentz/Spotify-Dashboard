@@ -19,6 +19,18 @@
       "module": "celery",
       "console": "integratedTerminal",
       "args": ["-A", "backend", "worker", "-l", "info", "-P", "solo"]
+    },
+    {
+      "name": "Python: Django Tests",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": ["test"],
+      // "args": [
+      //   "test",
+      //   "spotify.tests.test_user_activity_views.TestUserActivityViews.test_simple_time_played"
+      // ],
+      "django": true
     }
   ]
 }

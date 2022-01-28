@@ -2,15 +2,18 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import ApiContext from "./Contexts/ApiContext";
+import ThemeContext from "./Contexts/ThemeContext";
 
 import OffcanvasFileUpload from "./Utilities/OffcanvasFileUpload";
 import UploadHistoryButton from "./Utilities/UploadHistoryButton";
 import AuthorizeButton from "./Utilities/AuthorizeButton";
 import Notifications from "./Utilities/Notifications";
+import ThemeSwitch from "./Utilities/ThemeSwitch";
 import Footer from "./Footer";
 
 const Layout = ({ children }) => {
   const { api } = useContext(ApiContext);
+  const { theme } = useContext(ThemeContext);
 
   const [isAuthorized, setIsAuthorized] = useState(true);
   const [years, setYears] = useState([]);
@@ -40,7 +43,11 @@ const Layout = ({ children }) => {
   }, []);
 
   return (
-    <div className="page relative">
+    <div
+      className={`page relative ${
+        theme === "dark" ? "theme-dark" : "theme-light"
+      }`}
+    >
       <header className="navbar navbar-expand-md navbar-light d-print-none">
         <div className="container-xl">
           <button
@@ -91,6 +98,7 @@ const Layout = ({ children }) => {
                 </a>
               </div>
             </div>
+            <ThemeSwitch />
           </div>
         </div>
       </header>
@@ -267,21 +275,6 @@ const Layout = ({ children }) => {
                               );
                             })
                           : null}
-                        {/* <a class="dropdown-item disabled" href="./empty.html">
-                          2022
-                        </a>
-                        <a
-                          class="dropdown-item disabled"
-                          href="./accordion.html"
-                        >
-                          2021
-                        </a>
-                        <a class="dropdown-item disabled" href="./blank.html">
-                          2020
-                        </a>
-                        <a class="dropdown-item disabled" href="./buttons.html">
-                          2019
-                        </a> */}
                       </div>
                     </div>
                   </div>

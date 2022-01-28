@@ -1,0 +1,56 @@
+[
+{
+    "model": "spotify.albums",
+    "pk": 5,
+    "fields": {
+        "sp_id": "78guAsers0klWl6RwzgDLd",
+        "name": "Audioslave",
+        "popularity": 76,
+        "release_date": "2002-11-17",
+        "total_tracks": 14,
+        "type": "album",
+        "art_sm": "https://i.scdn.co/image/ab67616d00004851a7292b6863258e889b78d787",
+        "art_md": "https://i.scdn.co/image/ab67616d00001e02a7292b6863258e889b78d787",
+        "art_lg": "https://i.scdn.co/image/ab67616d0000b273a7292b6863258e889b78d787",
+        "artists": [
+            6
+        ]
+    }
+},
+{
+    "model": "spotify.albums",
+    "pk": 22,
+    "fields": {
+        "sp_id": "0HQhToIjonHnJRRPN4jeJU",
+        "name": "Out of Exile",
+        "popularity": 69,
+        "release_date": "2005-01-01",
+        "total_tracks": 12,
+        "type": "album",
+        "art_sm": "https://i.scdn.co/image/ab67616d0000485107301dd5fedf5ad64cde4882",
+        "art_md": "https://i.scdn.co/image/ab67616d00001e0207301dd5fedf5ad64cde4882",
+        "art_lg": "https://i.scdn.co/image/ab67616d0000b27307301dd5fedf5ad64cde4882",
+        "artists": [
+            6
+        ]
+    }
+},
+{
+    "model": "spotify.albums",
+    "pk": 540,
+    "fields": {
+        "sp_id": "3Iz3o8owPasr8PKUSZPqD5",
+        "name": "Love Over Gold",
+        "popularity": 43,
+        "release_date": "1982-09-20",
+        "total_tracks": 5,
+        "type": "album",
+        "art_sm": "https://i.scdn.co/image/ab67616d000048516eb1486e037eba0ff701df77",
+        "art_md": "https://i.scdn.co/image/ab67616d00001e026eb1486e037eba0ff701df77",
+        "art_lg": "https://i.scdn.co/image/ab67616d0000b2736eb1486e037eba0ff701df77",
+        "artists": [
+            151
+        ]
+    }
+}
+]
