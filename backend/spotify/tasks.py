@@ -18,7 +18,7 @@ import logging
 logger = logging.getLogger("django")
 
 # dev only
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 
 class LogErrorsTask(Task):
@@ -58,7 +58,7 @@ def insert_track_entry(track_entry_data):
         return
 
     # In case it wasn't in the database, then I'll have to do a bunch of queries to get all the data
-    load_dotenv()
+    # load_dotenv()
     sp = spotipy.Spotify(
         client_credentials_manager=SpotifyClientCredentials(cache_handler=None)
     )
@@ -264,9 +264,7 @@ def insert_track_from_history(
         return
 
     # If not, I will try to find it in Spotify
-
-    # TODO: Tirar isso no futuro
-    load_dotenv()
+    # load_dotenv()
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
     # Search song on Spotify
