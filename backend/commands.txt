@@ -1,16 +1,10 @@
 # FOR DEVELOPMENT
 
-# Start docker redis and postgres
-docker-compose up -d redis db
+# Run docker dev
+docker-compose -f docker-compose.dev.yml up
 
-# Start celery locally
-celery -A backend worker -l info
-
-# Start server and scheduler
-python3 manage.py runserver & python3 manage.py runapscheduler
-
-# To kill server
-pkill -f runserver
+# Test
+docker exec spotify_api python3 manage.py test
 
 # Coverage
 coverage run --source='.' manage.py test spotify
