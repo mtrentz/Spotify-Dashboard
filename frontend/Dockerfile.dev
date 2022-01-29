@@ -10,8 +10,5 @@ RUN npm install
 # Copy rest of the project
 COPY . .
 
+# Rebuild on changes to volume
 ENV CHOKIDAR_USEPOLLING=true
-
-EXPOSE 8081
-
-CMD ["npm", "start"]
