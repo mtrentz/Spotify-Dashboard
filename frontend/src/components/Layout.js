@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 import ApiContext from "./Contexts/ApiContext";
 import ThemeContext from "./Contexts/ThemeContext";
@@ -296,7 +297,9 @@ const Layout = ({ children }) => {
       </div>
       <div className="page-wrapper">
         <div className="page-body">
-          <div className="container-xl">{children}</div>
+          <div className="container-xl">
+            <Outlet />
+          </div>
         </div>
       </div>
       <OffcanvasFileUpload />

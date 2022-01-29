@@ -7,6 +7,7 @@ import { NotificationProvider } from "./components/Contexts/NotificationContext"
 import { ThemeProvider } from "./components/Contexts/ThemeContext";
 
 import Home from "./pages/Home";
+import Login from "./pages/Login";
 import Layout from "./components/Layout";
 
 function App() {
@@ -16,11 +17,12 @@ function App() {
         <ApiProvider>
           <NotificationProvider>
             <BrowserRouter>
-              <Layout>
-                <Routes>
+              <Routes>
+                <Route element={<Layout />}>
                   <Route path="/" element={<Home />} />
-                </Routes>
-              </Layout>
+                </Route>
+                <Route path="/login" element={<Login />} />
+              </Routes>
             </BrowserRouter>
           </NotificationProvider>
         </ApiProvider>
