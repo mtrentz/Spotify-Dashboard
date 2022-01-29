@@ -73,6 +73,7 @@ services:
     build:
       context: ./frontend
     container_name: spotify_react
+    stdin: true
     environment:
       - CHOKIDAR_USEPOLLING=true
     volumes:
