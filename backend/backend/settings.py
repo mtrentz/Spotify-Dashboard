@@ -30,8 +30,8 @@ DEBUG = int(os.environ.get("DEBUG", default=1))
 
 django_allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
 if django_allowed_hosts:
-    # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
-    os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+    # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each host.
+    ALLOWED_HOSTS = django_allowed_hosts.split(" ")
 else:
     ALLOWED_HOSTS = []
 
@@ -195,13 +195,18 @@ APSCHEDULER_RUN_NOW_TIMEOUT = 300  # Seconds
 
 # CORSHEADERS
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-    "http://localhost:8081",
-    "http://127.0.0.1:8081",
+django_cors_allowed_origins = os.environ.get("DJANGO_CORS_ALLOWED")
+if django_cors_allowed_origins:
+    CORS_ALLOWED_ORIGINS = django_cors_allowed_origins.split(" ")
+else:
+    CORS_ALLOWED_ORIGINS = []
 
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8080",
+#     "http://127.0.0.1:8080",
+#     "http://localhost:8081",
+#     "http://127.0.0.1:8081",
+# ]
 
 # CELERY
 CELERY_TIMEZONE = TIME_ZONE

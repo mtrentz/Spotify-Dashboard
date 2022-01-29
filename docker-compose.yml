@@ -48,6 +48,7 @@ services:
       DEBUG: 0
       # Separate by spaces
       DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1 [::1]
+      DJANGO_CORS_ALLOWED: http://localhost:8080 http://localhost:8081
     # Runserver is sent to the background, runapscheduler runs in the foreground
     command: sh -c "gunicorn backend.wsgi --bind 0.0.0.0:8000 & python3 manage.py runapscheduler"
     volumes:
@@ -73,17 +74,15 @@ services:
     build:
       context: ./frontend
     container_name: spotify_react
-    stdin: true
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
     volumes:
       - spotify_build:/react/build/
+    depends_on:
+      - api
 
   nginx:
     image: nginx:latest
     container_name: spotify_nginx
-    environment:
-      - CHOKIDAR_USEPOLLING=true
     ports:
       - 8080:80
     volumes:

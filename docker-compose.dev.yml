@@ -48,8 +48,10 @@ services:
     environment:
       <<: *common-variables
       DEBUG: 1
+      CHOKIDAR_USEPOLLING: "true"
       # Separate by spaces
       DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1 [::1]
+      DJANGO_CORS_ALLOWED: http://localhost:8080 http://localhost:8081
     # Runserver is sent to the background, runapscheduler runs in the foreground
     command: sh -c "gunicorn backend.wsgi --bind 0.0.0.0:8000 & python3 manage.py runapscheduler"
     volumes:
@@ -63,6 +65,7 @@ services:
     container_name: spotify_celery
     environment:
       <<: *common-variables
+      CHOKIDAR_USEPOLLING: "true"
     command: sh -c "celery -A backend worker -l info"
     volumes:
       - ./backend/:/django/
@@ -83,6 +86,8 @@ services:
       - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./frontend/:/react/
+    depends_on:
+      - api
 
 volumes:
   spotify_data:
