@@ -9,3 +9,9 @@ RUN npm install
 
 # Copy rest of the project
 COPY . .
+
+ENV CHOKIDAR_USEPOLLING=true
+
+EXPOSE 8081
+
+CMD ["npm", "start"]
