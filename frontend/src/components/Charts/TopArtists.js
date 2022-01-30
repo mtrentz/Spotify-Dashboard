@@ -1,12 +1,12 @@
 import React from "react";
 import { useContext, useEffect, useState } from "react";
 
-import ApiContext from "../Contexts/ApiContext";
+import useAxios from "../../hooks/useAxios";
 
 import PeriodDropdown from "../Utilities/PeriodDropdown";
 
 const TopArtists = () => {
-  const { api } = useContext(ApiContext);
+  const axios = useAxios();
 
   const [topArtistsData, setTopArtistsData] = useState([]);
 
@@ -42,7 +42,7 @@ const TopArtists = () => {
   };
 
   useEffect(() => {
-    api
+    axios
       .get("/top-played-artists/", {
         params: { qty: 7, days: periodOptions[period] },
       })

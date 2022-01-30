@@ -1,9 +1,39 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
-import ThemeContext from "../components/Contexts/ThemeContext";
+import { Link, useNavigate } from "react-router-dom";
+
+import { axiosUsers } from "../api/axios";
+
+import ThemeContext from "../contexts/ThemeContext";
+import AuthenticationContext from "../contexts/AuthenticationContext";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const { theme } = useContext(ThemeContext);
+  const { setAuthenticated, setToken } = useContext(AuthenticationContext);
+
+  const storeToken = (token) => {
+    sessionStorage.setItem("authToken", JSON.stringify(token));
+  };
+
+  const login = async (e) => {
+    e.preventDefault();
+    axiosUsers
+      .post("/login/", {
+        username: e.target.username.value,
+        password: e.target.password.value,
+      })
+      .then((response) => {
+        setAuthenticated(true);
+        setToken(response.data.token);
+        storeToken(response.data.token);
+        navigate("/");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   return (
     <body
       className={`border-top-wide border-primary d-flex flex-column ${
@@ -27,28 +57,37 @@ const Login = () => {
           </div>
           <form
             className="card card-md"
-            action="."
-            method="get"
-            autocomplete="off"
+            // action="."
+            // method="get"
+            // autocomplete="off"
+            onSubmit={login}
           >
             <div className="card-body">
               {/* <h2 className="card-title text-center mb-4">Login to continue</h2> */}
               <div className="mb-3">
-                <label className="form-label">Username</label>
+                <label htmlFor="username" className="form-label">
+                  Username
+                </label>
                 <input
                   type="text"
+                  id="username"
                   className="form-control"
+                  aria-describedby="username"
                   placeholder="Enter username"
                 />
               </div>
               <div className="mb-2">
-                <label className="form-label">Password</label>
+                <label htmlFor="password" className="form-label">
+                  Password
+                </label>
                 <div className="input-group input-group-flat">
                   <input
                     type="password"
+                    id="password"
                     className="form-control"
                     placeholder="Password"
                     autocomplete="off"
+                    aria-describedby="Password"
                   />
                   <span className="input-group-text"></span>
                 </div>

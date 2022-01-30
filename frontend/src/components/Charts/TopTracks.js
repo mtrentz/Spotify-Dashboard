@@ -1,12 +1,12 @@
 import React from "react";
 import { useContext, useEffect, useState } from "react";
 
-import ApiContext from "../Contexts/ApiContext";
+import useAxios from "../../hooks/useAxios";
 
 import PeriodDropdown from "../Utilities/PeriodDropdown";
 
 const TopTracks = () => {
-  const { api } = useContext(ApiContext);
+  const axios = useAxios();
 
   const [topTracksData, setTopTracksData] = useState([]);
 
@@ -37,7 +37,7 @@ const TopTracks = () => {
   };
 
   useEffect(() => {
-    api
+    axios
       .get("/top-played-tracks/", {
         params: { qty: 7, days: periodOptions[period] },
       })

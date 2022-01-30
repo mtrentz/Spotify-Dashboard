@@ -1,7 +1,7 @@
 import React, { useEffect, useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import ApiContext from "../components/Contexts/ApiContext";
+import useAxios from "../hooks/useAxios";
 
 import TimePlayedChart from "../components/Charts/TimePlayedChart";
 import UniqueAlbumsKPI from "../components/Charts/UniqueAlbumsKPI";
@@ -12,13 +12,13 @@ import TopArtists from "../components/Charts/TopArtists";
 import TopTracks from "../components/Charts/TopTracks";
 
 const Home = () => {
-  const { api } = useContext(ApiContext);
+  const axios = useAxios();
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     const code = searchParams.get("code");
     if (code) {
-      api
+      axios
         .post("/token/", { code: code })
         .then((res) => {
           console.log(res);

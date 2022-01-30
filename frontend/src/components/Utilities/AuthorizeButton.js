@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 
-import ApiContext from "../Contexts/ApiContext";
+import useAxios from "../../hooks/useAxios";
 
 const AuthorizeButton = () => {
   const [authUrl, setAuthUrl] = useState("/");
 
-  const { api } = useContext(ApiContext);
+  const axios = useAxios();
 
   useEffect(() => {
-    api
+    axios
       .get("/auth/")
       .then((res) => {
         setAuthUrl(res.data.url);

@@ -1,19 +1,19 @@
 import React from "react";
 import { useContext, useEffect, useState } from "react";
 
-import ApiContext from "../Contexts/ApiContext";
+import useAxios from "../../hooks/useAxios";
 import { generateTrendComponent } from "../helpers";
 
 import CardKPI from "../Utilities/CardKPI";
 
 const UniqueTracksKPI = () => {
-  const { api } = useContext(ApiContext);
+  const axios = useAxios();
 
   const [uniqueTracksData, setUniqueTracksData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    api
+    axios
       .get("/unique-tracks/", { params: { days: 7 } })
       .then((res) => {
         setUniqueTracksData(res.data);

@@ -26,14 +26,6 @@ User.objects.all().delete()
 uname = os.environ.get('LOGIN_USERNAME', None)
 passw = os.environ.get('LOGIN_PASSWORD', None)
 
-# If not set, quit
-if not (uname and passw):
-    quit()
-
-# If already exists, quit
-if User.objects.filter(username=uname).exists():
-    quit()
-
 # Create the superuser
 User.objects.create_superuser(uname, 'admin@admin.com', passw)
 " | python3 manage.py shell
