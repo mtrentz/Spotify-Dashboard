@@ -20,4 +20,5 @@ urlpatterns = [
     # This is used only in development as the spotify callback
     path("admin/", admin.site.urls),
     path("api/spotify/", include("spotify.urls")),
+    path("api/users/", include("users.urls")),
 ]

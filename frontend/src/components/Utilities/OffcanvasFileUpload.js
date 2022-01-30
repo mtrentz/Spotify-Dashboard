@@ -1,11 +1,11 @@
 import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import ApiContext from "../Contexts/ApiContext";
-import NotificationContext from "../Contexts/NotificationContext";
+import useAxios from "../../hooks/useAxios";
+import NotificationContext from "../../contexts/NotificationContext";
 
 const OffcanvasFileUpload = () => {
-  const { api } = useContext(ApiContext);
+  const axios = useAxios();
   const { addNotification } = useContext(NotificationContext);
 
   const { register, handleSubmit, getValues } = useForm();
@@ -32,7 +32,7 @@ const OffcanvasFileUpload = () => {
     // It takes a while to process the files.
     // For this reason I'm setting a timeout of 30s per file
     const timeOut = files.length * 30000;
-    api
+    axios
       .post("/history/", formData, { timeout: timeOut })
       .then((res) => {
         console.log(res);

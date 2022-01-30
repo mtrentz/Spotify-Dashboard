@@ -3,11 +3,12 @@ import { useContext, useEffect, useState } from "react";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 
-import ApiContext from "../Contexts/ApiContext";
-import NotificationContext from "../Contexts/NotificationContext";
+import useAxios from "../../hooks/useAxios";
+import NotificationContext from "../../contexts/NotificationContext";
 
 const RecentActivity = () => {
-  const { api } = useContext(ApiContext);
+  const axios = useAxios();
+
   const { addNotification } = useContext(NotificationContext);
 
   const [recentlyPlayedData, setRecentlyPlayedData] = useState([]);
@@ -50,7 +51,7 @@ const RecentActivity = () => {
   };
 
   const refreshRecentActivity = () => {
-    api
+    axios
       .post("/refresh-recently-played/")
       .then((res) => {
         // Add a alert that the request its being refreshed
@@ -75,7 +76,7 @@ const RecentActivity = () => {
   };
 
   useEffect(() => {
-    api
+    axios
       .get("/recently-played/", { params: { qty: 25 } })
       .then((res) => {
         setRecentlyPlayedData(cleanApiResponse(res.data));

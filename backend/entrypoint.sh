@@ -13,7 +13,23 @@ then
 fi
 
 # Create superuser from environment variables
-echo "import os; from django.contrib.auth import get_user_model; uname = os.environ.get('LOGIN_USERNAME', None); passw = os.environ.get('LOGIN_PASSWORD', None); None if (uname and passw) else quit(); User = get_user_model(); quit() if User.objects.filter(username=uname).exists() else None ; User.objects.create_superuser(uname, 'admin@admin.com', passw)" | python3 manage.py shell
+echo "
+import os
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+# At the start, delete all users
+User.objects.all().delete()
+
+# Get info from environment variables
+uname = os.environ.get('LOGIN_USERNAME', None)
+passw = os.environ.get('LOGIN_PASSWORD', None)
+
+# Create the superuser
+User.objects.create_superuser(uname, 'admin@admin.com', passw)
+" | python3 manage.py shell
+
 
 # python manage.py flush --no-input
 python manage.py makemigrations

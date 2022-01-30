@@ -1,7 +1,7 @@
 import React from "react";
 import { useContext, useEffect, useState } from "react";
 
-import ApiContext from "../Contexts/ApiContext";
+import useAxios from "../../hooks/useAxios";
 import { generateTrendComponent } from "../helpers";
 
 import Chart from "react-apexcharts";
@@ -9,6 +9,8 @@ import PeriodDropdown from "../Utilities/PeriodDropdown";
 import LoadingDots from "../Utilities/LoadingDots";
 
 const TimePlayedChart = () => {
+  const axios = useAxios();
+
   const startingGraphStatus = {
     series: [
       {
@@ -74,8 +76,6 @@ const TimePlayedChart = () => {
     },
   };
 
-  const { api } = useContext(ApiContext);
-
   const [timePlayedData, setTimePlayedData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [graphStatus, setGraphStatus] = useState(startingGraphStatus);
@@ -97,7 +97,7 @@ const TimePlayedChart = () => {
   const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   useEffect(() => {
-    api
+    axios
       .get("/time-played/", {
         params: { days: periodOptions[period], timezone: browserTimezone },
       })

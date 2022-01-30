@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
-import ApiContext from "./Contexts/ApiContext";
-import ThemeContext from "./Contexts/ThemeContext";
+import useAxios from "../hooks/useAxios";
+import ThemeContext from "../contexts/ThemeContext";
 
 import OffcanvasFileUpload from "./Utilities/OffcanvasFileUpload";
 import UploadHistoryButton from "./Utilities/UploadHistoryButton";
@@ -12,7 +13,7 @@ import ThemeSwitch from "./Utilities/ThemeSwitch";
 import Footer from "./Footer";
 
 const Layout = ({ children }) => {
-  const { api } = useContext(ApiContext);
+  const axios = useAxios();
   const { theme } = useContext(ThemeContext);
 
   const [isAuthorized, setIsAuthorized] = useState(true);
@@ -22,7 +23,7 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     // Request Authorization Status
-    api
+    axios
       .get("/is-authorized/")
       .then((res) => {
         setIsAuthorized(res.data.is_authorized);
@@ -32,7 +33,7 @@ const Layout = ({ children }) => {
       });
 
     // Request Available Years
-    api
+    axios
       .get("/available-years/", { timezone: browserTimezone })
       .then((res) => {
         setYears(res.data.map((year) => year.year).reverse());
@@ -200,7 +201,7 @@ const Layout = ({ children }) => {
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="icon icon-tabler icon-tabler-user"
+                        class="icon icon-tabler icon-tabler-microphone-2"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
@@ -215,8 +216,8 @@ const Layout = ({ children }) => {
                           d="M0 0h24v24H0z"
                           fill="none"
                         ></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                        <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+                        <path d="M15.002 12.9a5 5 0 1 0 -3.902 -3.9"></path>
+                        <path d="M15.002 12.9l-3.902 -3.899l-7.513 8.584a2 2 0 1 0 2.827 2.83l8.588 -7.515z"></path>
                       </svg>
                     </span>
                     <span className="nav-link-title">Artists</span>
@@ -296,7 +297,9 @@ const Layout = ({ children }) => {
       </div>
       <div className="page-wrapper">
         <div className="page-body">
-          <div className="container-xl">{children}</div>
+          <div className="container-xl">
+            <Outlet />
+          </div>
         </div>
       </div>
       <OffcanvasFileUpload />
