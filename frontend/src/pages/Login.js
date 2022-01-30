@@ -30,10 +30,9 @@ const Login = () => {
             action="."
             method="get"
             autocomplete="off"
-            data-bitwarden-watching="1"
           >
             <div className="card-body">
-              <h2 className="card-title text-center mb-4">Login to continue</h2>
+              {/* <h2 className="card-title text-center mb-4">Login to continue</h2> */}
               <div className="mb-3">
                 <label className="form-label">Username</label>
                 <input
