@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import AuthenticationContext from "../contexts/AuthenticationContext";
 
 const useAxios = () => {
-  const { token, getToken } = useContext(AuthenticationContext);
+  const { token, getToken, isExpired } = useContext(AuthenticationContext);
 
   const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ const useAxios = () => {
           error?.response?.status === 401
         ) {
           //  If this is the first fail, try again
-          if (!prevRequest?.sent) {
+          if (!prevRequest?.sent && !isExpired()) {api/spotify/unique-artists/?days=7
             prevRequest.sent = true;
             // Try again
             let newToken = await getToken();
