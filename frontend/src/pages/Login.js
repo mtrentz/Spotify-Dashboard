@@ -10,11 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const { theme } = useContext(ThemeContext);
-  const { setAuthenticated, setToken } = useContext(AuthenticationContext);
-
-  const storeToken = (token) => {
-    sessionStorage.setItem("authToken", JSON.stringify(token));
-  };
+  const { storeToken } = useContext(AuthenticationContext);
 
   const login = async (e) => {
     e.preventDefault();
@@ -24,8 +20,7 @@ const Login = () => {
         password: e.target.password.value,
       })
       .then((response) => {
-        setAuthenticated(true);
-        setToken(response.data.token);
+        // Also sets authenticated and everything
         storeToken(response.data.token);
         navigate("/");
       })

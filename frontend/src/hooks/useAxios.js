@@ -5,13 +5,14 @@ import { useNavigate } from "react-router-dom";
 import AuthenticationContext from "../contexts/AuthenticationContext";
 
 const useAxios = () => {
-  const { token } = useContext(AuthenticationContext);
+  const { token, getToken } = useContext(AuthenticationContext);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const requestIntercept = axios.interceptors.request.use(
       (config) => {
+        console.log("At request interceptor", token);
         config.headers["Authorization"] = `Token ${token}`;
         return config;
       },
@@ -32,9 +33,12 @@ const useAxios = () => {
           if (!prevRequest?.sent) {
             prevRequest.sent = true;
             // Try again
-            prevRequest.headers["Authorization"] = `Token ${token}`;
+            let newToken = await getToken();
+            console.log("At response interceptor", token);
+            prevRequest.headers["Authorization"] = `Token ${newToken}`;
             return axios(prevRequest);
           }
+          console.log("At rsponse interceptor navitage", token);
           // If this is the second fail, go to login
           navigate("/login");
         }
