@@ -19,7 +19,7 @@ export const AuthenticationProvider = ({ children }) => {
   };
 
   const isExpired = () => {
-    const expiresAt = new Date(localStorage.getItem("expiresAt"));
+    const expiresAt = new Date(JSON.parse(localStorage.getItem("expiresAt")));
     return expiresAt < new Date();
   };
 

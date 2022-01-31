@@ -13,7 +13,15 @@ const useAxios = () => {
     const requestIntercept = axios.interceptors.request.use(
       (config) => {
         console.log("At request interceptor", token);
-        config.headers["Authorization"] = `Token ${token}`;
+        if (isExpired()) {
+          navigate("/login");
+        }
+        let newToken = getToken();
+        if (newToken) {
+          config.headers["Authorization"] = `Token ${newToken}`;
+        } else {
+          config.headers["Authorization"] = `Token ${token}`;
+        }
         return config;
       },
       (error) => {
