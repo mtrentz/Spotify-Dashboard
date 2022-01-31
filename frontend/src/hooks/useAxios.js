@@ -30,7 +30,7 @@ const useAxios = () => {
           error?.response?.status === 401
         ) {
           //  If this is the first fail, try again
-          if (!prevRequest?.sent && !isExpired()) {api/spotify/unique-artists/?days=7cjec
+          if (!prevRequest?.sent && !isExpired())
             prevRequest.sent = true;
             // Try again
             let newToken = await getToken();
