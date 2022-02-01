@@ -22,7 +22,7 @@ const Layout = ({ children }) => {
   const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   useEffect(() => {
-    // Request Authorization Status
+    // Request Authorization Status (for spotify api)
     axios
       .get("/is-authorized/")
       .then((res) => {

@@ -16,6 +16,8 @@ const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
+    // This is for the redirect from the Spotify Login page
+    // which sends the code that will be used for oauth on the backend
     const code = searchParams.get("code");
     if (code) {
       axios

@@ -12,9 +12,9 @@ x-common-variables: &common-variables
   SQL_PORT: 5432
   SECRET_KEY: CF7FgFy8tGPzhUZBzQMvdoNBfEhdWRRLvejbVneyo9S8eFfE45iS5E27mDZEF8eXfVYA # DJANGO_SECRET_KEY, change if deploying
   ### CHANGE BELOW ###
-  SPOTIPY_CLIENT_ID: YOUR_CLIENT_ID
-  SPOTIPY_CLIENT_SECRET: YOUR_CLIENT_SECRET
-  SPOTIPY_REDIRECT_URI: YOUR_REDIRECT_URI
+  SPOTIPY_CLIENT_ID: f18de31089bf449184c4a4c30639246b
+  SPOTIPY_CLIENT_SECRET: 5d24ac376eb1442dbe1f15e018e3be83
+  SPOTIPY_REDIRECT_URI: http://localhost:3000/
   LOGIN_USERNAME: admin
   LOGIN_PASSWORD: admin
   # Frequency which your recently played tracks will be checked in MINUTES (1-59). Defaults to 15.
