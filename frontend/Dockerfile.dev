@@ -1,14 +1,14 @@
-FROM node:17-alpine
-WORKDIR /react
-
-# Copy only package json
+FROM node:14-alpine AS development
+ENV NODE_ENV development
+# Add a work directory
+WORKDIR /app
+# Cache and Install dependencies
 COPY package.json .
-
-# Install all dependencies
-RUN npm install
-
-# Copy rest of the project
+COPY yarn.lock .
+RUN yarn install
+# Copy app files
 COPY . .
-
-# Rebuild on changes to volume
-ENV CHOKIDAR_USEPOLLING=true
+# Expose port
+EXPOSE 3000
+# Start the app
+CMD [ "yarn", "start" ]

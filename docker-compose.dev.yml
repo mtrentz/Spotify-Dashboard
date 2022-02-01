@@ -74,21 +74,18 @@ services:
       - api
       - db
 
-  react_dev:
+  app:
+    container_name: spotify_app_dev
+    image: spotify-app-dev
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    stdin_open: true
+    volumes:
+      - ./frontend/src:/app/src
     ports:
       - 3000:3000
-    container_name: spotify_react_dev
-    environment:
-      CHOKIDAR_USEPOLLING: "true"
-    volumes:
-      - ./frontend/:/react/
     depends_on:
       - api
 
 volumes:
   spotify_data:
-  spotify_build:
