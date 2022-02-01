@@ -5,7 +5,7 @@ const AuthenticationContext = createContext();
 export default AuthenticationContext;
 
 export const AuthenticationProvider = ({ children }) => {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authenticated, setAuthenticated] = useState(true);
 
   const storeToken = (token) => {
     localStorage.setItem("authToken", JSON.stringify(token));
