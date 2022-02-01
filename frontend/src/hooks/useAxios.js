@@ -16,6 +16,9 @@ const useAxios = () => {
       (config) => {
         // If token is expired, redirect to login
         if (isExpired()) {
+          // Delete token from local storage
+          removeToken();
+          // Redirect to login
           navigate("/login");
         }
         let token = getToken();
@@ -30,6 +33,7 @@ const useAxios = () => {
     const responseIntercept = axios.interceptors.response.use(
       (response) => {
         // If request was successful refresh the token expiration
+        // since the app is "in use"
         refreshExpiration();
         return response;
       },

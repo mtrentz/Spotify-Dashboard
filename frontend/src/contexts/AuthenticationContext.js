@@ -9,7 +9,7 @@ export const AuthenticationProvider = ({ children }) => {
 
   const storeToken = (token) => {
     localStorage.setItem("authToken", JSON.stringify(token));
-    // Set expires at at 1 hour from now
+    // Refresh the token duration
     refreshExpiration();
     setAuthenticated(true);
   };
@@ -21,9 +21,9 @@ export const AuthenticationProvider = ({ children }) => {
   };
 
   const refreshExpiration = () => {
-    // Set expires at at 1 hour from now
+    // Set expires at 30min from now
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 1);
+    expiresAt.setMinutes(expiresAt.getMinutes() + 30);
     localStorage.setItem("expiresAt", JSON.stringify(expiresAt));
   };
 

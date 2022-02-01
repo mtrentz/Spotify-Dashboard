@@ -9,6 +9,7 @@ import { AuthenticationProvider } from "./contexts/AuthenticationContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
+import RequireAuth from "./components/RequireAuth";
 
 function App() {
   return (
@@ -18,8 +19,10 @@ function App() {
           <NotificationProvider>
             <BrowserRouter>
               <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Home />} />
+                <Route element={<RequireAuth />}>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<Home />} />
+                  </Route>
                 </Route>
                 <Route path="/login" element={<Login />} />
               </Routes>
