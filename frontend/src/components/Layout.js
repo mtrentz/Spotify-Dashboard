@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Outlet } from "react-router-dom";
+import { Link, Navigate, Outlet } from "react-router-dom";
 
 import useAxios from "../hooks/useAxios";
 import ThemeContext from "../contexts/ThemeContext";
+import AuthenticationContext from "../contexts/AuthenticationContext";
 
 import OffcanvasFileUpload from "./Utilities/OffcanvasFileUpload";
 import UploadHistoryButton from "./Utilities/UploadHistoryButton";
@@ -15,11 +15,18 @@ import Footer from "./Footer";
 const Layout = ({ children }) => {
   const axios = useAxios();
   const { theme } = useContext(ThemeContext);
+  const { removeToken } = useContext(AuthenticationContext);
 
+  // Authorized for spotify API, not login
   const [isAuthorized, setIsAuthorized] = useState(true);
   const [years, setYears] = useState([]);
 
   const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const logout = () => {
+    removeToken();
+    Navigate("/login");
+  };
 
   useEffect(() => {
     // Request Authorization Status (for spotify api)
@@ -232,7 +239,7 @@ const Layout = ({ children }) => {
                     role="button"
                     aria-expanded="false"
                   >
-                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                    <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         class="icon icon-tabler icon-tabler-calendar"
@@ -289,6 +296,27 @@ const Layout = ({ children }) => {
                 )}
                 <li className="nav-link">
                   <UploadHistoryButton />
+                </li>
+                <li className="nav-link">
+                  <btn className="flex" type="button" onClick={logout}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="icon icon-tabler icon-tabler-logout"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      stroke-width="2"
+                      stroke="currentColor"
+                      fill="none"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
+                      <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
+                    </svg>
+                    <span className="md:hidden ml-2">Logout</span>
+                  </btn>
                 </li>
               </ul>
             </div>
