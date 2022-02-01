@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { axiosUsers } from "../api/axios";
@@ -11,6 +11,8 @@ const Login = () => {
 
   const { theme } = useContext(ThemeContext);
   const { storeToken } = useContext(AuthenticationContext);
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const login = async (e) => {
     e.preventDefault();
@@ -26,6 +28,7 @@ const Login = () => {
       })
       .catch((error) => {
         console.log(error);
+        setErrorMessage("Invalid username or password");
       });
   };
 
@@ -66,11 +69,12 @@ const Login = () => {
                 <input
                   type="text"
                   id="username"
-                  className="form-control"
+                  className={`form-control ${errorMessage ? "is-invalid" : ""}`}
                   aria-describedby="username"
                   placeholder="Enter username"
                 />
               </div>
+
               <div className="mb-2">
                 <label htmlFor="password" className="form-label">
                   Password
@@ -79,15 +83,18 @@ const Login = () => {
                   <input
                     type="password"
                     id="password"
-                    className="form-control"
+                    className={`form-control ${
+                      errorMessage ? "is-invalid" : ""
+                    }`}
                     placeholder="Password"
                     autocomplete="off"
                     aria-describedby="Password"
                   />
-                  <span className="input-group-text"></span>
                 </div>
               </div>
-
+              {errorMessage ? (
+                <h6 class="text-danger">{errorMessage}</h6>
+              ) : null}
               <div className="form-footer">
                 <button type="submit" className="btn btn-primary w-100">
                   Sign in
