@@ -22,19 +22,19 @@ const AuthorizeButton = () => {
     <a
       href={authUrl}
       target="_blank"
-      class="btn btn-outline-teal w-32 h-7 btn-sm"
+      className="btn btn-outline-teal w-32 h-7 btn-sm"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="icon icon-tabler icon-tabler-brand-spotify"
+        className="icon icon-tabler icon-tabler-brand-spotify"
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        stroke-width="2"
+        strokeWidth="2"
         stroke="currentColor"
         fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       >
         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
         <circle cx="12" cy="12" r="9"></circle>

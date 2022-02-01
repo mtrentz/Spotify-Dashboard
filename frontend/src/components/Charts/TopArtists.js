@@ -68,7 +68,7 @@ const TopArtists = () => {
         <thead>
           <tr>
             <th>Artist</th>
-            <th colspan="2">Minutes Played</th>
+            <th colSpan="2">Minutes Played</th>
           </tr>
         </thead>
         <tbody>

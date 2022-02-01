@@ -88,8 +88,8 @@ const RecentActivity = () => {
 
   return (
     <div className="card" style={{ height: "calc(24rem + 10px)" }}>
-      <div class="card-header flex justify-between">
-        <h3 class="card-title">Your Recent Activity</h3>
+      <div className="card-header flex justify-between">
+        <h3 className="card-title">Your Recent Activity</h3>
         {/* Force activity recheck button */}
         <button onClick={refreshRecentActivity}>
           <svg
@@ -119,7 +119,7 @@ const RecentActivity = () => {
                   <span className="avatar">
                     {" "}
                     <span
-                      class="avatar"
+                      className="avatar"
                       style={{
                         backgroundImage: `url(${item.albumCover})` || "",
                       }}

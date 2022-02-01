@@ -120,15 +120,15 @@ const Layout = ({ children }) => {
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="icon icon-tabler icon-tabler-chart-bar"
+                        className="icon icon-tabler icon-tabler-chart-bar"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
-                        stroke-width="2"
+                        strokeWidth="2"
                         stroke="currentColor"
                         fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
                         <path
                           stroke="none"
@@ -150,15 +150,15 @@ const Layout = ({ children }) => {
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="icon icon-tabler icon-tabler-music"
+                        className="icon icon-tabler icon-tabler-music"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
-                        stroke-width="2"
+                        strokeWidth="2"
                         stroke="currentColor"
                         fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
                         <path
                           stroke="none"
@@ -179,15 +179,15 @@ const Layout = ({ children }) => {
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="icon icon-tabler icon-tabler-disc"
+                        className="icon icon-tabler icon-tabler-disc"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
-                        stroke-width="2"
+                        strokeWidth="2"
                         stroke="currentColor"
                         fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
                         <path
                           stroke="none"
@@ -208,15 +208,15 @@ const Layout = ({ children }) => {
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="icon icon-tabler icon-tabler-microphone-2"
+                        className="icon icon-tabler icon-tabler-microphone-2"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
-                        stroke-width="2"
+                        strokeWidth="2"
                         stroke="currentColor"
                         fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
                         <path
                           stroke="none"
@@ -230,9 +230,9 @@ const Layout = ({ children }) => {
                     <span className="nav-link-title">Artists</span>
                   </a>
                 </li>
-                <li class="nav-item dropdown">
+                <li className="nav-item dropdown">
                   <a
-                    class="nav-link dropdown-toggle"
+                    className="nav-link dropdown-toggle"
                     href="#navbar-base"
                     data-bs-toggle="dropdown"
                     data-bs-auto-close="outside"
@@ -242,15 +242,15 @@ const Layout = ({ children }) => {
                     <span className="nav-link-icon d-md-none d-lg-inline-block">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="icon icon-tabler icon-tabler-calendar"
+                        className="icon icon-tabler icon-tabler-calendar"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
-                        stroke-width="2"
+                        strokeWidth="2"
                         stroke="currentColor"
                         fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
                         <path
                           stroke="none"
@@ -265,17 +265,17 @@ const Layout = ({ children }) => {
                         <line x1="12" y1="15" x2="12" y2="18"></line>
                       </svg>
                     </span>
-                    <span class="nav-link-title">Year in Review</span>
+                    <span className="nav-link-title">Year in Review</span>
                   </a>
-                  <div class="dropdown-menu">
-                    <div class="dropdown-menu-columns">
-                      <div class="dropdown-menu-column">
+                  <div className="dropdown-menu">
+                    <div className="dropdown-menu-columns">
+                      <div className="dropdown-menu-column">
                         {years
                           ? years.map((year, index) => {
                               return (
                                 <a
                                   key={index}
-                                  class="dropdown-item disabled"
+                                  className="dropdown-item disabled"
                                   href="./empty.html"
                                 >
                                   {year}
@@ -298,25 +298,25 @@ const Layout = ({ children }) => {
                   <UploadHistoryButton />
                 </li>
                 <li className="nav-link">
-                  <btn className="flex" type="button" onClick={logout}>
+                  <button className="flex" type="button" onClick={logout}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      class="icon icon-tabler icon-tabler-logout"
+                      className="icon icon-tabler icon-tabler-logout"
                       width="24"
                       height="24"
                       viewBox="0 0 24 24"
-                      stroke-width="2"
+                      strokeWidth="2"
                       stroke="currentColor"
                       fill="none"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
                       <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
                     </svg>
                     <span className="md:hidden ml-2">Logout</span>
-                  </btn>
+                  </button>
                 </li>
               </ul>
             </div>

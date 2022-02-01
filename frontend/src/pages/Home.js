@@ -33,9 +33,9 @@ const Home = () => {
 
   return (
     <div>
-      <div class="col mx-2 mb-3">
-        <div class="page-pretitle">Overview</div>
-        <h2 class="page-title">Home Dashboard</h2>
+      <div className="col mx-2 mb-3">
+        <div className="page-pretitle">Overview</div>
+        <h2 className="page-title">Home Dashboard</h2>
       </div>
       <div className="m-2 flex flex-col gap-2 md:grid md:grid-cols-2 md:grid-flow-row md:auto-rows-min">
         <div className="order-none md:order-1 md:col-span-2">
