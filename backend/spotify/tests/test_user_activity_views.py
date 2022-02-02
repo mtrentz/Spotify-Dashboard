@@ -21,6 +21,9 @@ class TestUserActivityViews(APITestCase):
 
         The different tracks do not matter here, so it will always be the same one,
         from the fixtures.
+
+        # TODO: Some tests here fail at specific hours of day. The ones that take into account TZ.
+        # I'll have to figure it out later.
         """
 
         user = User.objects.create_superuser('admin', 'admin@admin.com', "admin")
