@@ -1,4 +1,5 @@
 from rest_framework.test import APITestCase
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.test.utils import tag
 from django.db.models import Sum
@@ -40,6 +41,9 @@ class TestInsert(APITestCase):
         """
         Creates a mock history from spotify. Adds it to the database.
         """
+        user = User.objects.create_superuser('admin', 'admin@admin.com', "admin")
+        self.client.force_authenticate(user)
+
         # This is a mock history data of spotify, using only the artists/tracks shown above.
         # Caution: I'll make some very specific mentions to this data,
         # so never change order, values, etc...

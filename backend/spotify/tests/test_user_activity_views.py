@@ -1,4 +1,5 @@
 from rest_framework.test import APITestCase
+from django.contrib.auth.models import User
 from django.urls import reverse
 from spotify.tasks import insert_track_batch_from_history
 from datetime import datetime, timedelta, timezone
@@ -21,6 +22,9 @@ class TestUserActivityViews(APITestCase):
         The different tracks do not matter here, so it will always be the same one,
         from the fixtures.
         """
+
+        user = User.objects.create_superuser('admin', 'admin@admin.com', "admin")
+        self.client.force_authenticate(user)
 
         today = datetime.today()
         # Set time as 1 am

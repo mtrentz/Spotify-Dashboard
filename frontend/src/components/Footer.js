@@ -7,7 +7,7 @@ const Footer = () => {
         <div className="row text-center align-items-center flex-row-reverse justify-center">
           <div className="col-lg-auto">
             <ul className="list-inline list-inline-dots mb-0">
-              <li className="list-inline-item">
+              <li className="list-inline-item" key="source-code">
                 <a
                   href="https://github.com/mtrentz/Spotify-Dashboard"
                   target="_blank"
@@ -17,7 +17,7 @@ const Footer = () => {
                   Source code
                 </a>
               </li>
-              <li className="list-inline-item">
+              <li className="list-inline-item" key="about-me">
                 <a
                   href="https://mtrentz.com.br/aboutme"
                   className="link-secondary"
@@ -30,7 +30,7 @@ const Footer = () => {
                   Github
                 </a>
               </li>
-              <li className="list-inline-item">
+              <li className="list-inline-item" key="linkedin">
                 <a
                   href="https://www.linkedin.com/in/mtrentz/"
                   target="_blank"
