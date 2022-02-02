@@ -87,7 +87,7 @@ const Login = () => {
                       errorMessage ? "is-invalid" : ""
                     }`}
                     placeholder="Password"
-                    autocomplete="off"
+                    autoComplete="off"
                     aria-describedby="Password"
                   />
                 </div>
