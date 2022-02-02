@@ -5,43 +5,51 @@ const Footer = () => {
     <footer className="footer footer-transparent d-print-none">
       <div className="container-xl">
         <div className="row text-center align-items-center flex-row-reverse justify-center">
-          <div className="col-lg-auto">
-            <ul className="list-inline list-inline-dots mb-0">
-              <li className="list-inline-item" key="source-code">
-                <a
-                  href="https://github.com/mtrentz/Spotify-Dashboard"
-                  target="_blank"
-                  className="link-secondary"
-                  rel="noopener"
-                >
-                  Source code
-                </a>
-              </li>
-              <li className="list-inline-item" key="about-me">
-                <a
-                  href="https://mtrentz.com.br/aboutme"
-                  className="link-secondary"
-                >
-                  About Me
-                </a>
-              </li>
-              <li className="list-inline-item">
-                <a href="https://github.com/mtrentz" className="link-secondary">
-                  Github
-                </a>
-              </li>
-              <li className="list-inline-item" key="linkedin">
-                <a
-                  href="https://www.linkedin.com/in/mtrentz/"
-                  target="_blank"
-                  className="link-secondary"
-                  rel="noopener"
-                >
-                  Linkedin
-                </a>
-              </li>
-            </ul>
-          </div>
+          <ol
+            className="breadcrumb breadcrumb-dots flex flex-row justify-center"
+            aria-label="breadcrumbs"
+          >
+            <li className="breadcrumb-item">
+              <a
+                href="https://github.com/mtrentz/Spotify-Dashboard"
+                target="_blank"
+                className="link-secondary"
+                rel="noopener"
+              >
+                Source code
+              </a>
+            </li>
+            <li className="breadcrumb-item">
+              <a
+                href="https://mtrentz.com.br/aboutme"
+                target="_blank"
+                className="link-secondary"
+                rel="noopener"
+              >
+                About Me
+              </a>
+            </li>
+            <li className="breadcrumb-item">
+              <a
+                href="https://github.com/mtrentz"
+                target="_blank"
+                className="link-secondary"
+                rel="noopener"
+              >
+                Github
+              </a>
+            </li>
+            <li className="breadcrumb-item">
+              <a
+                href="https://www.linkedin.com/in/mtrentz/"
+                target="_blank"
+                className="link-secondary"
+                rel="noopener"
+              >
+                Linkedin
+              </a>
+            </li>
+          </ol>
         </div>
         <div className="mt-3 mt-lg-0 flex flex-row justify-center">
           <li className="list-inline-item">

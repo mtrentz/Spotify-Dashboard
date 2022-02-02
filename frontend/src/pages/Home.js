@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import useAxios from "../hooks/useAxios";
