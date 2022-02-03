@@ -1,7 +1,9 @@
 from .models import UserActivity
+from rest_framework.exceptions import ValidationError
 from datetime import timedelta, datetime
 from rest_framework.exceptions import ParseError
 from .models import Tracks, SearchHistory
+from django.db.models.functions import Trunc
 import logging
 import pytz
 
@@ -237,6 +239,27 @@ def validate_days_query_param(days):
     return days
 
 
+def validate_year_query_param(year):
+    try:
+        year = int(year)
+    except ValueError:
+        raise ParseError("Year must be an integer")
+    if year <= 1970:
+        raise ParseError("Year must be after 1970")
+    return year
+
+
+def validate_date_query_param(date):
+    """
+    Accepts date as a string in the format of YYYY-MM-DD
+    """
+    try:
+        date = datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        raise ParseError("Date must be in the format of YYYY-MM-DD")
+    return date
+
+
 def validate_qty_query_params(qty):
     try:
         qty = int(qty)
@@ -247,11 +270,204 @@ def validate_qty_query_params(qty):
     return qty
 
 
+def validate_and_parse_date_selection_query_parameters(
+    days, year, date_start, date_end
+):
+    """
+    This is the main function that will do the logic for validating the date parameters
+    that many endpoint will receive.
+
+    Some endpoints will have the possibility of filtering by:
+        days: The amount of days in the past to include in the query.
+        year: The single year to include in the query.
+        date_start, date_end: Range of dates to be included in the query.
+
+    These types of filtering are exclusive. Meaning only one can be chosen.
+
+    This function will check if more than one of them were passed through as query parameters
+    and return an error if so.
+
+    If everthing is valid, it will return the query parameters back, with None for those that were not passed.
+    And will also return the method which the query has to be made. The possible methods are
+    "days", "year", "date_range" or None if no date parameter was passed.
+
+    Returns:
+        tuple: (days, year, date_start, date_end, method)
+    """
+
+    amount_params = sum([bool(days), bool(year), (bool(date_start) or bool(date_end))])
+
+    # First I will check if not too many parameters were passed
+    if amount_params > 1:
+        raise ParseError(
+            "You can only pass one of the following parameters: days, year, [date_start, date_end]"
+        )
+
+    # I will also check if no parameter was passed
+    if amount_params == 0:
+        return None, None, None, None, None
+
+    # If days was passed, I'll validate it and return it
+    if days:
+        days = validate_days_query_param(days)
+        return days, None, None, None, "days"
+
+    # If year was passed, I'll validate it and return it
+    if year:
+        year = validate_year_query_param(year)
+        return None, year, None, None, "year"
+
+    # If date_start or date_end was passed, I'll validate them and return them
+    if date_start:
+        date_start = validate_date_query_param(date_start)
+
+    if date_end:
+        date_end = validate_date_query_param(date_end)
+
+    if date_start == date_end:
+        raise ParseError("date_start and date_end cannot be the same")
+
+    # If one of date_start, date_end wasn't passed, it will still be returned as None
+    return None, None, date_start, date_end, "date_range"
+
+
 def validate_timezone_query_params(tz_name):
     if tz_name not in pytz.all_timezones:
         logger.warning(f"Invalid timezone: {tz_name}")
         return "UTC"
     return tz_name
+
+
+def filter_model_by_date_selection(
+    model,
+    tzinfo,
+    days_param,
+    year_param,
+    date_start_param,
+    date_end_param,
+    method,
+    path_to_played_at,
+):
+    """
+    As well as validating the types of date filtering that will be done, the process of
+    filtering a table for the queryset is also common in many endpoints.
+
+    So here a model will be filtered depending on the date parameters sent to the endpoint.
+
+    The tricky argument is "path_to_played_at", which should be a django query to get to the played_at field.
+    For example "tracks__useractivity__played_at"
+
+    It will return a queryset.
+    """
+    # First I have to see which method is going to be used for filtering
+    if method == "year":
+        objects = model.objects.annotate(
+            year=Trunc(path_to_played_at, "year", tzinfo=tzinfo)
+        ).filter(year__year=year_param)
+    else:
+        # All other methods share the same logic of filtering by date range
+        # If no method is passed, the default will be returning the last 7 days
+        if method == "days" or method == None:
+            if method == None:
+                days_param = 7
+            date_now = datetime.now(tzinfo)
+            # Defines date start and end for filtering
+            date_start = date_now - timedelta(days=days_param)
+            date_end = date_now
+        elif method == "date_range":
+            # I have to check if both date_start and date_end were passed
+            # If no start, set it to 7 days ago
+            if not date_start_param:
+                date_start_param = datetime.now(tzinfo) - timedelta(days=7)
+            # If no end, set it to now
+            if not date_end_param:
+                date_end_param = datetime.now(tzinfo)
+
+            date_start = date_start_param
+            date_end = date_end_param
+            # Add tz info to dates
+            date_start = date_start.replace(tzinfo=tzinfo)
+            date_end = date_end.replace(tzinfo=tzinfo)
+        # Should never get here, but just in case...
+        else:
+            raise ValidationError(
+                "Invalid method parameter. Valid values are: days, year, date_range"
+            )
+        # Filter by range
+        # I have to pass the path to the played_at_field__range
+        kwargs = {path_to_played_at + "__range": [date_start, date_end]}
+
+        objects = model.objects.filter(**kwargs)
+
+    # Returns the queryset filtered by date
+    return objects
+
+
+def filter_model_by_date_selection_previous_period(
+    model,
+    tzinfo,
+    days_param,
+    year_param,
+    date_start_param,
+    date_end_param,
+    method,
+    path_to_played_at,
+):
+    """
+    Very similar to the normal filter by date selection, but has extra logic to get the previous period.
+    """
+    if method == "year":
+        # Get 1 year before
+        previous_objects = model.objects.annotate(
+            year=Trunc(path_to_played_at, "year", tzinfo=tzinfo)
+        ).filter(year__year=year_param - 1)
+    else:
+        # Here, all other methods filter by range
+        if method == "days" or method == None:
+            # If no parameter was passed, default to last 7 days
+            if method == None:
+                days_param = 7
+            # For previous period, the start is now - 2 * days_param ago
+            previous_date_start = datetime.now(tzinfo) - timedelta(days=2 * days_param)
+            # The end is now - days_parm ago
+            previous_date_end = datetime.now(tzinfo) - timedelta(days=days_param)
+        elif method == "date_range":
+            # I have to check if both date_start and date_end were passed
+            # If no start, set it to 7 days ago
+            if not date_start_param:
+                date_start_param = datetime.now(tzinfo) - timedelta(days=7)
+            # If no end, set it to now
+            if not date_end_param:
+                date_end_param = datetime.now(tzinfo)
+            # Get the amount of days between dates
+            days_diff = (date_end_param - date_start_param).days
+            # For previous period just subtract the days_diff
+            previous_date_start = date_start_param - timedelta(days=days_diff)
+            previous_date_end = date_end_param - timedelta(days=days_diff)
+            # Add tz info to dates
+            previous_date_start = previous_date_start.replace(tzinfo=tzinfo)
+            previous_date_end = previous_date_end.replace(tzinfo=tzinfo)
+        # Should never get here, but just in case...
+        else:
+            raise ValidationError(
+                "Invalid method parameter. Valid values are: days, year, date_range"
+            )
+        # Filter by range
+        kwargs = {
+            path_to_played_at + "__range": [previous_date_start, previous_date_end]
+        }
+        previous_objects = model.objects.filter(**kwargs)
+
+    return previous_objects
+
+
+def calculate_growth(previous_value, current_value):
+    """
+    Calculates the growth between two values.
+    """
+    if previous_value == 0:
+        return 0
+    return (current_value - previous_value) / previous_value
 
 
 def unpack_response_images(imgs_resp):
@@ -287,3 +503,12 @@ def unpack_response_images(imgs_resp):
                 image_lg = data[2][1]
 
     return image_sm, image_md, image_lg
+
+
+def make_filter(model, **kwargs):
+    print(model.objects.filter(**kwargs))
+
+
+def make_filter_two(model, arg_kw, d1, d2):
+    args = {arg_kw: [d1, d2]}
+    print(model.objects.filter(**args))

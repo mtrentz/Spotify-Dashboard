@@ -2,11 +2,11 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from spotify.tasks import insert_track_entry
 from spotify.models import Tracks, Artists
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, tzinfo
 from django.contrib.auth.models import User
 
 
-class TestTrackViews(APITestCase):
+class TestArtistViews(APITestCase):
     """
     I'll be testing the artist views, which give stats for
     unique, most played artists in some period.
@@ -22,7 +22,7 @@ class TestTrackViews(APITestCase):
     fixtures = ["albums.json", "artists.json", "genres.json", "tracks.json"]
 
     def setUp(self):
-        user = User.objects.create_superuser('admin', 'admin@admin.com', "admin")
+        user = User.objects.create_superuser("admin", "admin@admin.com", "admin")
         self.client.force_authenticate(user)
 
     @staticmethod
@@ -199,7 +199,7 @@ class TestTrackViews(APITestCase):
         self.assertEqual(res.json()[1]["artist"], "Dire Straits")
         self.assertEqual(res.json()[1]["minutes_played"], 6)
 
-    def test_top_played_cals(self):
+    def test_top_played_calcs(self):
         """
         Add some mock entries, check if its properly ordering artists,
         if its grouping them together and summing everything properly.
@@ -296,6 +296,45 @@ class TestTrackViews(APITestCase):
 
         # Check if the second one is Dire Straits
         self.assertEqual(res.json()[1]["artist"], "Dire Straits")
+
+        # Pass date_start and date_end for last week
+        date_start = (datetime.now(timezone.utc) - timedelta(days=14)).strftime(
+            "%Y-%m-%d"
+        )
+        date_end = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%d")
+
+        res = self.client.get(
+            reverse("top_played_artists"),
+            {"date_start": date_start, "date_end": date_end},
+        )
+
+        # First, check for response ok
+        self.assertEqual(res.status_code, 200)
+
+        # Check if there is only one artists
+        self.assertEqual(len(res.json()), 1)
+
+        # Check if the artist is Dire Straits
+        self.assertEqual(res.json()[0]["artist"], "Dire Straits")
+
+        # Testing by YEAR only is kinda weird because 14 days ago could be a different year.
+        # So i'll add an entry in 2016 and query for only that year
+        new_entry = [
+            {
+                "played_at": (datetime(2016, 5, 5, 5, tzinfo=timezone.utc)).isoformat(),
+                "ms_played": 5 * 60_000,
+            },
+        ]
+
+        self.insert_track_entries(track_one, new_entry)
+
+        res = self.client.get(reverse("top_played_artists"), {"year": "2016"})
+
+        # First, check for response ok
+        self.assertEqual(res.status_code, 200)
+
+        # Check if time played is correct
+        self.assertEqual(res.json()[0]["minutes_played"], 5)
 
     def test_unique_artists_query_params(self):
         """
@@ -398,3 +437,58 @@ class TestTrackViews(APITestCase):
         res = self.client.get(reverse("unique_artists"), {"days": 7})
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.json()["growth"], 0)
+
+        # To test passing date range I'll focus getting this week only
+        date_start = (datetime.now(timezone.utc) - timedelta(days=7)).strftime(
+            "%Y-%m-%d"
+        )
+        date_end = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        res = self.client.get(
+            reverse("unique_artists"),
+            {"date_start": date_start, "date_end": date_end},
+        )
+
+        # First, check for response ok
+        self.assertEqual(res.status_code, 200)
+
+        # This week there are two artists
+        self.assertEqual(res.json()["count"], 2)
+
+        # Check growth
+        self.assertEqual(res.json()["growth"], 0)
+
+        # To test year is a bit tricky, so I'll add two artists in 2016
+        # and one in 2015
+        new_entry_2016 = [
+            {
+                "played_at": (datetime(2016, 5, 5, 5, tzinfo=timezone.utc)).isoformat(),
+                "ms_played": 5 * 60_000,
+            },
+        ]
+
+        new_entry_2015 = [
+            {
+                "played_at": (datetime(2015, 5, 5, 5, tzinfo=timezone.utc)).isoformat(),
+                "ms_played": 5 * 60_000,
+            },
+        ]
+
+        # Add Audioslave and Dire Straits in 2016
+        self.insert_track_entries(track_one, new_entry_2016)
+        self.insert_track_entries(track_three, new_entry_2016)
+
+        # Add only Audioslave 2015
+        self.insert_track_entries(track_one, new_entry_2015)
+
+        # Check now passing the year if its correct
+        res = self.client.get(reverse("unique_artists"), {"year": "2016"})
+
+        # First, check for response ok
+        self.assertEqual(res.status_code, 200)
+
+        # There are two artists in 2016
+        self.assertEqual(res.json()["count"], 2)
+
+        # Check growth
+        self.assertEqual(res.json()["growth"], 1)

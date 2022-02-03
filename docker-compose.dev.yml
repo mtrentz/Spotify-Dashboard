@@ -24,14 +24,14 @@ services:
   redis:
     image: redis
     container_name: spotify_redis
-    # ports:
-    #   - 6379:6379
+    ports:
+      - 6379:6379
 
   db:
     image: postgres:latest
     container_name: spotify_postgres
-    # ports:
-    #   - 5432:5432
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
