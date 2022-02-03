@@ -6,28 +6,60 @@ from ..serializers.track_serializers import (
 from django.db.models import Sum, Count
 from ..models import Tracks
 from datetime import datetime, timedelta, timezone
-from ..helpers import validate_days_query_param, validate_qty_query_params
+from ..helpers import (
+    validate_days_query_param,
+    validate_qty_query_params,
+    validate_and_parse_date_selection_query_parameters,
+    validate_timezone_query_params,
+    filter_model_by_date_selection,
+    filter_model_by_date_selection_previous_period,
+    calculate_growth,
+)
+import pytz
 
 
 class TopPlayedTracksView(ListAPIView):
     serializer_class = TopTracksSerializer
 
     def get_queryset(self):
+        days_param = self.request.query_params.get("days", None)
+        year_param = self.request.query_params.get("year", None)
+        date_start_param = self.request.query_params.get("date_start", None)
+        date_end_param = self.request.query_params.get("date_end", None)
+        # Qty defaults to 10
+        qty = self.request.query_params.get("qty", 10)
+        # Defaults to UTC
+        tz_name = self.request.query_params.get("timezone", "UTC")
 
-        # How many days in the past to include, defaults to 7, func will raise for errors
-        days = validate_days_query_param(self.request.query_params.get("days", 7))
-
-        # How many artists to return, defaults to 10, func will raise for errors
-        qty = validate_qty_query_params(self.request.query_params.get("qty", 10))
-
-        date_now = datetime.now(timezone.utc)
-        date_start = date_now - timedelta(days=days)
-
-        items = (
-            Tracks.objects.filter(useractivity__played_at__range=[date_start, date_now])
-            .annotate(time_played_ms=Sum("useractivity__ms_played"))
-            .order_by("-time_played_ms")[:qty]
+        # Validate the parameters
+        (
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+        ) = validate_and_parse_date_selection_query_parameters(
+            days_param, year_param, date_start_param, date_end_param
         )
+        qty = validate_qty_query_params(qty)
+        tz_name = validate_timezone_query_params(tz_name)
+
+        tzinfo = pytz.timezone(tz_name)
+
+        objects = filter_model_by_date_selection(
+            Tracks,
+            tzinfo,
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+            path_to_played_at="useractivity__played_at",
+        )
+
+        items = objects.annotate(
+            time_played_ms=Sum("useractivity__ms_played")
+        ).order_by("-time_played_ms")[:qty]
 
         queryset = []
 
@@ -49,17 +81,47 @@ class UniqueTracksView(RetrieveAPIView):
     serializer_class = UniqueTracksSerializer
 
     def get_queryset(self):
-        # How many days in the past to include, defaults to 7, func will raise for errors
-        days = validate_days_query_param(self.request.query_params.get("days", 7))
+        days_param = self.request.query_params.get("days", None)
+        year_param = self.request.query_params.get("year", None)
+        date_start_param = self.request.query_params.get("date_start", None)
+        date_end_param = self.request.query_params.get("date_end", None)
+        # Qty defaults to 10
+        qty = self.request.query_params.get("qty", 10)
+        # Defaults to UTC
+        tz_name = self.request.query_params.get("timezone", "UTC")
 
-        date_now = datetime.now(timezone.utc)
-        date_start = date_now - timedelta(days=days)
+        # Validate the parameters
+        (
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+        ) = validate_and_parse_date_selection_query_parameters(
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+        )
+        qty = validate_qty_query_params(qty)
+        tz_name = validate_timezone_query_params(tz_name)
+
+        tzinfo = pytz.timezone(tz_name)
+
+        objects = filter_model_by_date_selection(
+            Tracks,
+            tzinfo,
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+            path_to_played_at="useractivity__played_at",
+        )
 
         # Calculate amount of unique tracks on the period selected
         count = (
-            Tracks.objects
-            # Filter by range
-            .filter(useractivity__played_at__range=[date_start, date_now])
+            objects
             # Group tracks by ms_played
             .annotate(time_played_ms=Sum("useractivity__ms_played"))
             # Filter by those listened to more than 2 minutes (120000 ms)
@@ -68,29 +130,25 @@ class UniqueTracksView(RetrieveAPIView):
             .aggregate(Count("sp_id", distinct=True))
         )
 
-        # To return the growth, calculate the unique count from the same number of days in the period just before.
-        # The start of the current one is at the end of the past one
-        previous_date_end = date_start
-        previous_date_start = previous_date_end - timedelta(days=days)
+        previous_objects = filter_model_by_date_selection_previous_period(
+            Tracks,
+            tzinfo,
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+            path_to_played_at="useractivity__played_at",
+        )
 
         previous_count = (
-            Tracks.objects.filter(
-                useractivity__played_at__range=[previous_date_start, previous_date_end]
-            )
-            .annotate(time_played_ms=Sum("useractivity__ms_played"))
+            previous_objects.annotate(time_played_ms=Sum("useractivity__ms_played"))
             .filter(time_played_ms__gte=120000)
             .aggregate(Count("sp_id", distinct=True))
         )
 
         # Calculate the growth
-        # Check if there was something listened to in the last period,
-        # else set growth to 0, to avoid division by 0.
-        if previous_count["sp_id__count"]:
-            growth = (
-                count["sp_id__count"] - previous_count["sp_id__count"]
-            ) / previous_count["sp_id__count"]
-        else:
-            growth = 0
+        growth = calculate_growth(previous_count["sp_id__count"], count["sp_id__count"])
 
         return {"count": count["sp_id__count"], "growth": growth}
 
