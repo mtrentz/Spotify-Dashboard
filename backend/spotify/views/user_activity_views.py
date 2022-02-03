@@ -6,12 +6,16 @@ from ..serializers.user_activity_serializers import (
 )
 from ..models import UserActivity
 from ..helpers import (
+    validate_and_parse_date_selection_query_parameters,
     validate_qty_query_params,
-    validate_days_query_param,
     validate_timezone_query_params,
+    filter_model_by_date_selection,
+    filter_model_by_date_selection_previous_period,
+    validate_periodicity_params,
+    calculate_growth,
 )
 from django.db.models import Sum
-from django.db.models.functions import TruncDay, TruncYear
+from django.db.models.functions import Trunc
 from django.utils import timezone
 from datetime import datetime, timedelta
 import pytz
@@ -55,36 +59,56 @@ class TimePlayedView(RetrieveAPIView):
         If the query param for days is 10, it will try to return the 10 latests days on the database.
         In case there isn't enough data, only then will return less than that amount of data points.
         """
-        # TODO: Não tenho 100% de ctz que ta lidando certo com timezone pro date range
-        # TODO: Utilizar Trunc() só, e deixar escolher day/week/month pra truncar.
-        # Ou fazer automatico pelo numero de dias. If days > x, trunc week etc...
-        # Tem que ver como o grafico do frontend lida com isso
+        days_param = self.request.query_params.get("days", None)
+        year_param = self.request.query_params.get("year", None)
+        date_start_param = self.request.query_params.get("date_start", None)
+        date_end_param = self.request.query_params.get("date_end", None)
+        # Defaults to daily
+        periodicity = self.request.query_params.get("periodicity", "daily")
+        # Qty defaults to 10
+        qty = self.request.query_params.get("qty", 10)
+        # Defaults to UTC
+        tz_name = self.request.query_params.get("timezone", "UTC")
+        tzinfo = pytz.timezone(tz_name)
 
-        # How many data points to include. Defaults to 7, func will raise for errors
-        days = validate_days_query_param(self.request.query_params.get("days", 7))
-        # Timezone from the client request, defaults to UTC. If name invalid, also defaults to UTC
-        tz_name = validate_timezone_query_params(
-            self.request.query_params.get("timezone", "UTC")
+        # Validate the parameters
+        (
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+        ) = validate_and_parse_date_selection_query_parameters(
+            days_param, year_param, date_start_param, date_end_param
         )
+        periodicity = validate_periodicity_params(periodicity)
+        qty = validate_qty_query_params(qty)
+        tz_name = validate_timezone_query_params(tz_name)
 
         tzinfo = pytz.timezone(tz_name)
 
-        date_now = datetime.now(tzinfo)
-        date_start = date_now - timedelta(days=days)
+        objects = filter_model_by_date_selection(
+            UserActivity,
+            tzinfo,
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+            path_to_played_at="played_at",
+        )
 
         # Here I have the amount played day by day in the current period.
         time_played_by_day = (
-            UserActivity.objects
-            # Filter by range
-            .filter(played_at__range=[date_start, date_now])
-            # Truncate by day
-            .annotate(day=TruncDay("played_at", tzinfo=tzinfo))
-            # Get the values for each day
-            .values("day")
+            objects
+            # Truncate period
+            .annotate(period=Trunc("played_at", periodicity, tzinfo=tzinfo))
+            # Get the values for period
+            .values("period")
             # Sum the ms_played for each day
             .annotate(time_played_ms=Sum("ms_played"))
             # Order so the oldest is first
-            .order_by("day")
+            .order_by("period")
         )
 
         # Sum the ms_played for the current period
@@ -95,14 +119,19 @@ class TimePlayedView(RetrieveAPIView):
         if not ms_played_current:
             ms_played_current = 0
 
-        # To return the growth, i'll ned to do this ms_played sum in the past period
-        previous_date_end = date_start
-        previous_date_start = previous_date_end - timedelta(days=days)
+        previous_objects = filter_model_by_date_selection_previous_period(
+            UserActivity,
+            tzinfo,
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+            path_to_played_at="played_at",
+        )
 
         ms_played_previous = (
-            UserActivity.objects
-            # Filter by range
-            .filter(played_at__range=[previous_date_start, previous_date_end])
+            previous_objects
             # Aggregate the sum
             .aggregate(Sum("ms_played"))
         )["ms_played__sum"]
@@ -113,7 +142,7 @@ class TimePlayedView(RetrieveAPIView):
         for obj in time_played_by_day:
             items.append(
                 {
-                    "date": obj["day"].strftime("%Y-%m-%d"),
+                    "date": obj["period"].strftime("%Y-%m-%d"),
                     "minutes_played": obj["time_played_ms"] / 60_000,
                 }
             )
@@ -152,7 +181,9 @@ class AvailableYearsView(ListAPIView):
         tzinfo = pytz.timezone(tz_name)
 
         items = (
-            UserActivity.objects.annotate(year=TruncYear("played_at", tzinfo=tzinfo))
+            UserActivity.objects.annotate(
+                year=Trunc("played_at", "year", tzinfo=tzinfo)
+            )
             .values("year")
             .distinct("year")
         )

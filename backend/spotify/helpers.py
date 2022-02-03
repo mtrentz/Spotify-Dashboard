@@ -270,6 +270,17 @@ def validate_qty_query_params(qty):
     return qty
 
 
+def validate_periodicity_params(periodicity):
+    if periodicity not in ["daily", "weekly", "monthly", "yearly"]:
+        raise ParseError(
+            "periodicity must be one of 'daily', 'weekly', 'monthly', 'yearly'"
+        )
+
+    # Translate to day, week, month, year
+    map = {"daily": "day", "weekly": "week", "monthly": "month", "yearly": "year"}
+    return map[periodicity]
+
+
 def validate_and_parse_date_selection_query_parameters(
     days, year, date_start, date_end
 ):
