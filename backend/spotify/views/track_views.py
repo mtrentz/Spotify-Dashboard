@@ -19,6 +19,21 @@ import pytz
 
 
 class TopPlayedTracksView(ListAPIView):
+    """
+    This will return the top tracks played by time.
+
+    It can be filtered by:
+        - days: the number of days to look back
+        - year: the year to look back
+        - date_start: the start date to look back
+        - date_end: the end date to look back
+        - qty: the number of artists to return
+
+    Some of them are exclusive, meaning that only one of them can be passed.
+    You can either filter by days, year or date_range. If none were passed
+    the endpoint will default to showing the top 10 artists for the last 7 days.
+    """
+
     serializer_class = TopTracksSerializer
 
     def get_queryset(self):

@@ -94,7 +94,7 @@ class TimePlayedView(RetrieveAPIView):
         )
 
         # Here I have the amount played day by day in the current period.
-        time_played_by_day = (
+        time_played_by_period = (
             objects
             # Truncate period
             .annotate(period=Trunc("played_at", periodicity, tzinfo=tzinfo))
@@ -107,7 +107,7 @@ class TimePlayedView(RetrieveAPIView):
         )
 
         # Sum the ms_played for the current period
-        ms_played_current = time_played_by_day.aggregate(Sum("time_played_ms"))[
+        ms_played_current = time_played_by_period.aggregate(Sum("time_played_ms"))[
             "time_played_ms__sum"
         ]
 
@@ -137,7 +137,7 @@ class TimePlayedView(RetrieveAPIView):
         # Items is going to be a list of objects {'date': date, 'minutes_played': int}
         items = []
 
-        for obj in time_played_by_day:
+        for obj in time_played_by_period:
             items.append(
                 {
                     "date": obj["period"].strftime("%Y-%m-%d"),

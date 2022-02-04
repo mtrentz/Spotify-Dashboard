@@ -273,13 +273,13 @@ const Layout = ({ children }) => {
                         {years
                           ? years.map((year, index) => {
                               return (
-                                <a
+                                <Link
                                   key={index}
-                                  className="dropdown-item disabled"
-                                  href="./empty.html"
+                                  className="dropdown-item"
+                                  to={`./year-in-review/${year}`}
                                 >
                                   {year}
-                                </a>
+                                </Link>
                               );
                             })
                           : null}

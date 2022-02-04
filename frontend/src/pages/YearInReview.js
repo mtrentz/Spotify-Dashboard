@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import TopAlbums from "../components/Charts/TopAlbums";
+
 const YearInReview = () => {
   const { year } = useParams();
   const navigate = useNavigate();
@@ -20,7 +22,11 @@ const YearInReview = () => {
     }
   }, []);
 
-  return <div>{year}</div>;
+  return (
+    <div>
+      <TopAlbums />
+    </div>
+  );
 };
 
 export default YearInReview;
