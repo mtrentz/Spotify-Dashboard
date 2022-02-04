@@ -3,8 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 
-import useAxios from "../../hooks/useAxios";
-import NotificationContext from "../../contexts/NotificationContext";
+import useAxios from "../../../hooks/useAxios";
+import NotificationContext from "../../../contexts/NotificationContext";
 
 const RecentActivity = () => {
   const axios = useAxios();

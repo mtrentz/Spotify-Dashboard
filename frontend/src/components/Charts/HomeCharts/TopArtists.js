@@ -1,9 +1,9 @@
 import React from "react";
 import { useEffect, useState } from "react";
 
-import useAxios from "../../hooks/useAxios";
+import useAxios from "../../../hooks/useAxios";
 
-import PeriodDropdown from "../Utilities/PeriodDropdown";
+import PeriodDropdown from "../../Utilities/PeriodDropdown";
 
 const TopArtists = () => {
   const axios = useAxios();

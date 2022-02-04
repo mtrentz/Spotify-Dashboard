@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 
-import useAxios from "../../hooks/useAxios";
+import useAxios from "../../../hooks/useAxios";
 
-const TopAlbums = () => {
+const TopAlbumsYear = ({ year }) => {
   const axios = useAxios();
 
   const [topAlbumsData, setTopAlbumsData] = useState([]);
@@ -19,10 +19,12 @@ const TopAlbums = () => {
     return processedData;
   };
 
+  const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   useEffect(() => {
     axios
       .get("/top-played-albums/", {
-        params: { qty: 7, year: 2022 },
+        params: { qty: 7, year: year, timezone: browserTimezone },
       })
       .then((res) => {
         setTopAlbumsData(processApiResponse(res.data));
@@ -32,11 +34,11 @@ const TopAlbums = () => {
         console.log(err);
         console.log(err.response.data);
       });
-  }, []);
+  }, [year]);
 
   return (
     <div className="col-lg-4">
-      <h3 className="mb-3">Top albums</h3>
+      <h3 className="mb-3">Top Albums</h3>
       <div className="row row-cards">
         {topAlbumsData.map((item, index) => {
           return (
@@ -78,4 +80,4 @@ const TopAlbums = () => {
   );
 };
 
-export default TopAlbums;
+export default TopAlbumsYear;

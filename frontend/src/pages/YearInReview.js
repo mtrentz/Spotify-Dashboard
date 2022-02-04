@@ -1,7 +1,10 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-import TopAlbums from "../components/Charts/TopAlbums";
+import TopAlbumsYear from "../components/Charts/YearReviewCharts/TopAlbumsYear";
+import TopArtistsYear from "../components/Charts/YearReviewCharts/TopArtistsYear";
+import TopTracksYear from "../components/Charts/YearReviewCharts/TopTracksYear";
+import TimePlayedYear from "../components/Charts/YearReviewCharts/TimePlayedYear";
 
 const YearInReview = () => {
   const { year } = useParams();
@@ -23,8 +26,11 @@ const YearInReview = () => {
   }, []);
 
   return (
-    <div>
-      <TopAlbums />
+    <div className="flex flex-col gap-3">
+      <TimePlayedYear year={year} />
+      <TopAlbumsYear year={year} />
+      <TopArtistsYear year={year} />
+      <TopTracksYear year={year} />
     </div>
   );
 };
