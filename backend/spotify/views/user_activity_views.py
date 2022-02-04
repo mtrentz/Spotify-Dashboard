@@ -54,11 +54,6 @@ class TimePlayedView(RetrieveAPIView):
     serializer_class = TimePlayedSerializer
 
     def get_queryset(self):
-        """
-        Here I will always return the days amount of data points.
-        If the query param for days is 10, it will try to return the 10 latests days on the database.
-        In case there isn't enough data, only then will return less than that amount of data points.
-        """
         days_param = self.request.query_params.get("days", None)
         year_param = self.request.query_params.get("year", None)
         date_start_param = self.request.query_params.get("date_start", None)
@@ -136,6 +131,9 @@ class TimePlayedView(RetrieveAPIView):
             .aggregate(Sum("ms_played"))
         )["ms_played__sum"]
 
+        if not ms_played_previous:
+            ms_played_previous = 0
+
         # Items is going to be a list of objects {'date': date, 'minutes_played': int}
         items = []
 
@@ -147,11 +145,7 @@ class TimePlayedView(RetrieveAPIView):
                 }
             )
 
-        # In case there was no data for previous period, I will set growth to 0
-        if ms_played_previous:
-            growth = (ms_played_current - ms_played_previous) / ms_played_previous
-        else:
-            growth = 0
+        growth = calculate_growth(ms_played_previous, ms_played_current)
 
         queryset = {
             "items": items,

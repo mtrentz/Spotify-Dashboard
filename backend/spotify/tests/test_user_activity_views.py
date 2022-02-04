@@ -4,6 +4,7 @@ from django.urls import reverse
 from spotify.tasks import insert_track_batch_from_history
 from datetime import datetime, timedelta, timezone
 from spotify.models import UserActivity
+from django.test.utils import tag
 
 
 class TestUserActivityViews(APITestCase):
@@ -26,8 +27,15 @@ class TestUserActivityViews(APITestCase):
         # I'll have to figure it out later.
         """
 
-        user = User.objects.create_superuser('admin', 'admin@admin.com', "admin")
+        user = User.objects.create_superuser("admin", "admin@admin.com", "admin")
         self.client.force_authenticate(user)
+
+        # This is a way of skipping the insert setup.
+        # Its placed after the auth because the user has to be authenticated.
+        method = getattr(self, self._testMethodName)
+        tags = getattr(method, "tags", {})
+        if "skip_setup" in tags:
+            return
 
         today = datetime.today()
         # Set time as 1 am
@@ -153,3 +161,60 @@ class TestUserActivityViews(APITestCase):
 
         # The last one hast to be (5th) has to be 11 minutes played
         self.assertEqual(res.data[-1]["ms_played"], 11 * 60_000)
+
+    @tag("skip_setup")
+    def test_recent_user_activity_periodicity(self):
+        # To test the weekly periodicity I have to make sure to put entrie
+        # in the middle of weeks.
+        this_weeks_wednesday = (
+            datetime.today()
+            # This gets monday
+            - timedelta(days=datetime.today().weekday())
+            # + 2 days for wednesday
+            + timedelta(days=2)
+        )
+
+        # Add one track track per week each wednesday for the past 5 weeks
+        entries = [
+            {
+                "end_time": (this_weeks_wednesday - timedelta(days=i * 7)).strftime(
+                    "%Y-%m-%d %H:%M"
+                ),
+                "artist_name": "Audioslave",
+                "track_name": "Be Yourself",
+                "ms_played": 15 * 60_000,
+            }
+            for i in range(5)
+        ]
+
+        # print(entries)
+
+        # Insert it into the database
+        insert_track_batch_from_history(entries)
+
+        # Query for weekly data
+        res = self.client.get(
+            reverse("time_played"), {"periodicity": "weekly", "days": 500}
+        )
+
+        # Check if ok
+        self.assertEqual(res.status_code, 200)
+
+        # Check if the data is correct
+        self.assertEqual(res.data["total_minutes_played"], 15 * 5)
+
+        # Check if returned the correct number of weeks
+        self.assertEqual(len(res.data["items"]), 5)
+
+        # The weeks truncate on the monday. So just check if the last is
+        # this weeks monday
+        this_monday = datetime.today() - timedelta(days=datetime.today().weekday())
+        self.assertEqual(
+            res.data["items"][-1]["date"], this_monday.strftime("%Y-%m-%d")
+        )
+
+        # Check if the second to last is the previous monday
+        previous_monday = this_monday - timedelta(days=7)
+        self.assertEqual(
+            res.data["items"][-2]["date"], previous_monday.strftime("%Y-%m-%d")
+        )

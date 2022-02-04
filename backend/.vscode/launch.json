@@ -25,11 +25,11 @@
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/manage.py",
-      "args": ["test"],
-      // "args": [
-      //   "test",
-      //   "spotify.tests.test_user_activity_views.TestUserActivityViews.test_simple_time_played"
-      // ],
+      // "args": ["test"],
+      "args": [
+        "test",
+        "spotify.tests.test_user_activity_views.TestUserActivityViews.test_recent_user_activity_periodicity"
+      ],
       "django": true
     }
   ]
