@@ -233,7 +233,7 @@ class TestUserActivityViews(APITestCase):
         self.assertEqual(res.status_code, 404)
 
         # Insert one entry in the 2021-02-01 and another in 2021-11-01
-        entry = [
+        entries = [
             {
                 "end_time": "2021-02-01 12:00",
                 "artist_name": "Audioslave",
@@ -249,7 +249,7 @@ class TestUserActivityViews(APITestCase):
         ]
 
         # Insert it into the database
-        insert_track_batch_from_history(entry)
+        insert_track_batch_from_history(entries)
 
         # Now make the request
         res = self.client.get(reverse("first_and_last_day_year"), {"year": 2021})
@@ -260,3 +260,40 @@ class TestUserActivityViews(APITestCase):
         # Check if the data is correct
         self.assertEqual(res.data["first_day"], "2021-02-01")
         self.assertEqual(res.data["last_day"], "2021-11-01")
+
+    @tag("skip_setup")
+    def test_user_activity_statistics(self):
+        """
+        Test for the view of general user statistics
+        """
+
+        # I'll add 10 minutes in two days of the 2021
+        entries = [
+            {
+                "end_time": "2021-05-01 12:00",
+                "artist_name": "Audioslave",
+                "track_name": "Be Yourself",
+                "ms_played": 10 * 60_000,
+            },
+            {
+                "end_time": "2021-06-01 12:00",
+                "artist_name": "Audioslave",
+                "track_name": "Be Yourself",
+                "ms_played": 10 * 60_000,
+            },
+        ]
+
+        # Insert it into the database
+        insert_track_batch_from_history(entries)
+
+        # Now make the request
+        res = self.client.get(reverse("user_activity_statistics"), {"year": 2021})
+
+        # Check if ok
+        self.assertEqual(res.status_code, 200)
+
+        # Check if the average per day is 20/365
+        self.assertEqual(res.data["average_minutes_per_day"], round(20 / 365, 2))
+
+        # Check if total time played in days is 20/60/24
+        self.assertEqual(res.data["total_time_played_in_days"], round(20 / 60 / 24, 2))

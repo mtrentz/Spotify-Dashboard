@@ -29,3 +29,10 @@ class TimePlayedSerializer(serializers.Serializer):
 class FirstAndLastDayYearSerializer(serializers.Serializer):
     first_day = serializers.DateField()
     last_day = serializers.DateField()
+
+
+class UserActivityStatisticsSerializer(serializers.Serializer):
+    average_minutes_per_day = serializers.FloatField()
+    total_time_played_in_days = serializers.FloatField()
+    day_of_week_most_activity = serializers.CharField(max_length=255)
+    hour_of_day_most_activity = serializers.CharField(max_length=255)

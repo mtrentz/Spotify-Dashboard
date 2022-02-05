@@ -5,6 +5,7 @@ from ..serializers.user_activity_serializers import (
     FirstAndLastDayYearSerializer,
     SimpleUserActivitySerializer,
     TimePlayedSerializer,
+    UserActivityStatisticsSerializer,
 )
 from ..models import UserActivity
 from ..helpers import (
@@ -16,12 +17,11 @@ from ..helpers import (
     validate_periodicity_params,
     calculate_growth,
 )
-from django.db.models import Sum, Min, Max
-from django.db.models.functions import Trunc
-from django.utils import timezone
-from datetime import datetime, timedelta
+from django.db.models import Sum, Min, Max, Avg
+from django.db.models.functions import Trunc, ExtractWeekDay, ExtractHour
 import pytz
 import logging
+from datetime import datetime
 
 logger = logging.getLogger("django")
 
@@ -242,6 +242,110 @@ class FirstAndLastDayYearView(RetrieveAPIView):
         queryset = {
             "first_day": first_and_last_day["first_day"].strftime("%Y-%m-%d"),
             "last_day": first_and_last_day["last_day"].strftime("%Y-%m-%d"),
+        }
+
+        return queryset
+
+    def get_object(self):
+        # Overrides the method that requires a pk
+        queryset = self.get_queryset()
+        return queryset
+
+
+class UserActivityStatisticsView(RetrieveAPIView):
+    """
+    For a given year and timezone return some diverse statistics, for example:
+        - day with highest time played
+        - what time of day the user mostly listens to spotify
+    etc...
+    """
+
+    serializer_class = UserActivityStatisticsSerializer
+
+    def get_queryset(self):
+        year_param = self.request.query_params.get("year", None)
+        tz_name = self.request.query_params.get("timezone", "UTC")
+
+        # Validate the parameters
+        (
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+        ) = validate_and_parse_date_selection_query_parameters(
+            None, year_param, None, None
+        )
+        tz_name = validate_timezone_query_params(tz_name)
+
+        if not year_param:
+            raise ParseError("The year parameter is required")
+
+        tzinfo = pytz.timezone(tz_name)
+
+        objects = filter_model_by_date_selection(
+            UserActivity,
+            tzinfo,
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+            path_to_played_at="played_at",
+        )
+
+        if objects.count() == 0:
+            raise NotFound("No data found for the given year")
+
+        # Getting average minutes per day, and total 'days' played in total
+        total_ms_played = objects.aggregate(total=Sum("ms_played"))["total"]
+
+        average_minutes_per_day = total_ms_played / (365 * 60_000)
+
+        total_time_played_in_days = total_ms_played / 60_000 / 60 / 24
+
+        # Getting the day of the week which user most listened to spotify
+        day_of_week_most_activity = (
+            (
+                objects.annotate(weekday=ExtractWeekDay("played_at"))
+                .values("weekday")
+                .annotate(Sum("ms_played"))
+            )
+            .order_by("-ms_played__sum")
+            .first()
+        )["weekday"]
+
+        # Map weekday to name
+        weekday_map = {
+            "1": "Sunday",
+            "2": "Monday",
+            "3": "Tuesday",
+            "4": "Wednesday",
+            "5": "Thursday",
+            "6": "Friday",
+            "7": "Saturday",
+        }
+
+        # Getting the hour of day which user most listened to spotify
+        hour_of_day_most_activity = (
+            objects.annotate(hour=ExtractHour("played_at"))
+            .values("hour")
+            .annotate(Sum("ms_played"))
+            .order_by("-ms_played__sum")
+        ).first()["hour"]
+
+        # Pass to am/pm
+        hour_of_day_most_activity = (
+            datetime.strptime(str(hour_of_day_most_activity), "%H")
+            .strftime("%I %p")
+            .lower()
+        )
+
+        queryset = {
+            "average_minutes_per_day": round(average_minutes_per_day, 2),
+            "total_time_played_in_days": round(total_time_played_in_days, 2),
+            "day_of_week_most_activity": weekday_map[str(day_of_week_most_activity)],
+            "hour_of_day_most_activity": hour_of_day_most_activity,
         }
 
         return queryset

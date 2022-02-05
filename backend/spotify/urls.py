@@ -6,6 +6,7 @@ from .views.user_activity_views import (
     TimePlayedView,
     AvailableYearsView,
     FirstAndLastDayYearView,
+    UserActivityStatisticsView,
 )
 from .views.artist_views import TopPlayedArtistsView, UniqueArtistsView
 from .views.album_views import UniqueAlbumsViews, TopPlayedAlbumsView
@@ -31,6 +32,11 @@ urlpatterns = [
         "first-and-last-day-year/",
         FirstAndLastDayYearView.as_view(),
         name="first_and_last_day_year",
+    ),
+    path(
+        "user-activity-statistics/",
+        UserActivityStatisticsView.as_view(),
+        name="user_activity_statistics",
     ),
     # ARTISTS
     path("unique-artists/", UniqueArtistsView.as_view(), name="unique_artists"),
