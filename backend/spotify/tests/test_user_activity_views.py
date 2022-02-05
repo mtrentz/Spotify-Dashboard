@@ -218,3 +218,45 @@ class TestUserActivityViews(APITestCase):
         self.assertEqual(
             res.data["items"][-2]["date"], previous_monday.strftime("%Y-%m-%d")
         )
+
+    @tag("skip_setup")
+    def test_first_and_last_day_year(self):
+        """
+        Test for a given year if the endpoint to get the first and most recent date
+        of a time activity works.
+        """
+
+        # First make the request without adding any data. Should throw error
+        res = self.client.get(reverse("first_and_last_day_year"), {"year": 2021})
+
+        # Check if error
+        self.assertEqual(res.status_code, 404)
+
+        # Insert one entry in the 2021-02-01 and another in 2021-11-01
+        entry = [
+            {
+                "end_time": "2021-02-01 12:00",
+                "artist_name": "Audioslave",
+                "track_name": "Be Yourself",
+                "ms_played": 15 * 60_000,
+            },
+            {
+                "end_time": "2021-11-01 12:00",
+                "artist_name": "Audioslave",
+                "track_name": "Be Yourself",
+                "ms_played": 15 * 60_000,
+            },
+        ]
+
+        # Insert it into the database
+        insert_track_batch_from_history(entry)
+
+        # Now make the request
+        res = self.client.get(reverse("first_and_last_day_year"), {"year": 2021})
+
+        # Check if ok
+        self.assertEqual(res.status_code, 200)
+
+        # Check if the data is correct
+        self.assertEqual(res.data["first_day"], "2021-02-01")
+        self.assertEqual(res.data["last_day"], "2021-11-01")

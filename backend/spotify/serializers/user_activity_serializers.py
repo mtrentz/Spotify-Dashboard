@@ -24,3 +24,8 @@ class TimePlayedSerializer(serializers.Serializer):
     total_minutes_played = serializers.IntegerField()
     growth = serializers.FloatField()
     tz_name = serializers.CharField(max_length=255)
+
+
+class FirstAndLastDayYearSerializer(serializers.Serializer):
+    first_day = serializers.DateField()
+    last_day = serializers.DateField()

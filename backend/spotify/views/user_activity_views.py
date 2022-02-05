@@ -1,6 +1,8 @@
+from rest_framework.exceptions import ParseError, NotFound
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from ..serializers.user_activity_serializers import (
     AvailableYearsSerializer,
+    FirstAndLastDayYearSerializer,
     SimpleUserActivitySerializer,
     TimePlayedSerializer,
 )
@@ -14,7 +16,7 @@ from ..helpers import (
     validate_periodicity_params,
     calculate_growth,
 )
-from django.db.models import Sum
+from django.db.models import Sum, Min, Max
 from django.db.models.functions import Trunc
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -187,4 +189,64 @@ class AvailableYearsView(ListAPIView):
         else:
             queryset = []
 
+        return queryset
+
+
+class FirstAndLastDayYearView(RetrieveAPIView):
+    """
+    For a given year and timezone, returns the first and last day of user activity.
+    """
+
+    serializer_class = FirstAndLastDayYearSerializer
+
+    def get_queryset(self):
+        year_param = self.request.query_params.get("year", None)
+        tz_name = self.request.query_params.get("timezone", "UTC")
+
+        # Validate the parameters
+        (
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+        ) = validate_and_parse_date_selection_query_parameters(
+            None, year_param, None, None
+        )
+        tz_name = validate_timezone_query_params(tz_name)
+
+        if not year_param:
+            raise ParseError("The year parameter is required")
+
+        tzinfo = pytz.timezone(tz_name)
+
+        objects = filter_model_by_date_selection(
+            UserActivity,
+            tzinfo,
+            days_param,
+            year_param,
+            date_start_param,
+            date_end_param,
+            method,
+            path_to_played_at="played_at",
+        )
+
+        # Get the object with lowest and highest date
+        first_and_last_day = objects.aggregate(
+            first_day=Min("played_at"), last_day=Max("played_at")
+        )
+
+        if not first_and_last_day["first_day"] or not first_and_last_day["last_day"]:
+            raise NotFound("No data found for the given year")
+
+        queryset = {
+            "first_day": first_and_last_day["first_day"].strftime("%Y-%m-%d"),
+            "last_day": first_and_last_day["last_day"].strftime("%Y-%m-%d"),
+        }
+
+        return queryset
+
+    def get_object(self):
+        # Overrides the method that requires a pk
+        queryset = self.get_queryset()
         return queryset
