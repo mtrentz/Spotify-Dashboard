@@ -51,7 +51,13 @@ const RecentActivity = () => {
   };
 
   const refreshRecentActivity = () => {
-    axios
+    //  Here when the request fails for not having the Spotify API
+    // authorized, I don't want to redirect to login. Since
+    // this authorization os not made via loggin in into the app,
+    // but to spotify itself.
+    const uninterceptedAxios = axios.create();
+
+    uninterceptedAxios
       .post("/refresh-recently-played/")
       .then((res) => {
         // Add a alert that the request its being refreshed
