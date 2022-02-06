@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import ValidationError, PermissionDenied, NotAcceptable
 import json
 from ..models import UserActivity
 from ..serializers.insert_serializers import (
@@ -113,7 +113,17 @@ class RecentlyPlayedView(BaseAuthView):
     """
 
     def post(self, request):
-        self.insert_recently_played()
+        try:
+            self.insert_recently_played()
+        except PermissionDenied:
+            # If I got an PermissionDenied I want to return a different response
+            # otherwise the frontend will think its a authentication error with
+            # the login system, and not the spotify official API.
+            # In this case I'll return a NotAcceptable
+            raise NotAcceptable(
+                "Failed getting recently played tracks. Please check if you've authorized the app."
+            )
+
         return Response(
             {"Success": "Your recently played tracks are being added to the database."},
             status=status.HTTP_201_CREATED,
