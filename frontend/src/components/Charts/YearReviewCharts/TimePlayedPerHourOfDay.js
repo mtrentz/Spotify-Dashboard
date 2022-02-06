@@ -79,7 +79,7 @@ const TimePlayedPerHourOfDay = ({ year }) => {
           top: -10,
           right: 0,
           left: 0,
-          bottom: -25,
+          bottom: -35,
         },
       },
       xaxis: {
