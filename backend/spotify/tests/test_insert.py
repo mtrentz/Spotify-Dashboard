@@ -1,4 +1,5 @@
 from rest_framework.test import APITestCase
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.test.utils import tag
 from django.db.models import Sum
@@ -40,6 +41,17 @@ class TestInsert(APITestCase):
         """
         Creates a mock history from spotify. Adds it to the database.
         """
+
+        user = User.objects.create_superuser("admin", "admin@admin.com", "admin")
+        self.client.force_authenticate(user)
+
+        # This is a way of skipping the insert setup.
+        # Its placed after the auth because the user has to be authenticated.
+        method = getattr(self, self._testMethodName)
+        tags = getattr(method, "tags", {})
+        if "skip_setup" in tags:
+            return
+
         # This is a mock history data of spotify, using only the artists/tracks shown above.
         # Caution: I'll make some very specific mentions to this data,
         # so never change order, values, etc...
@@ -94,6 +106,9 @@ class TestInsert(APITestCase):
         self.assertEqual(Albums.objects.all().count(), 3)
         self.assertEqual(Tracks.objects.all().count(), 3)
         self.assertEqual(Genres.objects.all().count(), 11)
+
+        # Just make sure that the setup was skipped
+        self.assertEqual(UserActivity.objects.all().count(), 0)
 
     def test_over_insert(self):
         """

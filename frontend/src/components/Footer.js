@@ -2,48 +2,59 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer class="footer footer-transparent d-print-none">
-      <div class="container-xl">
-        <div class="row text-center align-items-center flex-row-reverse justify-center">
-          <div class="col-lg-auto">
-            <ul class="list-inline list-inline-dots mb-0">
-              <li class="list-inline-item">
-                <a
-                  href="https://github.com/mtrentz/Spotify-Dashboard"
-                  target="_blank"
-                  class="link-secondary"
-                  rel="noopener"
-                >
-                  Source code
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a href="https://mtrentz.com.br/aboutme" class="link-secondary">
-                  About Me
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a href="https://github.com/mtrentz" class="link-secondary">
-                  Github
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a
-                  href="https://www.linkedin.com/in/mtrentz/"
-                  target="_blank"
-                  class="link-secondary"
-                  rel="noopener"
-                >
-                  Linkedin
-                </a>
-              </li>
-            </ul>
-          </div>
+    <footer className="footer footer-transparent d-print-none">
+      <div className="container-xl">
+        <div className="row text-center align-items-center flex-row-reverse justify-center">
+          <ol
+            className="breadcrumb breadcrumb-dots flex flex-row justify-center"
+            aria-label="breadcrumbs"
+          >
+            <li className="breadcrumb-item">
+              <a
+                href="https://github.com/mtrentz/Spotify-Dashboard"
+                target="_blank"
+                className="link-secondary"
+                rel="noopener"
+              >
+                Source code
+              </a>
+            </li>
+            <li className="breadcrumb-item">
+              <a
+                href="https://mtrentz.com.br/aboutme"
+                target="_blank"
+                className="link-secondary"
+                rel="noopener"
+              >
+                About Me
+              </a>
+            </li>
+            <li className="breadcrumb-item">
+              <a
+                href="https://github.com/mtrentz"
+                target="_blank"
+                className="link-secondary"
+                rel="noopener"
+              >
+                Github
+              </a>
+            </li>
+            <li className="breadcrumb-item">
+              <a
+                href="https://www.linkedin.com/in/mtrentz/"
+                target="_blank"
+                className="link-secondary"
+                rel="noopener"
+              >
+                Linkedin
+              </a>
+            </li>
+          </ol>
         </div>
-        <div class="mt-3 mt-lg-0 flex flex-row justify-center">
-          <li class="list-inline-item">
+        <div className="mt-3 mt-lg-0 flex flex-row justify-center">
+          <li className="list-inline-item">
             Website made with{" "}
-            <a href="https://tabler.io" class="link-secondary">
+            <a href="https://tabler.io" className="link-secondary">
               Tabler
             </a>
             .

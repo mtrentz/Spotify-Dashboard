@@ -40,7 +40,7 @@ const Login = () => {
     >
       <div className="page page-center">
         <div className="container-tight py-4">
-          <div class="text-center mb-4">
+          <div className="text-center mb-4">
             <Link to="/">
               <h1 className="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
                 <img
@@ -87,13 +87,13 @@ const Login = () => {
                       errorMessage ? "is-invalid" : ""
                     }`}
                     placeholder="Password"
-                    autocomplete="off"
+                    autoComplete="off"
                     aria-describedby="Password"
                   />
                 </div>
               </div>
               {errorMessage ? (
-                <h6 class="text-danger">{errorMessage}</h6>
+                <h6 className="text-danger">{errorMessage}</h6>
               ) : null}
               <div className="form-footer">
                 <button type="submit" className="btn btn-primary w-100">

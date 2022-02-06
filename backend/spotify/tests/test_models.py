@@ -1,10 +1,14 @@
 from rest_framework.test import APITestCase
+from django.contrib.auth.models import User
 from spotify.models import Genres, Artists, Albums, Tracks
 from django.db import IntegrityError
 
 
 class TestModels(APITestCase):
     def setUp(self):
+        user = User.objects.create_superuser('admin', 'admin@admin.com', "admin")
+        self.client.force_authenticate(user)
+
         self.genres = ["rock", "rap", "pop"]
         self.artists_one = {
             "sp_id": "FAKEdsad7sa8d7sa89DAS",

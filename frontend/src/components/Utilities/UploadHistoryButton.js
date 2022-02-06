@@ -3,12 +3,12 @@ import React from "react";
 const UploadHistoryButton = () => {
   return (
     <>
-      <btn
+      <button
         type="button"
-        class="btn btn-outline-primary btn-sm h-7"
+        className="btn btn-outline-primary btn-sm h-7"
         data-bs-toggle="offcanvas"
         href="#offcanvasEnd"
-        ariaControls="offcanvasEnd"
+        aria-controls="offcanvasEnd"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -27,7 +27,7 @@ const UploadHistoryButton = () => {
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
         Upload History
-      </btn>
+      </button>
     </>
   );
 };

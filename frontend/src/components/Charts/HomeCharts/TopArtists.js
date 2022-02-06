@@ -1,9 +1,9 @@
 import React from "react";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import useAxios from "../../hooks/useAxios";
+import useAxios from "../../../hooks/useAxios";
 
-import PeriodDropdown from "../Utilities/PeriodDropdown";
+import PeriodDropdown from "../../Utilities/PeriodDropdown";
 
 const TopArtists = () => {
   const axios = useAxios();
@@ -68,7 +68,7 @@ const TopArtists = () => {
         <thead>
           <tr>
             <th>Artist</th>
-            <th colspan="2">Minutes Played</th>
+            <th colSpan="2">Minutes Played</th>
           </tr>
         </thead>
         <tbody>

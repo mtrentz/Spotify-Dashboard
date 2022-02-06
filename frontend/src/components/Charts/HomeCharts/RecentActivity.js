@@ -3,8 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 
-import useAxios from "../../hooks/useAxios";
-import NotificationContext from "../../contexts/NotificationContext";
+import useAxios from "../../../hooks/useAxios";
+import NotificationContext from "../../../contexts/NotificationContext";
 
 const RecentActivity = () => {
   const axios = useAxios();
@@ -51,7 +51,13 @@ const RecentActivity = () => {
   };
 
   const refreshRecentActivity = () => {
-    axios
+    //  Here when the request fails for not having the Spotify API
+    // authorized, I don't want to redirect to login. Since
+    // this authorization os not made via loggin in into the app,
+    // but to spotify itself.
+    const uninterceptedAxios = axios.create();
+
+    uninterceptedAxios
       .post("/refresh-recently-played/")
       .then((res) => {
         // Add a alert that the request its being refreshed
@@ -88,8 +94,8 @@ const RecentActivity = () => {
 
   return (
     <div className="card" style={{ height: "calc(24rem + 10px)" }}>
-      <div class="card-header flex justify-between">
-        <h3 class="card-title">Your Recent Activity</h3>
+      <div className="card-header flex justify-between">
+        <h3 className="card-title">Your Recent Activity</h3>
         {/* Force activity recheck button */}
         <button onClick={refreshRecentActivity}>
           <svg
@@ -119,7 +125,7 @@ const RecentActivity = () => {
                   <span className="avatar">
                     {" "}
                     <span
-                      class="avatar"
+                      className="avatar"
                       style={{
                         backgroundImage: `url(${item.albumCover})` || "",
                       }}

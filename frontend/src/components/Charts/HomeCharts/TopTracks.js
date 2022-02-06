@@ -1,9 +1,9 @@
 import React from "react";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import useAxios from "../../hooks/useAxios";
+import useAxios from "../../../hooks/useAxios";
 
-import PeriodDropdown from "../Utilities/PeriodDropdown";
+import PeriodDropdown from "../../Utilities/PeriodDropdown";
 
 const TopTracks = () => {
   const axios = useAxios();
@@ -50,46 +50,48 @@ const TopTracks = () => {
   }, [period]);
 
   return (
-    <div class="card">
-      <div class="card-header flex justify-between">
-        <h3 class="card-title">Top Played Tracks</h3>
+    <div className="card">
+      <div className="card-header flex justify-between">
+        <h3 className="card-title">Top Played Tracks</h3>
         <PeriodDropdown
           current={period}
           options={Object.keys(periodOptions)}
           handleClick={handlePeriodChange}
         />
       </div>
-      <div class="list-group card-list-group">
+      <div className="list-group card-list-group">
         {topTracksData.map((item, index) => (
-          <div class="list-group-item" key={index}>
-            <div class="row g-2 align-items-center">
-              <div class="col-auto fs-3">{index + 1}</div>
-              <div class="col-auto">
+          <div className="list-group-item" key={index}>
+            <div className="row g-2 align-items-center">
+              <div className="col-auto fs-3">{index + 1}</div>
+              <div className="col-auto">
                 <img
                   src={item.albumCover}
-                  class="rounded"
+                  className="rounded"
                   alt={item.trackName}
                   width="40"
                   height="40"
                 />
               </div>
-              <div class="col">
+              <div className="col">
                 {item.trackName}
-                <div class="text-muted">{item.artistsString}</div>
+                <div className="text-muted">{item.artistsString}</div>
               </div>
-              <div class="col-auto text-muted">{item.minutesPlayed} mins</div>
-              <div class="col-auto">
+              <div className="col-auto text-muted">
+                {item.minutesPlayed} mins
+              </div>
+              <div className="col-auto">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="icon icon-tabler icon-tabler-clock"
+                  className="icon icon-tabler icon-tabler-clock"
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"
-                  stroke-width="2"
+                  strokeWidth="2"
                   stroke="currentColor"
                   fill="none"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="9"></circle>

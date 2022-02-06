@@ -1,15 +1,15 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import useAxios from "../hooks/useAxios";
 
-import TimePlayedChart from "../components/Charts/TimePlayedChart";
-import UniqueAlbumsKPI from "../components/Charts/UniqueAlbumsKPI";
-import UniqueArtistsKPI from "../components/Charts/UniqueArtistsKPI";
-import UniqueTracksKPI from "../components/Charts/UniqueTracksKPI";
-import RecentActivity from "../components/Charts/RecentActivity";
-import TopArtists from "../components/Charts/TopArtists";
-import TopTracks from "../components/Charts/TopTracks";
+import TimePlayedChart from "../components/Charts/HomeCharts/TimePlayedChart";
+import UniqueAlbumsKPI from "../components/Charts/HomeCharts/UniqueAlbumsKPI";
+import UniqueArtistsKPI from "../components/Charts/HomeCharts/UniqueArtistsKPI";
+import UniqueTracksKPI from "../components/Charts/HomeCharts/UniqueTracksKPI";
+import RecentActivity from "../components/Charts/HomeCharts/RecentActivity";
+import TopArtists from "../components/Charts/HomeCharts/TopArtists";
+import TopTracks from "../components/Charts/HomeCharts/TopTracks";
 
 const Home = () => {
   const axios = useAxios();
@@ -33,9 +33,9 @@ const Home = () => {
 
   return (
     <div>
-      <div class="col mx-2 mb-3">
-        <div class="page-pretitle">Overview</div>
-        <h2 class="page-title">Home Dashboard</h2>
+      <div className="col mx-2 mb-3">
+        <div className="page-pretitle">Overview</div>
+        <h2 className="page-title">Home Dashboard</h2>
       </div>
       <div className="m-2 flex flex-col gap-2 md:grid md:grid-cols-2 md:grid-flow-row md:auto-rows-min">
         <div className="order-none md:order-1 md:col-span-2">

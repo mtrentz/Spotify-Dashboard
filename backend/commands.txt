@@ -13,6 +13,11 @@ coverage html
 # Running single test file
 python3 manage.py test spotify.tests.test_track_views.TestTrackViews
 
+# Exporting the env variables to run outside container
+export SPOTIPY_CLIENT_ID=ababc
+export SPOTIPY_CLIENT_SECRET=ababc
+export SPOTIPY_REDIRECT_URI=ababc
+
 
 
 # Running server in background and starting scheduler

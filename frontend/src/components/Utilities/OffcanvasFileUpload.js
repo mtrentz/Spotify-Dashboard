@@ -55,11 +55,11 @@ const OffcanvasFileUpload = () => {
   return (
     <div
       className="offcanvas offcanvas-end"
-      tabindex="-1"
+      tabIndex="-1"
       id="offcanvasEnd"
-      ariaLabelledby="offcanvasEndLabel"
+      aria-labelledby="offcanvasEndLabel"
       style={{ visibility: "hidden" }}
-      ariaHidden="true"
+      aria-hidden="true"
     >
       <div className="offcanvas-header">
         <h2 className="offcanvas-title" id="offcanvasEndLabel">

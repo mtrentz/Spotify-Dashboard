@@ -3,6 +3,7 @@ from django.urls import reverse
 from spotify.tasks import insert_track_entry
 from spotify.models import Tracks
 from datetime import datetime, timedelta, timezone
+from django.contrib.auth.models import User
 
 
 class TestAlbumViews(APITestCase):
@@ -18,6 +19,10 @@ class TestAlbumViews(APITestCase):
     """
 
     fixtures = ["albums.json", "artists.json", "genres.json", "tracks.json"]
+
+    def setUp(self):
+        user = User.objects.create_superuser("admin", "admin@admin.com", "admin")
+        self.client.force_authenticate(user)
 
     @staticmethod
     def insert_track_entries(track, entries):

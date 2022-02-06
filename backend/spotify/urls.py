@@ -5,9 +5,13 @@ from .views.user_activity_views import (
     RecentUserActivityView,
     TimePlayedView,
     AvailableYearsView,
+    FirstAndLastDayYearView,
+    UserActivityStatisticsView,
+    TimePlayedPerHourOfDayView,
+    TimePlayedPerDayOfWeekView,
 )
 from .views.artist_views import TopPlayedArtistsView, UniqueArtistsView
-from .views.album_views import UniqueAlbumsViews
+from .views.album_views import UniqueAlbumsViews, TopPlayedAlbumsView
 from .views.auth_views import AuthURLView, AuthTokenView, IsAuthorizedView
 
 urlpatterns = [
@@ -26,6 +30,26 @@ urlpatterns = [
     path("recently-played/", RecentUserActivityView.as_view(), name="recently_played"),
     path("time-played/", TimePlayedView.as_view(), name="time_played"),
     path("available-years/", AvailableYearsView.as_view(), name="available_years"),
+    path(
+        "first-and-last-day-year/",
+        FirstAndLastDayYearView.as_view(),
+        name="first_and_last_day_year",
+    ),
+    path(
+        "user-activity-statistics/",
+        UserActivityStatisticsView.as_view(),
+        name="user_activity_statistics",
+    ),
+    path(
+        "time-played-per-hour-of-day/",
+        TimePlayedPerHourOfDayView.as_view(),
+        name="time_played_per_hour_of_day",
+    ),
+    path(
+        "time-played-per-day-of-week/",
+        TimePlayedPerDayOfWeekView.as_view(),
+        name="time_played_per_day_of_week",
+    ),
     # ARTISTS
     path("unique-artists/", UniqueArtistsView.as_view(), name="unique_artists"),
     path(
@@ -36,6 +60,7 @@ urlpatterns = [
     path("top-played-tracks/", TopPlayedTracksView.as_view(), name="top_played_tracks"),
     # ALBUMS
     path("unique-albums/", UniqueAlbumsViews.as_view(), name="unique_albums"),
+    path("top-played-albums/", TopPlayedAlbumsView.as_view(), name="top_played_albums"),
     # GENRES
     # path("top-played-genres/", TopPlayedGenresView.as_view(), name="top_played_genres"),
 ]
