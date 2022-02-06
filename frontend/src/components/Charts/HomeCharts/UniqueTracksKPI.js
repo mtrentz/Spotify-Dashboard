@@ -1,10 +1,10 @@
 import React from "react";
 import { useContext, useEffect, useState } from "react";
 
-import useAxios from "../../hooks/useAxios";
-import { generateTrendComponent } from "../helpers";
+import useAxios from "../../../hooks/useAxios";
+import { generateTrendComponent } from "../../helpers";
 
-import CardKPI from "../Utilities/CardKPI";
+import CardKPI from "../../Utilities/CardKPI";
 
 const UniqueTracksKPI = () => {
   const axios = useAxios();

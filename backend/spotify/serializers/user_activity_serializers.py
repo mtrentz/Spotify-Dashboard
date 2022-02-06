@@ -24,3 +24,25 @@ class TimePlayedSerializer(serializers.Serializer):
     total_minutes_played = serializers.IntegerField()
     growth = serializers.FloatField()
     tz_name = serializers.CharField(max_length=255)
+
+
+class FirstAndLastDayYearSerializer(serializers.Serializer):
+    first_day = serializers.DateField()
+    last_day = serializers.DateField()
+
+
+class UserActivityStatisticsSerializer(serializers.Serializer):
+    average_minutes_per_day = serializers.FloatField()
+    total_time_played_in_days = serializers.FloatField()
+    day_of_week_most_activity = serializers.CharField(max_length=255)
+    hour_of_day_most_activity = serializers.CharField(max_length=255)
+
+
+class TimePlayedPerHourOfDaySerializer(serializers.Serializer):
+    hour = serializers.CharField(max_length=255)
+    minutes_played = serializers.FloatField()
+
+
+class TimePlayedPerDayOfWeekSerializer(serializers.Serializer):
+    day_of_week = serializers.CharField(max_length=255)
+    minutes_played = serializers.FloatField()

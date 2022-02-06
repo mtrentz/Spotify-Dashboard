@@ -1,14 +1,11 @@
-import React from "react";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import useAxios from "../../hooks/useAxios";
-import { generateTrendComponent } from "../helpers";
+import useAxios from "../../../hooks/useAxios";
 
 import Chart from "react-apexcharts";
-import PeriodDropdown from "../Utilities/PeriodDropdown";
-import LoadingDots from "../Utilities/LoadingDots";
+import LoadingDots from "../../Utilities/LoadingDots";
 
-const TimePlayedChart = () => {
+const TimePlayedYear = ({ year }) => {
   const axios = useAxios();
 
   const startingGraphStatus = {
@@ -80,26 +77,16 @@ const TimePlayedChart = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [graphStatus, setGraphStatus] = useState(startingGraphStatus);
 
-  const [period, setPeriod] = useState("Last 7 days");
-
-  // Map the text option to the value to API Call
-  const periodOptions = {
-    "Last 7 days": 7,
-    "Last 30 days": 30,
-    "Last 90 days": 90,
-    "Last 180 days": 180,
-  };
-
-  const handlePeriodChange = (e) => {
-    setPeriod(e.target.text);
-  };
-
   const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   useEffect(() => {
     axios
       .get("/time-played/", {
-        params: { days: periodOptions[period], timezone: browserTimezone },
+        params: {
+          year: year,
+          timezone: browserTimezone,
+          periodicity: "weekly",
+        },
       })
       .then((res) => {
         setTimePlayedData(res.data);
@@ -109,7 +96,7 @@ const TimePlayedChart = () => {
       .catch((err) => {
         console.log(err);
       });
-  }, [period]);
+  }, [year]);
 
   const updateGraphStatus = (res) => {
     // Make a copy of the previous status
@@ -127,23 +114,13 @@ const TimePlayedChart = () => {
       <div className="card-body">
         <div className="d-flex align-items-center">
           <div className="subheader">Hours Played</div>
-          <div className="ms-auto lh-1">
-            <PeriodDropdown
-              current={period}
-              options={Object.keys(periodOptions)}
-              handleClick={handlePeriodChange}
-            />
-          </div>
+          <div className="ms-auto lh-1"></div>
         </div>
         <div className="d-flex align-items-baseline">
           <div className="h1 mb-0 me-2">
             {isLoading
               ? 0
               : (timePlayedData.total_minutes_played / 60).toFixed(0)}
-          </div>
-          <div className="me-auto">
-            {/* Trend component */}
-            {generateTrendComponent(isLoading ? 0 : timePlayedData.growth)}
           </div>
         </div>
       </div>
@@ -164,4 +141,4 @@ const TimePlayedChart = () => {
   );
 };
 
-export default TimePlayedChart;
+export default TimePlayedYear;

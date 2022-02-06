@@ -131,7 +131,7 @@ class RecentlyPlayedView(BaseAuthView):
 
         except Exception as e:
             # Error here means it's not authorized, so I'll just reset token info
-            self.sp.auth_manager.cache_handler.save_token_to_cache({})
+            # self.sp.auth_manager.cache_handler.save_token_to_cache({})
             logger.error(f"Error getting recently played: {e}")
             raise PermissionDenied(
                 f"Error trying to get recently played; Most likely not authorized."

@@ -21,7 +21,7 @@ class TestAlbumViews(APITestCase):
     fixtures = ["albums.json", "artists.json", "genres.json", "tracks.json"]
 
     def setUp(self):
-        user = User.objects.create_superuser('admin', 'admin@admin.com', "admin")
+        user = User.objects.create_superuser("admin", "admin@admin.com", "admin")
         self.client.force_authenticate(user)
 
     @staticmethod
