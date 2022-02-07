@@ -192,9 +192,15 @@ class TestUserActivityViews(APITestCase):
         # Insert it into the database
         insert_track_batch_from_history(entries)
 
+        # Since "this_weeks_wednesday" can be in the 'future', I have to use a date range
+        # to query the data instead of using last few days.
+        start = (datetime.today() - timedelta(days=100)).strftime("%Y-%m-%d")
+        end = (datetime.today() + timedelta(days=100)).strftime("%Y-%m-%d")
+
         # Query for weekly data
         res = self.client.get(
-            reverse("time_played"), {"periodicity": "weekly", "days": 500}
+            reverse("time_played"),
+            {"periodicity": "weekly", "date_start": start, "date_end": end},
         )
 
         # Check if ok
