@@ -29,11 +29,9 @@ const OffcanvasFileUpload = () => {
       msg_muted: "Your files are being uploaded...",
     });
 
-    // It takes a while to process the files.
-    // For this reason I'm setting a timeout of 30s per file
-    const timeOut = files.length * 30000;
+    // Removes timeout from uploading files
     axios
-      .post("/history/", formData, { timeout: timeOut })
+      .post("/history/", formData, { timeout: null })
       .then((res) => {
         console.log(res);
         addNotification({
@@ -50,6 +48,9 @@ const OffcanvasFileUpload = () => {
           msg_muted: "Are you sure you uploaded the correct files?",
         });
       });
+
+    // Clean the files
+    setFiles(0);
   };
 
   return (

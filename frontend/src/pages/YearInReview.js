@@ -17,7 +17,7 @@ const YearInReview = () => {
   const navigate = useNavigate();
 
   const axios = useAxios();
-  const [dateLimits, setDateLimits] = useState({});
+  const [dateLimits, setDateLimits] = useState();
 
   function isPositiveInteger(str) {
     const num = Number(str);
@@ -63,9 +63,13 @@ const YearInReview = () => {
             Data available from
           </div>
           <div className="flex flex-row gap-3 justify-start w-64">
-            <h3 className="page-title">{formateDate(dateLimits?.first_day)}</h3>
+            <h3 className="page-title">
+              {dateLimits ? formateDate(dateLimits.first_day) : ""}
+            </h3>
             <h3 className="page-title">-</h3>
-            <h3 className="page-title">{formateDate(dateLimits?.last_day)}</h3>
+            <h3 className="page-title">
+              {dateLimits ? formateDate(dateLimits.last_day) : ""}
+            </h3>
           </div>
         </div>
       </div>

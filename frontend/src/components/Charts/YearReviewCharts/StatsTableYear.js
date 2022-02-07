@@ -65,7 +65,7 @@ const StatsTableYear = ({ year }) => {
   }, [year]);
 
   return (
-    <div className="card md:-mt-6 lg:-mt-3 xl:-mt-4 2xl:-mt-5">
+    <div className="card md:-mt-4 lg:-mt-1 xl:-mt-2 2xl:-mt-3">
       <table className="table table-vcenter card-table">
         <thead>
           <tr>
