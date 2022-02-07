@@ -100,8 +100,6 @@ class UniqueArtistsView(RetrieveAPIView):
         year_param = self.request.query_params.get("year", None)
         date_start_param = self.request.query_params.get("date_start", None)
         date_end_param = self.request.query_params.get("date_end", None)
-        # Qty defaults to 10
-        qty = self.request.query_params.get("qty", 10)
         # Defaults to UTC
         tz_name = self.request.query_params.get("timezone", "UTC")
 
@@ -118,7 +116,6 @@ class UniqueArtistsView(RetrieveAPIView):
             date_start_param,
             date_end_param,
         )
-        qty = validate_qty_query_params(qty)
         tz_name = validate_timezone_query_params(tz_name)
 
         tzinfo = pytz.timezone(tz_name)
