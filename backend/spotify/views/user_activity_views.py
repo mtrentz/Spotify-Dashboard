@@ -64,8 +64,6 @@ class TimePlayedView(RetrieveAPIView):
         date_end_param = self.request.query_params.get("date_end", None)
         # Defaults to daily
         periodicity = self.request.query_params.get("periodicity", "daily")
-        # Qty defaults to 10
-        qty = self.request.query_params.get("qty", 10)
         # Defaults to UTC
         tz_name = self.request.query_params.get("timezone", "UTC")
         tzinfo = pytz.timezone(tz_name)
@@ -81,7 +79,6 @@ class TimePlayedView(RetrieveAPIView):
             days_param, year_param, date_start_param, date_end_param
         )
         periodicity = validate_periodicity_params(periodicity)
-        qty = validate_qty_query_params(qty)
         tz_name = validate_timezone_query_params(tz_name)
 
         tzinfo = pytz.timezone(tz_name)
@@ -373,8 +370,6 @@ class TimePlayedPerHourOfDayView(ListAPIView):
         date_end_param = self.request.query_params.get("date_end", None)
         # Defaults to daily
         periodicity = self.request.query_params.get("periodicity", "daily")
-        # Qty defaults to 10
-        qty = self.request.query_params.get("qty", 10)
         # Defaults to UTC
         tz_name = self.request.query_params.get("timezone", "UTC")
         tzinfo = pytz.timezone(tz_name)
@@ -390,7 +385,6 @@ class TimePlayedPerHourOfDayView(ListAPIView):
             days_param, year_param, date_start_param, date_end_param
         )
         periodicity = validate_periodicity_params(periodicity)
-        qty = validate_qty_query_params(qty)
         tz_name = validate_timezone_query_params(tz_name)
 
         tzinfo = pytz.timezone(tz_name)
@@ -460,8 +454,6 @@ class TimePlayedPerDayOfWeekView(ListAPIView):
         date_end_param = self.request.query_params.get("date_end", None)
         # Defaults to daily
         periodicity = self.request.query_params.get("periodicity", "daily")
-        # Qty defaults to 10
-        qty = self.request.query_params.get("qty", 10)
         # Defaults to UTC
         tz_name = self.request.query_params.get("timezone", "UTC")
         tzinfo = pytz.timezone(tz_name)
@@ -477,7 +469,6 @@ class TimePlayedPerDayOfWeekView(ListAPIView):
             days_param, year_param, date_start_param, date_end_param
         )
         periodicity = validate_periodicity_params(periodicity)
-        qty = validate_qty_query_params(qty)
         tz_name = validate_timezone_query_params(tz_name)
 
         tzinfo = pytz.timezone(tz_name)

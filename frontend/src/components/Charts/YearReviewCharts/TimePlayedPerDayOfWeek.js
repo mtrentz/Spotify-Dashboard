@@ -19,7 +19,7 @@ const TimePlayedPerDayOfWeek = ({ year }) => {
       chart: {
         type: "bar",
         fontFamily: "inherit",
-        height: 240,
+        // height: 240,
         toolbar: {
           show: false,
         },

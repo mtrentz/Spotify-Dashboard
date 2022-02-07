@@ -203,12 +203,30 @@ def insert_track_entry(track_entry_data):
 
 
 @shared_task(base=LogErrorsTask)
+def insert_track_batch_from_list(batch):
+    """
+    Just a wrapper for the insert_track_from_history function.
+    This one receives the data in a list format, used because it's
+    quicker for Celery to serialize it.
+    """
+
+    for data in batch:
+        # Sending each one as a different task to celery
+        # to be picked up by a different worker.
+        # TODO: Check if its not a bad idea to create so many tasks like this.
+        insert_track_from_history.delay(
+            track_name=data[0],
+            artist_name=data[1],
+            end_time=data[2],
+            ms_played=data[3],
+        )
+
+
+@shared_task(base=LogErrorsTask)
 def insert_track_batch_from_history(batch):
     """
-    This serves just as a wrapper for the insert_track_from_history function.
-
-    Since executing one Task is too intensive for celery/redis,
-    doing this is batches proved to be way faster.
+    This serves just as a wrapper for the insert_track_from_history function
+    to receive data just like spotify's history json.
     """
     for data in batch:
         insert_track_from_history(

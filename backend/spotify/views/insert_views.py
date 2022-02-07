@@ -11,6 +11,7 @@ from ..serializers.insert_serializers import (
 )
 from .auth_views import BaseAuthView
 from ..tasks import (
+    insert_track_batch_from_list,
     insert_track_entry,
     insert_track_batch_from_history,
 )
@@ -39,63 +40,20 @@ class ImportStreamingHistoryView(APIView):
         except Exception as e:
             raise ValidationError(f"Invalid Streaming History JSON file; {e}")
 
-        # I'll send the data to Celery, to run in the background,
-        # in batches. This is because it takes too long to create
-        # one Task per entry.
-        batch = []
+        # Unpack the data into a list, because this way its pretty fast for
+        # celery to serialize it.
+        batch_data = [
+            [
+                d.get("trackName"),
+                d.get("artistName"),
+                d.get("endTime"),
+                d.get("msPlayed"),
+            ]
+            for d in data_list
+        ]
 
-        # I have to choose a batch size. When it's too small, it will take too long
-        # because then too many TASKS will be created for celery to run.
-        # But when its too few, then all requests will be running
-        # in the same thread, which will be too slow.
-        if len(data_list) < 50:
-            batch_size = 1
-        elif len(data_list) < 500:
-            batch_size = 10
-        elif len(data_list) < 1000:
-            batch_size = 100
-        else:
-            batch_size = 200
-
-        # The delay to start executing the task has to be proportional with the
-        # amount of entries coming through.
-        # This is because I have to prepare all tasks and return OK to client
-        # before it starts executing. Else it will take too long to give OK.
-        # Randomly guessing a good delay. Its going to be 1s per 200 entries
-        delay = int(len(data_list) / 200)
-        # It will be at least 5 seconds
-        delay = max(delay, 5)
-
-        for data in data_list:
-            history_entry_serializer = HistoryEntrySerializer(data=data)
-
-            # If not valid for some reason, I'll log error and continue
-            if not history_entry_serializer.is_valid():
-                logger.warning(history_entry_serializer.errors)
-                continue
-
-            # Won't let duplicates be added into Streaming History
-            history_entry_serializer.save()
-
-            batch.append(
-                {
-                    "track_name": data.get("trackName"),
-                    "artist_name": data.get("artistName"),
-                    "end_time": data.get("endTime"),
-                    "ms_played": data.get("msPlayed"),
-                }
-            )
-
-            # Send to celery every few entries
-            if len(batch) >= batch_size:
-                insert_track_batch_from_history.apply_async(
-                    args=[batch], countdown=delay
-                )
-                batch = []
-
-        # Send the remaining tracks
-        if batch:
-            insert_track_batch_from_history.apply_async(args=[batch], countdown=delay)
+        # Send it to celery
+        insert_track_batch_from_list.apply_async(args=[batch_data], countdown=5)
 
         return Response(
             {"Success": "History is being added into the database."},

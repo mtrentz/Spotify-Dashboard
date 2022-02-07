@@ -35,8 +35,8 @@ const TopAlbumsYear = ({ year }) => {
   }, [year]);
 
   return (
-    <div className="col-12">
-      <h3 className="mt-1 md:-mt-1 mb-3">Top Albums</h3>
+    <div className="col-12 md:-mt-2">
+      <h3 className="mt-2 mb-3">Top Albums</h3>
       <div className="row row-cards">
         {topAlbumsData.map((item, index) => {
           return (
