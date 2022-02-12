@@ -56,8 +56,6 @@ const StatsTableYear = ({ year }) => {
       })
       .then((res) => {
         setGeneralStats(res.data);
-        console.log(typeof res.data.total_time_played_in_days);
-        console.log(res.data.total_time_played_in_days.toFixed(1));
       })
       .catch((err) => {
         console.log(err);
